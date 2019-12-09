@@ -5,7 +5,7 @@ public:
 	~testClass();
 
 private:
-
+	int lidborn;
 };
 
 testClass::testClass()
