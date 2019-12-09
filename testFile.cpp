@@ -17,3 +17,4 @@ testClass::~testClass()
 }
 
 int lordBananaMan;
+int helloDere;
