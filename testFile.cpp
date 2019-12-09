@@ -15,3 +15,5 @@ testClass::testClass()
 testClass::~testClass()
 {
 }
+
+int lordBananaMan;
