@@ -15,6 +15,7 @@ testClass::testClass()
 testClass::~testClass()
 {
 }
-sdogjspgd
-int lordcvvxbananaMan;1
-fgdfgdf
+
+
+int lordBananaMan;
+int helloDere;
