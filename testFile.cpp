@@ -19,3 +19,4 @@ testClass::~testClass()
 
 int lordBananaMan;
 int helloDere;
+int gazzanWasHere;
