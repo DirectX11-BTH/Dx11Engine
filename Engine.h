@@ -1,17 +1,19 @@
 #pragma once
+#include "DXVariables.h"
 #include "DXHandler.h"
 #include "RenderWindow.h"
 #include "InputHandler.h"
 
-static ID3D11Device* devicePtr;
-static ID3D11DeviceContext* contextPtr;
-static HINSTANCE hInstance;
+
 
 class Engine
 {
 private:
-	InputHandler* inputHandler;
-	RenderWindow* window;
+	InputHandler inputHandler;
+	RenderWindow window;
+	DxHandler* directXHandler;
+
+	HWND primaryWindow;
 
 	void createWindow();
 	void createDirectX();

@@ -1,5 +1,5 @@
 #include "RenderWindow.h"
-#include "Engine.h"
+#include "DXVariables.h"
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1);
 namespace wrl = Microsoft::WRL;
 HWND& RenderWindow::createWindow(int width, int height, std::string title, std::string applicationName)

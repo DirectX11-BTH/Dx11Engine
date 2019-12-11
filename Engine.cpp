@@ -2,14 +2,28 @@
 
 void Engine::createWindow()
 {
-	this->window = new RenderWindow();
-	this->window->createWindow(600, 500, "SpaghettiEngine", "Title");
+	this->window = RenderWindow();
+	this->primaryWindow = this->window.createWindow(600, 500, "SpaghettiEngine", "Title");
+}
 
+void Engine::createDirectX()
+{
+	this->directXHandler = new DxHandler;
+	this->directXHandler->configureSwapChain(primaryWindow);
+	this->directXHandler->initalizeDeviceContextAndSwapChain();
+
+}
+
+void Engine::createInputHandler()
+{
+	this->inputHandler = InputHandler();
 }
 
 void Engine::initialSetup()
 {
 	this->createWindow();
+	createInputHandler();
+	createDirectX();
 }
 
 void Engine::engineLoop()
@@ -35,6 +49,19 @@ void Engine::engineLoop()
 		// ...
 		// ...
 
-		//UPDATING CONSTANT BUFFER -------------------------------------------------
+		RECT viewportRect;
+		GetClientRect(primaryWindow, &viewportRect);
+		D3D11_VIEWPORT port = {
+			0.f,
+			0.f,
+			(float)(viewportRect.right - viewportRect.left),
+			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
+		};
+		contextPtr->RSSetViewports(1, &port);
+		float background_color[4] = { 0.5f, 0.f, 0.f, 0.f };
+		contextPtr->ClearRenderTargetView(directXHandler->renderTargetPtr, background_color);
+		contextPtr->OMSetRenderTargets(1, &directXHandler->renderTargetPtr, NULL);
+
+		directXHandler->swapChainPtr->Present(1, 0);
 	}
 }
