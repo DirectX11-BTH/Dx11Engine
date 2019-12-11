@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{c158ee38-c4e8-4fed-94a7-3dca13b32cbd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,8 +30,35 @@
     <ClInclude Include="RenderWindow2ActuallyWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="RenderWindow2ActuallyWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,11 +77,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VShader.hlsl">
-      <Filter>Source Files</Filter>
-    </FxCompile>
     <FxCompile Include="PShader.hlsl">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
