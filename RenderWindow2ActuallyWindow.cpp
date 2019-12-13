@@ -11,7 +11,6 @@
 #include <assert.h>
 #include <iostream>
 #include <Windows.h>
-#include <d3dcompiler.h>
 #include <tchar.h>
 #include <string>
 #include <wrl.h>

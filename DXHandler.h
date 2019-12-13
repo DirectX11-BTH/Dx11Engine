@@ -48,9 +48,12 @@ public:
 	static IDXGISwapChain* swapChainPtr;
 	static ID3D11RenderTargetView* renderTargetPtr;
 	static DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
+	static ID3D11Buffer* vertexShaderBuffer;
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
+	void setupInputLayout();
+	ID3D11Buffer* createVertexBuffer();
 
 	void setCullingMode(D3D11_CULL_MODE mode);
 

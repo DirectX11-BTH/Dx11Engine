@@ -7,6 +7,7 @@ HINSTANCE DxHandler::hInstance = HINSTANCE();
 IDXGISwapChain* DxHandler::swapChainPtr = nullptr;
 ID3D11RenderTargetView* DxHandler::renderTargetPtr = nullptr;
 DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
+ID3D11Buffer* DxHandler::vertexShaderBuffer = NULL;
 
 void DxHandler::initalizeDeviceContextAndSwapChain()
 {
@@ -101,6 +102,49 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 	//assert(swapChainPtr != nullptr);
 	////
 
+}
+void DxHandler::setupInputLayout()
+{
+	ID3D11InputLayout* input_layout_ptr = NULL;
+
+	D3D11_INPUT_ELEMENT_DESC inputDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	HRESULT inputLayoutSucc = devicePtr->CreateInputLayout
+	(
+		inputDesc, ARRAYSIZE(inputDesc),
+		//vertexShaderBuffer->GetBufferPointer(), //TO DO
+		//vertexShaderBuffer->GetBufferSize(), // TO DO
+		&input_layout_ptr
+	);
+	assert(SUCCEEDED(inputLayoutSucc));
+}
+ID3D11Buffer* DxHandler::createVertexBuffer()
+{
+	D3D11_BUFFER_DESC bufferDesc = { 0 };
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.ByteWidth = sizeOfBuffer;
+	bufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{};
+	subResData.pSysMem = fArray;
+	subResData.SysMemPitch = 512 * sizeof(float) * 4;
+
+	ID3D11Buffer* vertexBufferPtr = NULL;
+	MSG msg;
+
+	HRESULT succ2 = devicePtr->CreateBuffer(&bufferDesc, &subResData, &vertexBufferPtr);
+	assert(succ2 == S_OK);
+	
+	return vertexBufferPtr;
 }
 void DxHandler::setCullingMode(D3D11_CULL_MODE mode)
 {
