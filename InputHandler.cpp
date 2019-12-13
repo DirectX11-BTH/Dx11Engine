@@ -3,7 +3,7 @@
 LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	//PAINTSTRUCT ps;
-	HDC hdc; //HDC is to handle		 context.
+	//HDC hdc; //HDC is to handle		 context.
 
 	switch (message)
 	{

@@ -1,5 +1,12 @@
 #include "DXHandler.h"
 
+ID3D11Device* DxHandler::devicePtr = nullptr;
+ID3D11DeviceContext* DxHandler::contextPtr = nullptr;
+HINSTANCE DxHandler::hInstance = HINSTANCE();
+
+IDXGISwapChain* DxHandler::swapChainPtr = nullptr;
+ID3D11RenderTargetView* DxHandler::renderTargetPtr = nullptr;
+DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
 
 void DxHandler::initalizeDeviceContextAndSwapChain()
 {
@@ -14,11 +21,11 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
-		&swapDesc,
-		&swapChainPtr,
-		&devicePtr,
+		&DxHandler::swapDesc,
+		&DxHandler::swapChainPtr,
+		&DxHandler::devicePtr,
 		nullptr,
-		&contextPtr
+		&DxHandler::contextPtr
 	);
 
 	assert(SUCCEEDED(succ));
@@ -28,7 +35,7 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
 	ID3D11RasterizerState* rasterizerState;
-
+	
 	devicePtr->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
 	contextPtr->RSSetState(rasterizerState);
 
@@ -45,26 +52,26 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 	// CREATING OUR CHAIN DESC
 	
 	//BUFFERDESC
-	swapDesc.BufferDesc.Width = 0;//widthOfScreen;
-	swapDesc.BufferDesc.Height = 0;//heightOfScreen;
-	swapDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;// doesnt work with 32 for some reason
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;//can be set to 0 for no max
-	swapDesc.BufferDesc.RefreshRate.Denominator = 0;
-	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	DxHandler::swapDesc.BufferDesc.Width = 0;//widthOfScreen;
+	DxHandler::swapDesc.BufferDesc.Height = 0;//heightOfScreen;
+	DxHandler::swapDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;// doesnt work with 32 for some reason
+	DxHandler::swapDesc.BufferDesc.RefreshRate.Numerator = 60;//can be set to 0 for no max
+	DxHandler::swapDesc.BufferDesc.RefreshRate.Denominator = 0;
+	DxHandler::swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	DxHandler::swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
 	//SAMPLEDESC
-	swapDesc.SampleDesc.Count = 1;
-	swapDesc.SampleDesc.Quality = 0;
+	DxHandler::swapDesc.SampleDesc.Count = 1;
+	DxHandler::swapDesc.SampleDesc.Quality = 0;
 	//END SAMPLEDESC
 
 	//GENERAL SWAPDESC
-	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDesc.BufferCount = 2; // might want 1 here. Not sure
-	swapDesc.OutputWindow = hWnd;
-	swapDesc.Windowed = TRUE;
-	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapDesc.Flags = 0;
+	DxHandler::swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	DxHandler::swapDesc.BufferCount = 2; // might want 1 here. Not sure
+	DxHandler::swapDesc.OutputWindow = hWnd;
+	DxHandler::swapDesc.Windowed = TRUE;
+	DxHandler::swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	DxHandler::swapDesc.Flags = 0;
 		//Checks for debug mode or not/////////
 	UINT swapCreateFlags = 0u;
 #ifndef NDEBUG
@@ -72,7 +79,7 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 #endif
 	//END GENERAL SWAPDESC
 
-		HRESULT succ = D3D11CreateDeviceAndSwapChain(
+	/*HRESULT succ = D3D11CreateDeviceAndSwapChain(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
@@ -80,18 +87,18 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
-		&swapDesc,
-		&swapChainPtr,
-		&devicePtr,
+		&DxHandler::swapDesc,
+		&DxHandler::swapChainPtr,
+		&DxHandler::devicePtr,
 		nullptr,
-		&contextPtr
+		&DxHandler::contextPtr
 	);
 		std::string s = std::to_string(succ);
 	//MessageBox(NULL, LPCWSTR(s.c_str()), L"Blah blah", MB_YESNO);//notice the L is removed
 
-	assert(succ == S_OK);
-	assert(contextPtr != nullptr);
-	assert(swapChainPtr != nullptr);
+	assert(succ == S_OK);*/
+	//assert(contextPtr != nullptr);
+	//assert(swapChainPtr != nullptr);
 	////
 
 }

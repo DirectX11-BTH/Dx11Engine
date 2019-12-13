@@ -45,9 +45,9 @@ public:
 		initalizeDeviceContextAndSwapChain();
 	}
 
-	IDXGISwapChain* swapChainPtr;
-	ID3D11RenderTargetView* renderTargetPtr;
-	DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
+	static IDXGISwapChain* swapChainPtr;
+	static ID3D11RenderTargetView* renderTargetPtr;
+	static DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
@@ -59,3 +59,5 @@ public:
 
 	void draw(Mesh& drawObject);
 };
+
+
