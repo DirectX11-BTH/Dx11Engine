@@ -45,6 +45,9 @@
     <ClInclude Include="DXHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EngineObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DXHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
