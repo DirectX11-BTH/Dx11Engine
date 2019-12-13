@@ -1,10 +1,7 @@
 #pragma once
-#include "DXVariables.h"
 #include "DXHandler.h"
 #include "RenderWindow.h"
 #include "InputHandler.h"
-
-
 
 class Engine
 {

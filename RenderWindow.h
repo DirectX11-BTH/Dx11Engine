@@ -7,6 +7,7 @@
 #include <atlstr.h>
 #include <iostream>
 #include "InputHandler.h"
+#include "DXHandler.h"
 
 class RenderWindow
 {

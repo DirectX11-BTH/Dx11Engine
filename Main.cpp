@@ -1,8 +1,9 @@
 #include "Engine.h"
+#include "DXHandler.h"
 
 int WinMain(HINSTANCE startInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	hInstance = startInstance;
+	DxHandler::hInstance = startInstance;
 
 	Engine engine;
 	engine.initialSetup();

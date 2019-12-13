@@ -23,6 +23,7 @@
 #include <SimpleMath.h>
 #include <WICTextureLoader.h>
 #include <math.h>
+#include "DXHandler.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
@@ -107,7 +108,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		widthOfScreen, heightOfScreen, //Size
 		NULL,
 		NULL,
-		hInstance,
+		DxHandler::hInstance,
 		NULL
 	);
 

@@ -1,9 +1,11 @@
 #include "RenderWindow.h"
-#include "DXVariables.h"
+#include "DXHandler.h"
+
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1);
 namespace wrl = Microsoft::WRL;
 HWND& RenderWindow::createWindow(int width, int height, std::string title, std::string applicationName)
 {
+
 	TCHAR szWindowClass[20];
 	TCHAR szWindowTitle[20];
 	_tcscpy_s(szWindowClass, CA2T(applicationName.c_str()));
@@ -16,8 +18,8 @@ HWND& RenderWindow::createWindow(int width, int height, std::string title, std::
 	window.lpfnWndProc = InputHandler::WndProc; //The function we want to call when we get an event. Could technically call function WndProc anything.
 	window.cbClsExtra = 0;
 	window.cbWndExtra = 0;
-	window.hInstance = hInstance;
-	window.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
+	window.hInstance = DxHandler::hInstance;
+	window.hIcon = LoadIcon(DxHandler::hInstance, IDI_APPLICATION);
 	window.hCursor = LoadCursor(NULL, IDC_ARROW);
 	window.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	window.lpszMenuName = NULL;
@@ -40,7 +42,7 @@ HWND& RenderWindow::createWindow(int width, int height, std::string title, std::
 		width, height, //Size
 		NULL,
 		NULL,
-		hInstance,
+		DxHandler::hInstance,
 		NULL
 	);
 
@@ -48,7 +50,7 @@ HWND& RenderWindow::createWindow(int width, int height, std::string title, std::
 	{
 		MessageBox(NULL,
 			_T("Call to create window failed!"),
-			_T("Windows Desktop Guided Tour!"),
+			_T(""),
 			NULL);
 	}
 

@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "DXHandler.h"
 
 void Engine::createWindow()
 {
@@ -8,9 +9,10 @@ void Engine::createWindow()
 
 void Engine::createDirectX()
 {
-	this->directXHandler = new DxHandler;
-	this->directXHandler->configureSwapChain(primaryWindow);
-	this->directXHandler->initalizeDeviceContextAndSwapChain();
+	this->directXHandler = new DxHandler(primaryWindow);
+
+	//this->directXHandler->configureSwapChain(primaryWindow);
+	//this->directXHandler->initalizeDeviceContextAndSwapChain();
 
 }
 
@@ -57,10 +59,10 @@ void Engine::engineLoop()
 			(float)(viewportRect.right - viewportRect.left),
 			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
 		};
-		contextPtr->RSSetViewports(1, &port);
+		directXHandler->contextPtr->RSSetViewports(1, &port);
 		float background_color[4] = { 0.5f, 0.f, 0.f, 0.f };
-		contextPtr->ClearRenderTargetView(directXHandler->renderTargetPtr, background_color);
-		contextPtr->OMSetRenderTargets(1, &directXHandler->renderTargetPtr, NULL);
+		directXHandler->contextPtr->ClearRenderTargetView(directXHandler->renderTargetPtr, background_color);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &directXHandler->renderTargetPtr, NULL);
 
 		directXHandler->swapChainPtr->Present(1, 0);
 	}

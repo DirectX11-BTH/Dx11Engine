@@ -13,7 +13,6 @@
 #include <vector>
 #include <stdint.h>
 #include <chrono>
-#include "DXVariables.h"
 #include <DirectXHelpers.h>
 #include <SimpleMath.h>
 #include <WICTextureLoader.h>
@@ -26,14 +25,25 @@
 
 namespace wrl = Microsoft::WRL;
 
+struct graphicsTuple
+{
+
+};
+
 class DxHandler
 {
 private:
-
+		
 public:
 	static  ID3D11Device* devicePtr;
 	static  ID3D11DeviceContext* contextPtr;
 	static  HINSTANCE hInstance;
+
+	DxHandler(HWND& hWnd)
+	{
+		configureSwapChain(hWnd);
+		initalizeDeviceContextAndSwapChain();
+	}
 
 	IDXGISwapChain* swapChainPtr;
 	ID3D11RenderTargetView* renderTargetPtr;
