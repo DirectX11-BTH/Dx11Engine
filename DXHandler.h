@@ -48,17 +48,20 @@ public:
 	static IDXGISwapChain* swapChainPtr;
 	static ID3D11RenderTargetView* renderTargetPtr;
 	static DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
-	static ID3D11Buffer* vertexShaderBuffer;
+	//static ID3D11Buffer* vertexShaderBuffer;
+
+	static ID3DBlob* vertexShaderBuffer;
+	static ID3DBlob* pixelShaderBuffer;
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
 	void setupInputLayout();
-	ID3D11Buffer* createVertexBuffer();
+	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
 
 	void setCullingMode(D3D11_CULL_MODE mode);
 
-	void setupPShader(TCHAR fileName[]);
-	void setupVShader(TCHAR fileName[]);
+	void setupPShader(const wchar_t fileName[]);
+	void setupVShader(const wchar_t fileName[]);
 
 	void draw(Mesh& drawObject);
 };

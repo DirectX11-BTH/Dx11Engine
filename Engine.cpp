@@ -21,11 +21,35 @@ void Engine::createInputHandler()
 	this->inputHandler = InputHandler();
 }
 
+void Engine::createDebugMesh()
+{
+	float fArray[] =
+	{
+		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
+		-0.7f, 0.7f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		0.7f, -0.7f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		-0.7f, -0.7f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+
+		-0.7f, 0.7f, 0.5f,		 1.f, 0.f, 0.f, 0.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		0.7f, 0.7f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		0.7f, -0.7f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
+	};
+
+	EngineObject* debugObject = new EngineObject;
+	debugObject->readMesh(fArray, 6);
+	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
+}
+
 void Engine::initialSetup()
 {
 	this->createWindow();
 	createInputHandler();
 	createDirectX();
+	directXHandler->setupPShader(L"PShader.hlsl");
+	directXHandler->setupVShader(L"VShader.hlsl");
+	directXHandler->setupInputLayout();
+
+	//this->directXHandler->createVertexBuffer()
 }
 
 void Engine::engineLoop()

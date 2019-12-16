@@ -2,6 +2,7 @@
 #include "DXHandler.h"
 #include "RenderWindow.h"
 #include "InputHandler.h"
+#include "EngineObject.h"
 
 class Engine
 {
@@ -15,6 +16,8 @@ private:
 	void createWindow();
 	void createDirectX();
 	void createInputHandler();
+
+	void createDebugMesh();
 public:
 	
 	void initialSetup();

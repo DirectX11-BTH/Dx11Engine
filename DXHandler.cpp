@@ -7,7 +7,8 @@ HINSTANCE DxHandler::hInstance = HINSTANCE();
 IDXGISwapChain* DxHandler::swapChainPtr = nullptr;
 ID3D11RenderTargetView* DxHandler::renderTargetPtr = nullptr;
 DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
-ID3D11Buffer* DxHandler::vertexShaderBuffer = NULL;
+ID3DBlob* DxHandler::vertexShaderBuffer = nullptr;
+ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
 void DxHandler::initalizeDeviceContextAndSwapChain()
 {
@@ -118,27 +119,28 @@ void DxHandler::setupInputLayout()
 	HRESULT inputLayoutSucc = devicePtr->CreateInputLayout
 	(
 		inputDesc, ARRAYSIZE(inputDesc),
-		//vertexShaderBuffer->GetBufferPointer(), //TO DO
-		//vertexShaderBuffer->GetBufferSize(), // TO DO
+		vertexShaderBuffer->GetBufferPointer(), //TO DO
+		vertexShaderBuffer->GetBufferSize(), // TO DO
 		&input_layout_ptr
 	);
 	assert(SUCCEEDED(inputLayoutSucc));
 }
-ID3D11Buffer* DxHandler::createVertexBuffer()
+ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 {
+	ID3D11Buffer* vertexBufferPtr = NULL;
+
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
-	bufferDesc.ByteWidth = sizeOfBuffer;
+	bufferDesc.ByteWidth = sizeof(float)*12;
 	bufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{};
-	subResData.pSysMem = fArray;
+	subResData.pSysMem = mesh.vertices.data();
 	subResData.SysMemPitch = 512 * sizeof(float) * 4;
 
-	ID3D11Buffer* vertexBufferPtr = NULL;
 	MSG msg;
 
 	HRESULT succ2 = devicePtr->CreateBuffer(&bufferDesc, &subResData, &vertexBufferPtr);
@@ -155,4 +157,47 @@ void DxHandler::setCullingMode(D3D11_CULL_MODE mode)
 
 	devicePtr->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
 	contextPtr->RSSetState(rasterizerState);
+}
+
+void DxHandler::setupPShader(const wchar_t fileName[])
+{
+	ID3DBlob* errorMessage;
+
+	HRESULT pixelShaderSucc = D3DCompileFromFile(
+		fileName,
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"ps_5_0", //Pixel shader
+		0,
+		0,
+		&DxHandler::pixelShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(pixelShaderSucc));
+
+	ID3D11PixelShader* pixelPtr;
+	HRESULT createPShaderSucc = devicePtr->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &pixelPtr);
+	assert(SUCCEEDED(createPShaderSucc));
+}
+
+void DxHandler::setupVShader(const wchar_t fileName[])
+{
+	ID3DBlob* errorMessage;
+	
+	HRESULT	vertShaderSucc = D3DCompileFromFile(
+		fileName,
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"vs_5_0", //Vertex shader
+		0,
+		0,
+		&DxHandler::vertexShaderBuffer,
+		&errorMessage
+	);
+
+	ID3D11VertexShader* vertexPtr;
+	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexPtr);
+	assert(SUCCEEDED(createVShaderSucc));
 }

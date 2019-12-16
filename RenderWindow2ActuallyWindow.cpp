@@ -340,7 +340,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	deviceContext->VSSetConstantBuffers( 0, 1, &constantBuffer );
 	//--------------------------------------
 
-	//CONSTANT PIXEL BUFFER SETUP
+	//CONSTANT PIXEL BUFFER 
 
 	struct PS_CONSTANT_BUFFER
 	{
