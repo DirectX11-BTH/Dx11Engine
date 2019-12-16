@@ -213,9 +213,9 @@ void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO D
 
 	for (int i = 0; i < drawObject.meshes.size(); i++)
 	{
-		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(0).vertexBuffer,
+		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(i).vertexBuffer,
 			&stride, &offset);
-		DxHandler::contextPtr->Draw(drawObject.meshes.at(0).vertices.size(), 0);
+		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
 	}
 
 	std::cout << "DRAWING" << std::endl << "Nr of verts:\t" << drawObject.meshes.at(0).vertices.size() << std::endl;

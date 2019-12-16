@@ -56,7 +56,7 @@ void Engine::engineLoop()
 	debugObject->readMesh(fArray, 6);
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
-	/*float fArray2[] =
+	float fArray2[] =
 	{
 		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
 		-0.8f, 0.9f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
@@ -68,8 +68,8 @@ void Engine::engineLoop()
 		0.6f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
 	};
 	EngineObject* debugObject2 = new EngineObject;
-	debugObject->readMesh(fArray2, 6);
-	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));*/
+	debugObject2->readMesh(fArray2, 6);
+	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	//delete debugObject;
 	//----------------------------------------------------------------------------------------------- END DEBUG
 
@@ -109,6 +109,7 @@ void Engine::engineLoop()
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);
 
 		directXHandler->draw(*debugObject);
+		directXHandler->draw(*debugObject2);
 
 		directXHandler->swapChainPtr->Present(1, 0);
 	}
