@@ -215,7 +215,7 @@ void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO D
 	//{
 	DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(0).vertexBuffer,
 		&stride, &offset);
-	DxHandler::contextPtr->Draw(6, 0);
+	DxHandler::contextPtr->Draw(drawObject.meshes.at(0).vertices.size(), 0);
 	//}
 
 	std::cout << "DRAWING" << std::endl << "Nr of verts:\t" << drawObject.meshes.at(0).vertices.size() << std::endl;

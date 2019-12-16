@@ -27,6 +27,8 @@ Mesh EngineObject::readMesh(float mesh[], int nrOfVertices)
 		createdMesh.vertices.push_back(Vertex{x,y,z,r,g,b,a,u,v,nx,ny,nz});
 	}
 
+	createdMesh.nrOfVertices = nrOfVertices;
+
 	this->meshes.push_back(createdMesh);
 
 	return createdMesh;
