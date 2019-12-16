@@ -3,7 +3,7 @@
 
 Mesh EngineObject::readMesh(float mesh[], int nrOfVertices)
 {
-	int vertexStride = 12; //12 floats per vertex in array XYZ, RGB, UV, NX,NY,NZ
+	int vertexStride = FLOATS_PER_VERTEX; //12 floats per vertex in array XYZ, RGB, UV, NX,NY,NZ
 
 	Mesh createdMesh;
 	for (int i = 0; i < nrOfVertices; i++)
@@ -15,15 +15,16 @@ Mesh EngineObject::readMesh(float mesh[], int nrOfVertices)
 		float r = mesh[3 + vertexStride * i];
 		float g = mesh[4 + vertexStride * i];
 		float b = mesh[5 + vertexStride * i];
+		float a = mesh[6 + vertexStride * i];
 
-		float u = mesh[6 + vertexStride * i];
-		float v = mesh[7 + vertexStride * i];
+		float u = mesh[7 + vertexStride * i];
+		float v = mesh[8 + vertexStride * i];
 
-		float nx = mesh[8 + vertexStride * i];
-		float ny = mesh[9 + vertexStride * i];
-		float nz = mesh[10 + vertexStride * i];
+		float nx = mesh[9 + vertexStride * i];
+		float ny = mesh[10 + vertexStride * i];
+		float nz = mesh[11 + vertexStride * i];
 
-		createdMesh.vertices.push_back(Vertex{x,y,z,r,g,b,u,v,nx,ny,nz});
+		createdMesh.vertices.push_back(Vertex{x,y,z,r,g,b,a,u,v,nx,ny,nz});
 	}
 
 	this->meshes.push_back(createdMesh);
