@@ -34,6 +34,7 @@ VS_OUTPUT main(VS_INPUT input)
 	Output.vPosition = float4(input.vPosition.xyz, 0);
 	//Output.vInterpolatedPosition = float4(mul(pos, rotationMatrix));
 
+
 	//Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 1), rotationMatrix));
 
 	Output.vColour = input.vColour;
