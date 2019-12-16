@@ -123,8 +123,8 @@ void DxHandler::setupInputLayout()
 	HRESULT inputLayoutSucc = devicePtr->CreateInputLayout
 	(
 		inputDesc, ARRAYSIZE(inputDesc),
-		vertexShaderBuffer->GetBufferPointer(), //TO DO
-		vertexShaderBuffer->GetBufferSize(), // TO DO
+		vertexShaderBuffer->GetBufferPointer(),
+		vertexShaderBuffer->GetBufferSize(),
 		&input_layout_ptr
 	);
 	assert(SUCCEEDED(inputLayoutSucc));
@@ -138,7 +138,7 @@ ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
-	bufferDesc.ByteWidth = sizeof(float) * FLOATS_PER_VERTEX * mesh.vertices.size(); // TO DO?
+	bufferDesc.ByteWidth = sizeof(float) * FLOATS_PER_VERTEX * mesh.vertices.size();
 	bufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{0};
@@ -211,12 +211,12 @@ void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO D
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
 
-	//for (int i = 0; i < drawObject.meshes.size(); i++)
-	//{
-	DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(0).vertexBuffer,
-		&stride, &offset);
-	DxHandler::contextPtr->Draw(drawObject.meshes.at(0).vertices.size(), 0);
-	//}
+	for (int i = 0; i < drawObject.meshes.size(); i++)
+	{
+		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(0).vertexBuffer,
+			&stride, &offset);
+		DxHandler::contextPtr->Draw(drawObject.meshes.at(0).vertices.size(), 0);
+	}
 
 	std::cout << "DRAWING" << std::endl << "Nr of verts:\t" << drawObject.meshes.at(0).vertices.size() << std::endl;
 	//swapChainPtr->Present(1, 0);
