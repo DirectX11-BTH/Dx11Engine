@@ -10,6 +10,10 @@ DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
 ID3DBlob* DxHandler::vertexShaderBuffer = nullptr;
 ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
+ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
+ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
+ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
+
 void DxHandler::initalizeDeviceContextAndSwapChain()
 {
 	//ID3D11DeviceContext* contextPtr = contextPtr;
@@ -106,7 +110,7 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 }
 void DxHandler::setupInputLayout()
 {
-	ID3D11InputLayout* input_layout_ptr = NULL;
+	//ID3D11InputLayout* input_layout_ptr = NULL;
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] =
 	{
@@ -134,17 +138,19 @@ ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
-	bufferDesc.ByteWidth = sizeof(float)*12;
+	bufferDesc.ByteWidth = sizeof(float) * FLOATS_PER_VERTEX * mesh.vertices.size(); // TO DO?
 	bufferDesc.StructureByteStride = 0;
 
-	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{};
+	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{0};
 	subResData.pSysMem = mesh.vertices.data();
-	subResData.SysMemPitch = 512 * sizeof(float) * 4;
+	subResData.SysMemPitch = FLOATS_PER_VERTEX * sizeof(float) * mesh.vertices.size();
 
 	MSG msg;
 
 	HRESULT succ2 = devicePtr->CreateBuffer(&bufferDesc, &subResData, &vertexBufferPtr);
 	assert(succ2 == S_OK);
+
+	mesh.vertexBuffer = vertexBufferPtr;
 	
 	return vertexBufferPtr;
 }
@@ -176,7 +182,6 @@ void DxHandler::setupPShader(const wchar_t fileName[])
 	);
 	assert(SUCCEEDED(pixelShaderSucc));
 
-	ID3D11PixelShader* pixelPtr;
 	HRESULT createPShaderSucc = devicePtr->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &pixelPtr);
 	assert(SUCCEEDED(createPShaderSucc));
 }
@@ -197,7 +202,22 @@ void DxHandler::setupVShader(const wchar_t fileName[])
 		&errorMessage
 	);
 
-	ID3D11VertexShader* vertexPtr;
 	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexPtr);
 	assert(SUCCEEDED(createVShaderSucc));
+}
+
+void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO DO
+{
+	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
+	UINT offset = 0u;
+
+	//for (int i = 0; i < drawObject.meshes.size(); i++)
+	//{
+	DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(0).vertexBuffer,
+		&stride, &offset);
+	DxHandler::contextPtr->Draw(6, 0);
+	//}
+
+	std::cout << "DRAWING" << std::endl << "Nr of verts:\t" << drawObject.meshes.at(0).vertices.size() << std::endl;
+	//swapChainPtr->Present(1, 0);
 }

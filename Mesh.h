@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+class ID3D11Buffer;
 
 
 struct Vertex
@@ -13,8 +14,7 @@ struct Vertex
 class Mesh
 {
 public:
+	ID3D11Buffer* vertexBuffer = NULL;
 	int nrOfVertices = 0;
 	std::vector<Vertex> vertices;
-	//TEST
-
 };

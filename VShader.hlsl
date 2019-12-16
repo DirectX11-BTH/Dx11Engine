@@ -3,10 +3,10 @@
 	December 6th 2019
 */
 
-cbuffer VS_CONSTANT_BUFFER
+/*cbuffer VS_CONSTANT_BUFFER
 {
 	Matrix rotationMatrix;
-}
+}*/
 
 struct VS_INPUT
 {
@@ -30,10 +30,11 @@ VS_OUTPUT main(VS_INPUT input)
 	VS_OUTPUT Output;
 
 	float4 pos = float4(input.vPosition.xy, input.vPosition.z, 1.0);
-	Output.vPosition = float4(mul(pos,rotationMatrix)); //Ignore W
-	Output.vInterpolatedPosition = float4(mul(pos, rotationMatrix));
+	//Output.vPosition = float4(mul(pos,rotationMatrix)); //Ignore W
+	Output.vPosition = float4(input.vPosition.xyz, 0);
+	//Output.vInterpolatedPosition = float4(mul(pos, rotationMatrix));
 
-	Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 1), rotationMatrix));
+	//Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 1), rotationMatrix));
 
 	Output.vColour = input.vColour;
 	Output.vUV = float4(input.vUV, 1, 1);

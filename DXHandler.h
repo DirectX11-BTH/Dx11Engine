@@ -18,17 +18,15 @@
 #include <WICTextureLoader.h>
 #include <math.h>
 #include "Mesh.h"
+#include "EngineObject.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
 #pragma comment(lib, "d3dcompiler.lib")
 
+const float FLOATS_PER_VERTEX = 12.f;
+
 namespace wrl = Microsoft::WRL;
-
-struct graphicsTuple
-{
-
-};
 
 class DxHandler
 {
@@ -52,6 +50,9 @@ public:
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
+	static ID3D11PixelShader* pixelPtr;
+	static ID3D11VertexShader* vertexPtr;
+	static ID3D11InputLayout* input_layout_ptr;
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
@@ -63,7 +64,7 @@ public:
 	void setupPShader(const wchar_t fileName[]);
 	void setupVShader(const wchar_t fileName[]);
 
-	void draw(Mesh& drawObject);
+	void draw(EngineObject& drawObject);
 };
 
 
