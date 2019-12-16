@@ -89,7 +89,7 @@ void Engine::engineLoop()
 		};
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
-		float background_color[4] = { 0.5f, 0.f, 0.f, 0.5f };
+		float background_color[4] = { 1.f, 1.f, 1.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);
 
