@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <DirectXHelpers.h>
+#include <SimpleMath.h>
 class ID3D11Buffer;
 
 

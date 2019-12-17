@@ -17,7 +17,8 @@ ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 template <typename T>
 ID3D11Buffer*& DxHandler::createVSConstBuffer(T cStruct)
 {
-	VS_CONSTANT_MATRIX_BUFFER cBuffer;
+	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
+	T cBuffer;
 
 	D3D11_BUFFER_DESC constBDesc;
 	constBDesc.ByteWidth = sizeof(cStruct);
@@ -55,7 +56,8 @@ ID3D11Buffer*& DxHandler::createPSConstBuffer(T cStruct)
 	constPixelDesc.MiscFlags = 0;
 	constPixelDesc.StructureByteStride = 0;
 
-	PS_CONSTANT_LIGHT_BUFFER cPixelBuffer;
+	//PS_CONSTANT_LIGHT_BUFFER cPixelBuffer;
+	T cPixelBuffer;
 
 	D3D11_SUBRESOURCE_DATA InitDataPixel;
 	InitDataPixel.pSysMem = &cPixelBuffer;

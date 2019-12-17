@@ -3,10 +3,11 @@
 	December 6th 2019
 */
 
-/*cbuffer VS_CONSTANT_BUFFER
+cbuffer VS_CONSTANT_BUFFER
 {
-	Matrix rotationMatrix;
-}*/
+	Matrix worldMatrix;
+	Matrix cameraMatrix;
+}
 
 struct VS_INPUT
 {
@@ -29,9 +30,9 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT Output;
 
-	//float4 pos = float4(input.vPosition.xy, input.vPosition.z, 1.0);
-	//Output.vPosition = float4(mul(pos,rotationMatrix)); //Ignore W
-	Output.vPosition = float4(input.vPosition, 1);
+	float4 pos = float4(input.vPosition.xy, input.vPosition.z, 1.0);
+	Output.vPosition = float4(mul(pos,worldMatrix)); //Ignore W
+	//Output.vPosition = float4(input.vPosition, 1);
 	//Output.vInterpolatedPosition = float4(mul(pos, rotationMatrix));
 
 

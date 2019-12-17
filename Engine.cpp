@@ -35,8 +35,16 @@ void Engine::initialSetup()
 	DxHandler::contextPtr->VSSetShader((ID3D11VertexShader*)DxHandler::vertexPtr, NULL, 0);
 	DxHandler::contextPtr->PSSetShader((ID3D11PixelShader*)DxHandler::pixelPtr, NULL, 0);
 
+	//DEBUG, TO DO
+	VS_CONSTANT_MATRIX_BUFFER matrixBuff;
+	//matrixBuff.worldMatrix = DirectX::XMMatrixRotationX(45);
+
+	ID3D11Buffer* VSConstBuff = directXHandler->createVSConstBuffer(&matrixBuff);
+	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
 	//this->directXHandler->createVertexBuffer()
 }
+
+float rot = 0;
 
 void Engine::engineLoop()
 {
@@ -73,6 +81,7 @@ void Engine::engineLoop()
 	debugObject2->readTextureFromFile(L"./texture2.png");
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	//delete debugObject;
+
 	//----------------------------------------------------------------------------------------------- END DEBUG
 
 	MSG msg;
