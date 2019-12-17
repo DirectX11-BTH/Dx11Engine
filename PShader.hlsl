@@ -4,13 +4,13 @@
 */
 
 
-/*Texture2D mytexture;
+Texture2D mytexture;
 SamplerState mysampler;
 
 cbuffer PS_CONSTANT_BUFFER
 {
 	float4 light;
-}*/
+}
 
 struct VS_OUTPUT
 {
@@ -23,7 +23,7 @@ struct VS_OUTPUT
 
 float4 main(VS_OUTPUT input) : SV_Target
 {
-	//float4 textureColor = mytexture.Sample(mysampler, input.vUV);
+	float4 textureColor = mytexture.Sample(mysampler, input.vUV);
 	//float3 surfaceToLightV = normalize(light.xyz - input.vInterpolatedPosition);
 	//float diffuseStrength = clamp(dot(input.vNormal, surfaceToLightV), 0, 1);
 	//float ambientStrength = 0.1f;
@@ -33,7 +33,8 @@ float4 main(VS_OUTPUT input) : SV_Target
 	//float4 reflectionVec = normalize(reflect(float4(surfaceToLightV,0), input.vNormal)); //Specular
 	//float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100);
 	
-	return input.vColour;//diffuseStrength+ambientStrength)*textureColor; //Should be black when correct cause rgb -1?
+	return textureColor;
+	//return input.vColour;//diffuseStrength+ambientStrength)*textureColor; //Should be black when correct cause rgb -1?
 
 	//return float4(input.vNormal, 0);
 }

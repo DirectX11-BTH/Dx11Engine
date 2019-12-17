@@ -54,21 +54,23 @@ void Engine::engineLoop()
 	};
 	EngineObject* debugObject = new EngineObject;
 	debugObject->readMesh(fArray, 6);
+	debugObject->readTextureFromFile(L"./texture.png");
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
 	float fArray2[] =
 	{
 		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
-		-0.8f, 0.9f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.6f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		-0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
 		-0.8f, -0.5f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
 
-		-0.6f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 0.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
+		-0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 0.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
 		0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.6f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
+		0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
 	};
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->readMesh(fArray2, 6);
+	debugObject2->readTextureFromFile(L"./texture2.png");
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	//delete debugObject;
 	//----------------------------------------------------------------------------------------------- END DEBUG

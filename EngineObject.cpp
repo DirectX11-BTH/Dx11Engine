@@ -34,9 +34,9 @@ Mesh EngineObject::readMesh(float mesh[], int nrOfVertices)
 	return createdMesh;
 }
 
-void EngineObject::readTextureFromFile(std::string textureName) //Kanske bör ändras till path?
+void EngineObject::readTextureFromFile(const wchar_t* textureName) //Kanske bör ändras till path?
 {
-	HRESULT readTextureResult = DirectX::CreateWICTextureFromFile(DxHandler::devicePtr, L"texture.png", &texture, &textureView, 0);
+	HRESULT readTextureResult = DirectX::CreateWICTextureFromFile(DxHandler::devicePtr, textureName, &texture, &textureView, 0);
 
 	//Check if file could be loaded
 	assert(SUCCEEDED(readTextureResult));
@@ -48,8 +48,6 @@ void EngineObject::readTextureFromFile(std::string textureName) //Kanske bör änd
 	imageSampleDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	imageSampleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	imageSampleDesc.MiscFlags = 0;
-
-
 
 	//Reading image size from the desc
 	ID3D11Texture2D *pTextureInterface = 0;

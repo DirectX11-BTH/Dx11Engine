@@ -28,6 +28,18 @@ const float FLOATS_PER_VERTEX = 12.f;
 
 namespace wrl = Microsoft::WRL;
 
+struct VS_CONSTANT_MATRIX_BUFFER
+{
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX cameraMatrix;
+};
+
+struct PS_CONSTANT_LIGHT_BUFFER
+{
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX cameraMatrix;
+};
+
 class DxHandler
 {
 private:
@@ -36,6 +48,8 @@ public:
 	static  ID3D11Device* devicePtr;
 	static  ID3D11DeviceContext* contextPtr;
 	static  HINSTANCE hInstance;
+
+	std::vector<ID3D11Buffer*> loadedBuffers;
 
 	DxHandler(HWND& hWnd)
 	{
@@ -53,6 +67,11 @@ public:
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
 	static ID3D11InputLayout* input_layout_ptr;
+
+	template <typename T>
+	ID3D11Buffer*& createVSConstBuffer(T cStruct);
+	template <typename T>
+	ID3D11Buffer*& createPSConstBuffer(T cStruct);
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
