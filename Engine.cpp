@@ -44,8 +44,6 @@ void Engine::initialSetup()
 	//this->directXHandler->createVertexBuffer()
 }
 
-float rot = 0;
-
 void Engine::engineLoop()
 {
 	//----------------------------------------------------------------------------------------------- DEBUG
