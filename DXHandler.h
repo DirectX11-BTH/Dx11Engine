@@ -14,8 +14,8 @@
 #include <vector>
 #include <stdint.h>
 #include <chrono>
-//#include <DirectXHelpers.h>
-//#include <SimpleMath.h>
+#include <DirectXHelpers.h>
+#include <SimpleMath.h>
 #include <WICTextureLoader.h>
 #include <math.h>
 #include "Mesh.h"
