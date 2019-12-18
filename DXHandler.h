@@ -4,6 +4,7 @@
 #include <dxgi.h>
 #include <d3d11.h>
 #include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <Windows.h>
 //#include <d3dcompiler.h>
@@ -13,8 +14,8 @@
 #include <vector>
 #include <stdint.h>
 #include <chrono>
-#include <DirectXHelpers.h>
-#include <SimpleMath.h>
+//#include <DirectXHelpers.h>
+//#include <SimpleMath.h>
 #include <WICTextureLoader.h>
 #include <math.h>
 #include "Mesh.h"

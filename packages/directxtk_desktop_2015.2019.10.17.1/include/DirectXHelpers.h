@@ -27,6 +27,7 @@
 
 #include <exception>
 #include <stdint.h>
+#include <assert.h>
 
 //
 // The core Direct3D headers provide the following helper C++ classes

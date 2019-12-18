@@ -36,11 +36,11 @@ void Engine::initialSetup()
 	DxHandler::contextPtr->PSSetShader((ID3D11PixelShader*)DxHandler::pixelPtr, NULL, 0);
 
 	//DEBUG, TO DO
-	VS_CONSTANT_MATRIX_BUFFER matrixBuff;
+	//VS_CONSTANT_MATRIX_BUFFER matrixBuff;
 	//matrixBuff.worldMatrix = DirectX::XMMatrixRotationX(45);
 
-	ID3D11Buffer* VSConstBuff = directXHandler->createVSConstBuffer(&matrixBuff);
-	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
+	//ID3D11Buffer* VSConstBuff = directXHandler->createVSConstBuffer(&matrixBuff);
+	//DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
 	//this->directXHandler->createVertexBuffer()
 }
 
