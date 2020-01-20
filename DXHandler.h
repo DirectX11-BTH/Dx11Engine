@@ -35,6 +35,7 @@ struct VS_CONSTANT_MATRIX_BUFFER
 	DirectX::XMMATRIX cameraMatrix;
 };
 
+
 struct PS_CONSTANT_LIGHT_BUFFER
 {
 	DirectX::XMMATRIX worldMatrix;
@@ -69,8 +70,7 @@ public:
 	static ID3D11VertexShader* vertexPtr;
 	static ID3D11InputLayout* input_layout_ptr;
 
-	template <typename T>
-	ID3D11Buffer*& createVSConstBuffer(T cStruct);
+	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	template <typename T>
 	ID3D11Buffer*& createPSConstBuffer(T cStruct);
 
@@ -86,5 +86,4 @@ public:
 
 	void draw(EngineObject& drawObject);
 };
-
 

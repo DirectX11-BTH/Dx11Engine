@@ -14,14 +14,12 @@ ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 
-template <typename T>
-ID3D11Buffer*& DxHandler::createVSConstBuffer(T cStruct)
+ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
 {
 	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
-	T cBuffer;
 
 	D3D11_BUFFER_DESC constBDesc;
-	constBDesc.ByteWidth = sizeof(cStruct);
+	constBDesc.ByteWidth = sizeof(matrix);
 	constBDesc.Usage = D3D11_USAGE_DEFAULT;
 	constBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBDesc.CPUAccessFlags = 0;
@@ -29,7 +27,7 @@ ID3D11Buffer*& DxHandler::createVSConstBuffer(T cStruct)
 	constBDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &cBuffer;
+	InitData.pSysMem = &matrix;
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 	ID3D11Buffer* constantBuffer = NULL;

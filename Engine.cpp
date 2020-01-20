@@ -37,10 +37,16 @@ void Engine::initialSetup()
 
 	//DEBUG, TO DO
 	VS_CONSTANT_MATRIX_BUFFER matrixBuff;
-	//matrixBuff.worldMatrix = DirectX::XMMatrixRotationX(45);
+	matrixBuff.cameraMatrix = DirectX::XMMATRIX();
+	matrixBuff.worldMatrix = DirectX::XMMATRIX();
 
-	//ID3D11Buffer* VSConstBuff = directXHandler->createVSConstBuffer(&matrixBuff);
-	//DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
+	//matrixBuff.worldMatrix.rotate(30);
+	matrixBuff.worldMatrix = DirectX::XMMatrixRotationX(45);
+	
+	ID3D11Buffer* VSConstBuff = NULL;
+	VSConstBuff = directXHandler->createVSConstBuffer(matrixBuff);
+
+	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
 	//this->directXHandler->createVertexBuffer()
 }
 
