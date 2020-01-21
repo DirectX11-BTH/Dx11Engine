@@ -4,7 +4,7 @@
 void Engine::createWindow()
 {
 	this->window = RenderWindow();
-	this->primaryWindow = this->window.createWindow(600, 500, "SpaghettiEngine", "Title");
+	this->primaryWindow = this->window.createWindow(WIDTH, HEIGHT, "SpaghettiEngine", "Title");
 }
 
 void Engine::createDirectX()
@@ -21,6 +21,11 @@ void Engine::createInputHandler()
 	this->inputHandler = InputHandler();
 }
 
+Engine::~Engine()
+{
+	delete directXHandler;
+}
+
 void Engine::initialSetup()
 {
 	this->createWindow();
@@ -35,19 +40,31 @@ void Engine::initialSetup()
 	DxHandler::contextPtr->VSSetShader((ID3D11VertexShader*)DxHandler::vertexPtr, NULL, 0);
 	DxHandler::contextPtr->PSSetShader((ID3D11PixelShader*)DxHandler::pixelPtr, NULL, 0);
 
-	//DEBUG, TO DO
-	VS_CONSTANT_MATRIX_BUFFER matrixBuff;
-	matrixBuff.cameraMatrix = DirectX::XMMATRIX();
-	matrixBuff.worldMatrix = DirectX::XMMATRIX();
-
-	//matrixBuff.worldMatrix.rotate(30);
-	matrixBuff.worldMatrix = DirectX::XMMatrixRotationX(45);
+	//Initiate constant buffers
+	VS_CONSTANT_MATRIX_BUFFER* matrixBuff = new VS_CONSTANT_MATRIX_BUFFER;
+	//matrixBuff->worldMatrix = DirectX::XMMATRIX();
 	
 	ID3D11Buffer* VSConstBuff = NULL;
-	VSConstBuff = directXHandler->createVSConstBuffer(matrixBuff);
-
+	VSConstBuff = directXHandler->createVSConstBuffer(*matrixBuff);
 	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &matrixBuff, 0, 0);
-	//this->directXHandler->createVertexBuffer()
+
+	//Camera setup & constant buffer that might not be used?
+	//Has to be created after perobject constant buffer so that index in vector (loadedVSBuffers) is equal to the constant CAMERA_CBUFFER_SLOT
+	VS_CONSTANT_CAMERA_BUFFER cameraMatrixBuff;
+	ID3D11Buffer* VSCameraConstBuff = NULL;
+	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
+
+	Camera::cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);
+
+	Camera::cameraProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH( //Creates projection space
+		0.35f * 3.14f,//FovAngleY, height angle of perspective in radians
+		(float)WIDTH / (float)HEIGHT,//AspectRatio, width/height of window
+		1.0f,//NearZ, how close we render
+		1000.f//FarZ how far we render
+	);
+
+	worldViewProjectionMatrix = worldMatrix * camera.cameraView * Camera::cameraProjectionMatrix;
+	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &Camera::cameraProjectionMatrix, 0, 0);
 }
 
 void Engine::engineLoop()
@@ -67,6 +84,13 @@ void Engine::engineLoop()
 	EngineObject* debugObject = new EngineObject;
 	debugObject->readMesh(fArray, 6);
 	debugObject->readTextureFromFile(L"./texture.png");
+	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(
+		0.f,    // Units translated on the x-axis
+		0.f,    // Units translated on the y-axis
+		0.f    // Units translated on the z-axis
+	);
+	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).translationMatrix;
+
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
 	float fArray2[] =

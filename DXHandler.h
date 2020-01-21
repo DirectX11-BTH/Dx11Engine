@@ -20,6 +20,7 @@
 #include <math.h>
 #include "Mesh.h"
 #include "EngineObject.h"
+#include "Camera.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
@@ -29,12 +30,27 @@ const float FLOATS_PER_VERTEX = 12.f;
 
 namespace wrl = Microsoft::WRL;
 
+const int PER_OBJECT_CBUFFER_SLOT = 0;
+const int CAMERA_CBUFFER_SLOT = 1;
+
 struct VS_CONSTANT_MATRIX_BUFFER
 {
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX cameraMatrix;
+	DirectX::XMMATRIX worldViewProjectionMatrix;
+
+	DirectX::XMMATRIX translationMatrix;
+	DirectX::XMMATRIX rotationMatrix;
+	DirectX::XMMATRIX scaleMatrix;
 };
 
+struct VS_CONSTANT_CAMERA_BUFFER
+{
+	DirectX::XMMATRIX worldViewProjectionMatrix;
+	DirectX::XMMATRIX cameraView;
+
+	DirectX::XMVECTOR cameraPosition; //= DirectX::XMVectorSet(0.0f, 0.0f, -8.f, 0.0f); //0.5f to shoot the camera 'back' a bit
+	DirectX::XMVECTOR cameraTarget; //= DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	DirectX::XMVECTOR cameraUp; //= DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+};
 
 struct PS_CONSTANT_LIGHT_BUFFER
 {
@@ -51,7 +67,8 @@ public:
 	static  ID3D11DeviceContext* contextPtr;
 	static  HINSTANCE hInstance;
 
-	std::vector<ID3D11Buffer*> loadedBuffers;
+	std::vector<ID3D11Buffer*> loadedVSBuffers;
+	std::vector<ID3D11Buffer*> loadedPSBuffers;
 
 	DxHandler(HWND& hWnd)
 	{
@@ -59,6 +76,7 @@ public:
 		initalizeDeviceContextAndSwapChain();
 	}
 
+	~DxHandler();
 	static IDXGISwapChain* swapChainPtr;
 	static ID3D11RenderTargetView* renderTargetPtr;
 	static DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
@@ -71,6 +89,8 @@ public:
 	static ID3D11InputLayout* input_layout_ptr;
 
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
+	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
+
 	template <typename T>
 	ID3D11Buffer*& createPSConstBuffer(T cStruct);
 

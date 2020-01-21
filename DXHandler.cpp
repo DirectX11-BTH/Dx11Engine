@@ -14,6 +14,19 @@ ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 
+DxHandler::~DxHandler()
+{
+	for (int i = 0; i < loadedVSBuffers.size(); i++)
+	{
+		loadedVSBuffers.at(i)->Release();
+	}
+
+	for (int i = 0; i < loadedPSBuffers.size(); i++)
+	{
+		loadedPSBuffers.at(i)->Release();
+	}
+}
+
 ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
 {
 	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
@@ -36,9 +49,38 @@ ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
 	assert(SUCCEEDED(buffSucc));
 
 	//deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
-	DxHandler::contextPtr->VSSetConstantBuffers(0, 1, &constantBuffer);
+	DxHandler::contextPtr->VSSetConstantBuffers(PER_OBJECT_CBUFFER_SLOT, 1, &constantBuffer);
 
-	loadedBuffers.push_back(constantBuffer);
+	loadedVSBuffers.push_back(constantBuffer);
+
+	return constantBuffer;
+}
+
+ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix)
+{
+	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
+
+	D3D11_BUFFER_DESC constBDesc;
+	constBDesc.ByteWidth = sizeof(matrix);
+	constBDesc.Usage = D3D11_USAGE_DEFAULT;
+	constBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBDesc.CPUAccessFlags = 0;
+	constBDesc.MiscFlags = 0;
+	constBDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &matrix;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+	ID3D11Buffer* constantBuffer = NULL;
+	HRESULT buffSucc = devicePtr->CreateBuffer(&constBDesc, &InitData,
+		&constantBuffer);
+	assert(SUCCEEDED(buffSucc));
+
+	//deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
+	DxHandler::contextPtr->VSSetConstantBuffers(CAMERA_CBUFFER_SLOT, 1, &constantBuffer);
+
+	loadedVSBuffers.push_back(constantBuffer);
 
 	return constantBuffer;
 }
@@ -70,7 +112,7 @@ ID3D11Buffer*& DxHandler::createPSConstBuffer(T cStruct)
 	contextPtr->UpdateSubresource(constantPixelBuffer, 0, NULL, &cPixelBuffer, 0, 0);
 	contextPtr->PSSetConstantBuffers(0, 1, &constantPixelBuffer);
 
-	loadedBuffers.push_back(cPixelBuffer);
+	loadedPSBuffers.push_back(cPixelBuffer);
 
 	return cPixelBuffer;
 }
@@ -100,7 +142,7 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 
 	D3D11_RASTERIZER_DESC rasterizerDesc = {};
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
 	ID3D11RasterizerState* rasterizerState;
 	
 	devicePtr->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
@@ -267,7 +309,7 @@ void DxHandler::setupVShader(const wchar_t fileName[])
 	assert(SUCCEEDED(createVShaderSucc));
 }
 
-void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO DO
+void DxHandler::draw(EngineObject& drawObject)
 {
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
@@ -276,10 +318,19 @@ void DxHandler::draw(EngineObject& drawObject) //Only draws one mesh, woops TO D
 	{
 		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(i).vertexBuffer,
 			&stride, &offset);
+
+		VS_CONSTANT_MATRIX_BUFFER matrixBuff;
+		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
+		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
+		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
+		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
+		DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
+
+		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, & matrixBuff, 0, 0);
+
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
 	}
-
-	std::cout << "DRAWING" << std::endl << "Nr of verts:\t" << drawObject.meshes.at(0).vertices.size() << std::endl;
+	
 	//swapChainPtr->Present(1, 0);
 }

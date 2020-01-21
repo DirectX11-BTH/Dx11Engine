@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="DXHandler.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineObject.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="RenderWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DXHandler.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineObject.cpp" />

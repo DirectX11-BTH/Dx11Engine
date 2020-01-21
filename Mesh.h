@@ -16,6 +16,14 @@ struct Vertex
 class Mesh
 {
 public:
+	//For going from local to world space. Starts with unit matrix.
+	//DirectX::XMMATRIX worldSpaceMatrix = DirectX::XMMatrixIdentity();
+	
+	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX scalingMatrix = DirectX::XMMatrixIdentity();
+
 	ID3D11Buffer* vertexBuffer = NULL;
 	int nrOfVertices = 0;
 	std::vector<Vertex> vertices;
