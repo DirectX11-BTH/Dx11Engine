@@ -4,6 +4,7 @@
 #include "InputHandler.h"
 #include "EngineObject.h"
 #include "Camera.h"
+#include "ObjParser.h"
 
 const int WIDTH = 600;
 const int HEIGHT = 500;

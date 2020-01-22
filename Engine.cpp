@@ -28,6 +28,12 @@ Engine::~Engine()
 
 void Engine::initialSetup()
 {
+
+	//Debug
+	EngineObject e;
+	ObjParser::readFromObj(".\Cube.obj", e);
+	// --------------------------------
+
 	this->createWindow();
 	createInputHandler();
 	createDirectX();
