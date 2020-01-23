@@ -8,5 +8,5 @@
 class ObjParser
 {
 public:
-	static Mesh readFromObj(std::string fileName, EngineObject& parentObject);
+	static Mesh readFromObj(std::string fileName);
 };

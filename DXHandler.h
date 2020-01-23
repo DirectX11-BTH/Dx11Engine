@@ -98,6 +98,7 @@ public:
 	void configureSwapChain(HWND& hWnd);
 	void setupInputLayout();
 	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
+	ID3D11Buffer* createIndexBuffer(Mesh& mesh);
 
 	void setCullingMode(D3D11_CULL_MODE mode);
 
@@ -105,5 +106,6 @@ public:
 	void setupVShader(const wchar_t fileName[]);
 
 	void draw(EngineObject& drawObject);
+	void drawIndexedMesh(EngineObject& drawObject);
 };
 

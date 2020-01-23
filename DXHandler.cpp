@@ -257,6 +257,24 @@ ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 	
 	return vertexBufferPtr;
 }
+ID3D11Buffer* DxHandler::createIndexBuffer(Mesh& mesh)
+{
+	ID3D11Buffer* indexBuff;
+
+	D3D11_BUFFER_DESC indexBDesc{ 0 };
+	indexBDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBDesc.ByteWidth = sizeof(DWORD) * mesh.indicies.size(); //???
+	indexBDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = mesh.indicies.data();
+	HRESULT bigBuffSucc = devicePtr->CreateBuffer(&indexBDesc, &initData, &indexBuff);
+	assert(SUCCEEDED(bigBuffSucc));
+
+	mesh.indexBuffer = indexBuff;
+
+	return indexBuff;
+}
 void DxHandler::setCullingMode(D3D11_CULL_MODE mode)
 {
 	D3D11_RASTERIZER_DESC rasterizerDesc = {};
@@ -266,7 +284,7 @@ void DxHandler::setCullingMode(D3D11_CULL_MODE mode)
 
 	devicePtr->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
 	contextPtr->RSSetState(rasterizerState);
-}
+}	
 
 void DxHandler::setupPShader(const wchar_t fileName[])
 {
@@ -333,4 +351,29 @@ void DxHandler::draw(EngineObject& drawObject)
 	}
 	
 	//swapChainPtr->Present(1, 0);
+}
+
+void DxHandler::drawIndexedMesh(EngineObject& drawObject)
+{
+	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
+	UINT offset = 0u;
+
+	for (int i = 0; i < drawObject.meshes.size(); i++)
+	{
+		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(i).vertexBuffer,
+			&stride, &offset);
+		DxHandler::contextPtr->IASetIndexBuffer(drawObject.meshes.at(i).indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		VS_CONSTANT_MATRIX_BUFFER matrixBuff;
+		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
+		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
+		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
+		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
+		DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
+
+		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
+
+		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		DxHandler::contextPtr->DrawIndexed(drawObject.meshes.at(i).indicies.size(), 0, 0);
+	}
 }

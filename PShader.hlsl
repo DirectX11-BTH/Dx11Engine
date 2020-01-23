@@ -34,6 +34,7 @@ float4 main(VS_OUTPUT input) : SV_Target
 	//float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100);
 	
 	return textureColor;
+
 	//return input.vColour;//diffuseStrength+ambientStrength)*textureColor; //Should be black when correct cause rgb -1?
 
 	//return float4(input.vNormal, 0);

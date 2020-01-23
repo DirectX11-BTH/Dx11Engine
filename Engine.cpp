@@ -31,7 +31,7 @@ void Engine::initialSetup()
 
 	//Debug
 	EngineObject e;
-	ObjParser::readFromObj(".\Cube.obj", e);
+	ObjParser::readFromObj(".\Cube.obj");
 	// --------------------------------
 
 	this->createWindow();
@@ -87,6 +87,8 @@ void Engine::engineLoop()
 		0.7f, 0.7f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
 		0.7f, -0.7f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
 	};
+	
+
 	EngineObject* debugObject = new EngineObject;
 	debugObject->readMesh(fArray, 6);
 	debugObject->readTextureFromFile(L"./texture.png");
@@ -99,7 +101,7 @@ void Engine::engineLoop()
 
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
-	float fArray2[] =
+	/*float fArray2[] =
 	{
 		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
 		-0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
@@ -113,8 +115,56 @@ void Engine::engineLoop()
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->readMesh(fArray2, 6);
 	debugObject2->readTextureFromFile(L"./texture2.png");
-	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
+	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));*/
 	//delete debugObject;
+
+	EngineObject* debugObject2 = new EngineObject;
+	debugObject2->meshes.push_back(ObjParser::readFromObj("./Cube.obj"));
+	
+
+	//CREATEING MESH WITH INDEXES ================================================================================
+	/*Mesh ourIndexMesh;
+
+	ourIndexMesh.vertices.push_back(Vertex{ -0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1 });
+	ourIndexMesh.vertices.push_back(Vertex{ 0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1 });
+	ourIndexMesh.vertices.push_back(Vertex{ -0.8f, -0.5f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1 });
+	ourIndexMesh.vertices.push_back(Vertex{ 0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1 });
+
+	ourIndexMesh.indicies.push_back(0);
+	ourIndexMesh.indicies.push_back(1);
+	ourIndexMesh.indicies.push_back(2);
+	ourIndexMesh.indicies.push_back(0);
+	ourIndexMesh.indicies.push_back(3);
+	ourIndexMesh.indicies.push_back(1);
+
+	//Second debug object -----------------------------------------------------------------------------------
+	Mesh ourIndexMesh2;
+
+	ourIndexMesh2.vertices.push_back(Vertex{ -0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1 });
+	ourIndexMesh2.vertices.push_back(Vertex{ 0.8f, -0.8f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1 });
+	ourIndexMesh2.vertices.push_back(Vertex{ -0.8f, -0.8f, 0.5f,	 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1 });
+	ourIndexMesh2.vertices.push_back(Vertex{ 0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1 });
+
+	ourIndexMesh2.indicies.push_back(0);
+	ourIndexMesh2.indicies.push_back(1);
+	ourIndexMesh2.indicies.push_back(2);
+	ourIndexMesh2.indicies.push_back(0);
+	ourIndexMesh2.indicies.push_back(3);
+	ourIndexMesh2.indicies.push_back(1);
+	
+	EngineObject* debugIndexObject2 = new EngineObject;
+	//debugObject2->readMesh(fArray2, 6);
+	debugIndexObject2->meshes.push_back(ourIndexMesh);
+	debugIndexObject2->readTextureFromFile(L"./texture2.png");
+	directXHandler->createVertexBuffer(debugIndexObject2->meshes.at(0));
+	directXHandler->createIndexBuffer(debugIndexObject2->meshes.at(0));
+
+	EngineObject* debugIndexObject = new EngineObject;
+	debugIndexObject->readTextureFromFile(L"./texture.png");
+	debugIndexObject->meshes.push_back(ourIndexMesh2);
+	directXHandler->createVertexBuffer(debugIndexObject->meshes.at(0));
+	directXHandler->createIndexBuffer(debugIndexObject->meshes.at(0));*/
+	//CREATEING MESH WITH END ================================================================================
 
 	//----------------------------------------------------------------------------------------------- END DEBUG
 
@@ -152,9 +202,10 @@ void Engine::engineLoop()
 		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);
-
-		directXHandler->draw(*debugObject);
 		directXHandler->draw(*debugObject2);
+		//directXHandler->draw(*debugObject);
+		//directXHandler->drawIndexedMesh(*debugIndexObject2);
+		//directXHandler->drawIndexedMesh(*debugIndexObject);
 
 		directXHandler->swapChainPtr->Present(1, 0);
 	}

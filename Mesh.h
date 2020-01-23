@@ -25,6 +25,12 @@ public:
 	DirectX::XMMATRIX scalingMatrix = DirectX::XMMatrixIdentity();
 
 	ID3D11Buffer* vertexBuffer = NULL;
+	ID3D11Buffer* indexBuffer = NULL;
+	std::vector<DWORD> indicies;
+
 	int nrOfVertices = 0;
+	//int nrOfIndicies = 0;
 	std::vector<Vertex> vertices;
+
+	~Mesh();
 };
