@@ -119,8 +119,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./Cube.obj"));
-	//debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, -10.f, 0.f);
-	//debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix;
+	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, -10.f, 0.f);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix;
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
 	
@@ -186,6 +186,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		if (msg.message == WM_QUIT)
 		{
 			PostQuitMessage(0);
+			//exit(0);
 			break;
 		}
 		// Run game code here
