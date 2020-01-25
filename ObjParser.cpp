@@ -62,14 +62,39 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				}
 				else if (line.compare(0, 2, "vn") == 0)
 				{
+					line.erase(0, 4); //Removes vn and spaces
+					int tempLen = line.find(' ');
+					std::string tempStr = line.substr(0, tempLen);
+					v1 = std::stoi(tempStr);
+
+					line.erase(0, tempLen + 2);
+					tempLen = line.find(' ');
+					tempStr = line.substr(0, tempLen);
+					v2 = std::stoi(tempStr);
+
+					line.erase(0, tempLen + 2);
+					tempLen = line.find(' ');
+					tempStr = line.substr(0, tempLen);
+					v3 = std::stoi(tempStr);
+
 					//its a normal
-					objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v
+					//objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v
 					loadedVertNormals.push_back(float3{ v1, v2, v3 });
 				}
 				else if (line.compare(0, 2, "vt") == 0)
 				{
+					line.erase(0, 4); //Removes vt and spaces
+					int tempLen = line.find(' ');
+					std::string tempStr = line.substr(0, tempLen);
+					v1 = std::stoi(tempStr);
+
+					line.erase(0, tempLen + 2);
+					tempLen = line.find(' ');
+					tempStr = line.substr(0, tempLen);
+					v2 = std::stoi(tempStr);
+
 					//texture coord
-					objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2;
+					//objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2;
 					loadedVertTextureCoords.push_back(float2{ v1, v2 });
 				}
 				else if (line.at(0) == 'f')
@@ -105,9 +130,10 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							{
 								if (tempLen != 0) //Make sure there is a number
 								{
-									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))).x;
-									tempVert.y = loadedVertsCoords.at((std::stoi(tempString))).y;
-									tempVert.z = loadedVertsCoords.at((std::stoi(tempString))).z;
+									std::cout << "Reading v index: " << (std::stoi(tempString)) - 1 << std::endl;
+									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))-1).x;
+									tempVert.y = loadedVertsCoords.at((std::stoi(tempString))-1).y;
+									tempVert.z = loadedVertsCoords.at((std::stoi(tempString))-1).z;
 								}
 
 								//loadedVertsCoords.at((std::stoi(tempString))
@@ -116,20 +142,22 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							{
 								//loadedVertTextureCoords[std::stoi(tempString)];
 
-								if (tempLen != 0)
+								if (tempString.length() != 0)//(tempLen != 0)
 								{
-									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString))).x;
-									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString))).y;
+									std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
+									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString))-1).x;
+									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString))-1).y;
 								}
 							}
 							if (i == 2) //It's vn index
 							{
-								loadedVertNormals[std::stoi(tempString)];
-								if (tempLen != 0)
+								//loadedVertNormals[std::stoi(tempString)];
+								if (tempString.length() != 0)//(tempLen != 0)
 								{
-									tempVert.nx = loadedVertNormals.at((std::stoi(tempString))).x;
-									tempVert.ny = loadedVertNormals.at((std::stoi(tempString))).y;
-									tempVert.nz = loadedVertNormals.at((std::stoi(tempString))).z;
+									std::cout << "Reading vn index: " << (std::stoi(tempString)) - 1 << std::endl;
+									tempVert.nx = loadedVertNormals.at((std::stoi(tempString))-1).x;
+									tempVert.ny = loadedVertNormals.at((std::stoi(tempString))-1).y;
+									tempVert.nz = loadedVertNormals.at((std::stoi(tempString))-1).z;
 								}
 							}
 
