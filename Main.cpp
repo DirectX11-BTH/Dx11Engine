@@ -6,8 +6,8 @@ int WinMain(HINSTANCE startInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, i
 	DxHandler::hInstance = startInstance;
 
 	Engine engine;
-	engine.initialSetup();
-	engine.engineLoop();
+	engine.initialSetup(); //Will set up all the DXStuff, and quite literally everything else
+	engine.engineLoop(); //Starts the rendering loop
 
 	return 0;
 };

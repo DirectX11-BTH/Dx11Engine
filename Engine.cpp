@@ -73,7 +73,7 @@ void Engine::initialSetup()
 	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &Camera::cameraProjectionMatrix, 0, 0);
 }
 
-void Engine::engineLoop()
+void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
 {
 	//----------------------------------------------------------------------------------------------- DEBUG
 	float fArray[] =
@@ -98,7 +98,6 @@ void Engine::engineLoop()
 		0.f    // Units translated on the z-axis
 	);
 	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).translationMatrix;
-
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
 	/*float fArray2[] =
@@ -120,8 +119,12 @@ void Engine::engineLoop()
 
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./Cube.obj"));
+	//debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, -10.f, 0.f);
+	//debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix;
+	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
+	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
 	
-
+	std::cout << "Executed" << std::endl;
 	//CREATEING MESH WITH INDEXES ================================================================================
 	/*Mesh ourIndexMesh;
 

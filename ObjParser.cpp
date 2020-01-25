@@ -21,8 +21,6 @@ Mesh ObjParser::readFromObj(std::string fileName)
 	std::string line;
 	Mesh readMesh;
 
-	char ignoreChar;
-	char ignoreChar2;
 	float v1, v2, v3;
 
 	while(!objFile.eof() && std::getline(objFile,line))
@@ -32,7 +30,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 		{
 			if (line.at(0) != '#')
 			{
-				std::cout << line.at(0) << std::endl;
+				//std::cout << line.at(0) << std::endl;
 				if (line.find("v ") != -1)//(line.compare(0, 2, "v ") == 0) //Does not trigger correctly
 				{
 					line.erase(0, 3); //Removes v and spaces
@@ -54,7 +52,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					//objFile >> ignoreChar >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v 
 					//v1 = v2 = v3 = 0;
 					loadedVertsCoords.push_back(float3{ v1, v2, v3 });
-					std::cout << "VertexPos: " << v1 << "\t" << v2 << "\t" << v3 << std::endl;
+					//std::cout << "VertexPos: " << v1 << "\t" << v2 << "\t" << v3 << std::endl;
 				}
 				else if (line.at(0) == 'g')
 				{
@@ -101,10 +99,6 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				{
 					//assemble vertices
 
-					int vertPosIndex = -1;
-					int vertTexCoordIndex = -1;
-					int vertNormalIndex = -1;
-
 					line.erase(0, 3);//Removes f and two first spaces
 
 
@@ -130,8 +124,8 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							{
 								if (tempLen != 0) //Make sure there is a number
 								{
-									std::cout << "Reading v index: " << (std::stoi(tempString)) - 1 << std::endl;
-									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))-1).x;
+									//std::cout << "Reading v index: " << (std::stoi(tempString)) - 1 << std::endl;
+									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))-1).x; //-1 to convert from index starting with 1 to 0
 									tempVert.y = loadedVertsCoords.at((std::stoi(tempString))-1).y;
 									tempVert.z = loadedVertsCoords.at((std::stoi(tempString))-1).z;
 								}
@@ -144,9 +138,14 @@ Mesh ObjParser::readFromObj(std::string fileName)
 
 								if (tempString.length() != 0)//(tempLen != 0)
 								{
-									std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
+									//std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
 									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString))-1).x;
 									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString))-1).y;
+								}
+								else
+								{
+									tempVert.u = 0;
+									tempVert.v = 0;
 								}
 							}
 							if (i == 2) //It's vn index
@@ -154,19 +153,23 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								//loadedVertNormals[std::stoi(tempString)];
 								if (tempString.length() != 0)//(tempLen != 0)
 								{
-									std::cout << "Reading vn index: " << (std::stoi(tempString)) - 1 << std::endl;
+									//std::cout << "Reading vn index: " << (std::stoi(tempString)) - 1 << std::endl;
 									tempVert.nx = loadedVertNormals.at((std::stoi(tempString))-1).x;
 									tempVert.ny = loadedVertNormals.at((std::stoi(tempString))-1).y;
 									tempVert.nz = loadedVertNormals.at((std::stoi(tempString))-1).z;
 								}
 							}
 
-							std::cout << "Before " << line << std::endl;
+							//std::cout << "Before " << line << std::endl;
 							line.erase(0, tempLen+1); //removes number and slash from string
 							if(line.at(0) == ' ')
 								line.erase(0,1); //Remove the last space in between groups of v/vt/vn
-							std::cout << "After " << line << std::endl;
+							//std::cout << "After " << line << std::endl;
 						}
+						tempVert.r = 1;
+						tempVert.g = 1;
+						tempVert.b = 1;
+
 						readMesh.vertices.push_back(tempVert);
 					}
 				}
@@ -174,5 +177,9 @@ Mesh ObjParser::readFromObj(std::string fileName)
 		}
 		
 	}
+
+	objFile.close();
+	readMesh.nrOfVertices = readMesh.vertices.size();
+
 	return readMesh;
 }

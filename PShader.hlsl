@@ -33,7 +33,8 @@ float4 main(VS_OUTPUT input) : SV_Target
 	//float4 reflectionVec = normalize(reflect(float4(surfaceToLightV,0), input.vNormal)); //Specular
 	//float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100);
 	
-	return textureColor;
+	return input.vColour;
+	//return textureColor;
 
 	//return input.vColour;//diffuseStrength+ambientStrength)*textureColor; //Should be black when correct cause rgb -1?
 
