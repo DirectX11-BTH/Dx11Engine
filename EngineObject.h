@@ -12,6 +12,8 @@ class EngineObject
 {
 private:
 public:
+	~EngineObject();
+
 	ID3D11Resource* texture;
 	ID3D11ShaderResourceView* textureView;
 	ID3D11Texture2D* pTexture = NULL;

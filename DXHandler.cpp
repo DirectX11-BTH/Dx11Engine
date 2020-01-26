@@ -14,6 +14,9 @@ ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 
+ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
+ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
+
 DxHandler::~DxHandler()
 {
 	for (int i = 0; i < loadedVSBuffers.size(); i++)
@@ -325,6 +328,26 @@ void DxHandler::setupVShader(const wchar_t fileName[])
 
 	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexPtr);
 	assert(SUCCEEDED(createVShaderSucc));
+}
+
+void DxHandler::setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow)
+{
+	D3D11_TEXTURE2D_DESC depthDesc{ 0 };
+
+	depthDesc.Width = widthOfRenderWindow;
+	depthDesc.Height = heightOfRenderWindow;
+	depthDesc.MipLevels = 1;
+	depthDesc.ArraySize = 1;
+	depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthDesc.SampleDesc.Count = 1;
+	depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	devicePtr->CreateTexture2D(&depthDesc, NULL, &depthBuffer);
+	devicePtr->CreateDepthStencilView(DxHandler::depthBuffer, NULL, &depthStencil);
+
+	//depthStencil->Release();
+	//depthBuffer->Release();
 }
 
 void DxHandler::draw(EngineObject& drawObject)

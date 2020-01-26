@@ -29,17 +29,13 @@ Engine::~Engine()
 void Engine::initialSetup()
 {
 
-	//Debug
-	EngineObject e;
-	ObjParser::readFromObj(".\Cube.obj");
-	// --------------------------------
-
 	this->createWindow();
 	createInputHandler();
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");
 	directXHandler->setupVShader(L"VShader.hlsl");
 	directXHandler->setupInputLayout();
+	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
 
 	DxHandler::contextPtr->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DxHandler::contextPtr->IASetInputLayout((ID3D11InputLayout*)DxHandler::input_layout_ptr);
@@ -118,11 +114,18 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	//delete debugObject;
 
 	EngineObject* debugObject2 = new EngineObject;
-	debugObject2->meshes.push_back(ObjParser::readFromObj("./Cube.obj"));
+	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
 	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, -10.f, 0.f);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix;
+	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix* debugObject2->meshes.at(0).scalingMatrix;
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
+
+	//Get texture name from debugMesh, gotta convert string to wchar_t*
+	debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
+	std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
+	const wchar_t* longCharArr = longString.c_str();
+	debugObject2->readTextureFromFile(longCharArr);
 	
 	std::cout << "Executed" << std::endl;
 	//CREATEING MESH WITH INDEXES ================================================================================
@@ -186,7 +189,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		if (msg.message == WM_QUIT)
 		{
 			PostQuitMessage(0);
-			//exit(0);
+			//y
+			exit(0);
 			break;
 		}
 		// Run game code here
@@ -201,11 +205,17 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			(float)(viewportRect.right - viewportRect.left),
 			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
 		};
+		port.MinDepth = 0.0f; //Closest possible to screen Z depth
+		port.MaxDepth = 1.0f; //Furthest possible
+
+		//Clear depth every frame
+		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil);
 		directXHandler->draw(*debugObject2);
 		//directXHandler->draw(*debugObject);
 		//directXHandler->drawIndexedMesh(*debugIndexObject2);

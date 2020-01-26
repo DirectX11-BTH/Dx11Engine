@@ -33,20 +33,20 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				//std::cout << line.at(0) << std::endl;
 				if (line.find("v ") != -1)//(line.compare(0, 2, "v ") == 0) //Does not trigger correctly
 				{
-					line.erase(0, 3); //Removes v and spaces
+					line.erase(0, 2); //Removes v and spaces
 					int tempLen = line.find(' ');
 					std::string tempStr = line.substr(0, tempLen);
-					v1 = std::stoi(tempStr);
+					v1 = (float)std::stof(tempStr);
 					
-					line.erase(0, tempLen+2);
+					line.erase(0, tempLen+1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v2 = std::stoi(tempStr);
+					v2 = (float)std::stof(tempStr);
 
-					line.erase(0, tempLen + 2);
+					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v3 = std::stoi(tempStr);
+					v3 = (float)std::stof(tempStr);
 
 					// this reads next line, which makes us only read half the verts
 					//objFile >> ignoreChar >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v 
@@ -60,36 +60,121 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				}
 				else if (line.compare(0, 2, "vn") == 0)
 				{
-					line.erase(0, 4); //Removes vn and spaces
+					line.erase(0, 3); //Removes vn and spaces
 					int tempLen = line.find(' ');
 					std::string tempStr = line.substr(0, tempLen);
-					v1 = std::stoi(tempStr);
+					v1 = std::stof(tempStr);
 
-					line.erase(0, tempLen + 2);
+					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v2 = std::stoi(tempStr);
+					v2 = std::stof(tempStr);
 
-					line.erase(0, tempLen + 2);
+					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v3 = std::stoi(tempStr);
+					v3 = std::stof(tempStr);
 
 					//its a normal
 					//objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v
 					loadedVertNormals.push_back(float3{ v1, v2, v3 });
 				}
+				else if (line.find("mtllib") != -1) //Parse mtl, we only support one material
+				{
+					line.erase(0, 7); //Deletes usemtl + spaces
+					std::ifstream mtlFile;
+					//mtlFile.open(("./TestModel/cube.mtl"));
+					mtlFile.open(("./TestModel/"+line));
+					std::string mtlLine;
+
+					assert(mtlFile.is_open());
+
+					while (!mtlFile.eof() && std::getline(mtlFile, mtlLine))
+					{
+						if (mtlLine.find("Ka") != -1) //Ambient light color
+						{
+							mtlLine.erase(0, mtlLine.find("Ka")+3);
+							int numToEmpty = mtlLine.find(' ');
+							float r = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float g = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float b = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							readMesh.ambientMeshColor = { r, g, b };
+						}
+
+						if (mtlLine.find("Kd ") != -1 && mtlLine.find("map") == -1) //Diffuse light color
+						{
+							mtlLine.erase(0, mtlLine.find("Kd") + 3);
+							int numToEmpty = mtlLine.find(' ');
+							float r = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float g = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float b = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							readMesh.diffueMeshColor = { r, g, b };
+						}
+
+						if (mtlLine.find("Ks") != -1) //Specular light color
+						{
+							mtlLine.erase(0, mtlLine.find("Ks") + 3);
+							int numToEmpty = mtlLine.find(' ');
+							float r = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float g = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							numToEmpty = mtlLine.find(' ');
+							float b = stof(mtlLine.substr(0, numToEmpty));
+							mtlLine.erase(0, numToEmpty + 1);
+
+							readMesh.specularMeshColor = { r, g, b };
+						}
+
+						if (mtlLine.find("Ns") != -1) //Shininess of material
+						{
+							mtlLine.erase(0, mtlLine.find("Ns")+3);
+							float shininess = 0;
+
+							shininess = stof(mtlLine);
+							readMesh.shininess = shininess;
+						}
+
+						if (mtlLine.find("map_Kd") != -1) //Texture
+						{
+							mtlLine.erase(0, mtlLine.find("map_Kd")+7);
+
+							readMesh.textureName = mtlLine;
+						}
+					}
+
+					mtlFile.close();
+				}
 				else if (line.compare(0, 2, "vt") == 0)
 				{
-					line.erase(0, 4); //Removes vt and spaces
+					line.erase(0, 3); //Removes vt and spaces
 					int tempLen = line.find(' ');
 					std::string tempStr = line.substr(0, tempLen);
-					v1 = std::stoi(tempStr);
+					v1 = std::stof(tempStr);
 
-					line.erase(0, tempLen + 2);
+					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v2 = std::stoi(tempStr);
+					v2 = std::stof(tempStr);
 
 					//texture coord
 					//objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2;
@@ -99,7 +184,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				{
 					//assemble vertices
 
-					line.erase(0, 3);//Removes f and two first spaces
+					line.erase(0, 2);//Removes f and two first spaces
 
 
 					//std::replace(line.begin(), line.end(), '/', ' '); / replace all / with \t 
@@ -115,7 +200,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							int tempLen = line.find('/'); // ger oss v/vn/vt
 							if (line.find(' ') < tempLen)
 							{
-								tempLen = line.find("  ");
+								tempLen = line.find(" ");
 
 							}
 							tempString = line.substr(0, tempLen); //Want to go up to the slash, not including it
@@ -124,7 +209,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							{
 								if (tempLen != 0) //Make sure there is a number
 								{
-									//std::cout << "Reading v index: " << (std::stoi(tempString)) - 1 << std::endl;
+									//std::cout << "Reading v index: " << (std::stof(tempString)) - 1 << std::endl;
 									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))-1).x; //-1 to convert from index starting with 1 to 0
 									tempVert.y = loadedVertsCoords.at((std::stoi(tempString))-1).y;
 									tempVert.z = loadedVertsCoords.at((std::stoi(tempString))-1).z;
@@ -160,13 +245,13 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								}
 							}
 
-							//std::cout << "Before " << line << std::endl;
+							std::cout << "Before " << line << std::endl;
 							line.erase(0, tempLen+1); //removes number and slash from string
 							if(line.at(0) == ' ')
 								line.erase(0,1); //Remove the last space in between groups of v/vt/vn
-							//std::cout << "After " << line << std::endl;
+							std::cout << "After " << line << std::endl;
 						}
-						tempVert.r = 1;
+						tempVert.r = 0.5;
 						tempVert.g = 1;
 						tempVert.b = 1;
 

@@ -88,6 +88,9 @@ public:
 	static ID3D11VertexShader* vertexPtr;
 	static ID3D11InputLayout* input_layout_ptr;
 
+	static ID3D11DepthStencilView* depthStencil;
+	static ID3D11Texture2D* depthBuffer;
+
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
 
@@ -104,6 +107,8 @@ public:
 
 	void setupPShader(const wchar_t fileName[]);
 	void setupVShader(const wchar_t fileName[]);
+
+	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
 	void draw(EngineObject& drawObject);
 	void drawIndexedMesh(EngineObject& drawObject);

@@ -2,6 +2,7 @@
 #include <vector>
 #include <DirectXHelpers.h>
 #include <SimpleMath.h>
+#include <string>
 class ID3D11Buffer;
 
 
@@ -11,6 +12,11 @@ struct Vertex
 	float r, g, b, a = 1; //Default to white for debug
 	float u, v = 0;
 	float nx, ny, nz = 0;
+};
+
+struct Color //For entire mesh color, needed for mtl parsing
+{
+	float r, g, b = 1; //Between 0-1.
 };
 
 class Mesh
@@ -23,6 +29,15 @@ public:
 	DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX scalingMatrix = DirectX::XMMatrixIdentity();
+
+	//Needed to parse MTL, assuming one material per mesh
+	Color ambientMeshColor;
+	Color diffueMeshColor;
+	Color specularMeshColor;
+	float shininess = 0.f;
+	float specularExponent = 10.f;
+
+	std::string textureName = "";
 
 	ID3D11Buffer* vertexBuffer = NULL;
 	ID3D11Buffer* indexBuffer = NULL;

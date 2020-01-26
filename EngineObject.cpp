@@ -1,6 +1,17 @@
 #include "EngineObject.h"
 #include "DXHandler.h"
 
+EngineObject::~EngineObject()
+{
+	if (texture)
+		texture->Release();
+
+	if (textureView)
+		textureView->Release();
+	if (pTexture)
+		pTexture->Release();
+}
+
 Mesh EngineObject::readMesh(float mesh[], int nrOfVertices) // reads from array to our format
 {
 	int vertexStride = FLOATS_PER_VERTEX; //12 floats per vertex in array XYZ, RGB, UV, NX,NY,NZ
