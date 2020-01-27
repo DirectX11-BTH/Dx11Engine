@@ -56,17 +56,16 @@ void Engine::initialSetup()
 	ID3D11Buffer* VSCameraConstBuff = NULL;
 	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
 
+	//Init camera
 	Camera::cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);
 
 	Camera::cameraProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH( //Creates projection space
-		0.35f * 3.14f,//FovAngleY, height angle of perspective in radians
-		(float)WIDTH / (float)HEIGHT,//AspectRatio, width/height of window
-		1.0f,//NearZ, how close we render
-		1000.f//FarZ how far we render
+		0.35f * 3.14f,					//FovAngleY, height angle of perspective in radians
+		(float)WIDTH / (float)HEIGHT,	//AspectRatio, width/height of window
+		0.1f,							//NearZ, how close we render
+		1000.f							//FarZ how far we render
 	);
 
-	worldViewProjectionMatrix = worldMatrix * camera.cameraView * Camera::cameraProjectionMatrix;
-	DxHandler::contextPtr->UpdateSubresource(VSConstBuff, 0, NULL, &Camera::cameraProjectionMatrix, 0, 0);
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -115,9 +114,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
-	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, -10.f, 0.f);
-	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).translationMatrix* debugObject2->meshes.at(0).scalingMatrix;
+	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.0f);
+	//debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).worldMatrix * debugObject2->meshes.at(0).translationMatrix;
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
 
@@ -189,9 +188,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		if (msg.message == WM_QUIT)
 		{
 			PostQuitMessage(0);
-			//y
-			exit(0);
-			break;
 		}
 		// Run game code here
 		// ...
@@ -205,17 +201,16 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			(float)(viewportRect.right - viewportRect.left),
 			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
 		};
-		port.MinDepth = 0.0f; //Closest possible to screen Z depth
-		port.MaxDepth = 1.0f; //Furthest possible
+		//port.MinDepth = 0.0f; //Closest possible to screen Z depth
+		//port.MaxDepth = 1.0f; //Furthest possible
 
-		//Clear depth every frame
-		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+		//Clear depth every frame - DEPTH
+		//DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);// , DxHandler::depthStencil); //DEPTH
 		directXHandler->draw(*debugObject2);
 		//directXHandler->draw(*debugObject);
 		//directXHandler->drawIndexedMesh(*debugIndexObject2);

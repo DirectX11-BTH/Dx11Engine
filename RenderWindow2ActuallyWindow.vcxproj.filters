@@ -112,7 +112,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="Cube.obj">
+    <Object Include="TestModel\cube.obj">
       <Filter>Resource Files</Filter>
     </Object>
   </ItemGroup>

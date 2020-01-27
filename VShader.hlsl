@@ -5,8 +5,7 @@
 
 cbuffer VS_CONSTANT_BUFFER
 {
-	Matrix worldViewProjectionMatrix;
-	Matrix worldMatrix;
+	row_major float4x4 worldViewProjectionMatrix;
 }
 
 cbuffer VS_CONSTANT_CAMERA_BUFFER
@@ -41,8 +40,10 @@ VS_OUTPUT main(VS_INPUT input)
 	//Output.vInterpolatedPosition = float4(mul(pos, rotationMatrix));
 
 	/////////Output.vPosition = normalize(mul(float4(normalize(input.vPosition), 1), worldMatrix));
-	Output.vPosition = normalize(mul(input.vPosition, worldViewProjectionMatrix));
+	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 
+	//Output.vInterpolatedPosition = mul(input.vPosition, worldViewProjectionMatrix);
+	//Output.vPosition = float4(input.vPosition, 1);
 
 	//Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 1), rotationMatrix));
 

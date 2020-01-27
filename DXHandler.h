@@ -36,10 +36,6 @@ const int CAMERA_CBUFFER_SLOT = 1;
 struct VS_CONSTANT_MATRIX_BUFFER
 {
 	DirectX::XMMATRIX worldViewProjectionMatrix;
-
-	DirectX::XMMATRIX translationMatrix;
-	DirectX::XMMATRIX rotationMatrix;
-	DirectX::XMMATRIX scaleMatrix;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER

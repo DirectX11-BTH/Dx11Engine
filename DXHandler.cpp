@@ -364,8 +364,10 @@ void DxHandler::draw(EngineObject& drawObject)
 		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
 		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
 		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
+		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
-		DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
+		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
+		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
 
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, & matrixBuff, 0, 0);
 
@@ -378,6 +380,7 @@ void DxHandler::draw(EngineObject& drawObject)
 
 void DxHandler::drawIndexedMesh(EngineObject& drawObject)
 {
+	/*
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
 
@@ -391,6 +394,7 @@ void DxHandler::drawIndexedMesh(EngineObject& drawObject)
 		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
 		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
 		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
+		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
 		DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
 
@@ -399,4 +403,5 @@ void DxHandler::drawIndexedMesh(EngineObject& drawObject)
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 		DxHandler::contextPtr->DrawIndexed(drawObject.meshes.at(i).indicies.size(), 0, 0);
 	}
+	*/
 }

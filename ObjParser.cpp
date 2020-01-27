@@ -36,17 +36,17 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					line.erase(0, 2); //Removes v and spaces
 					int tempLen = line.find(' ');
 					std::string tempStr = line.substr(0, tempLen);
-					v1 = (float)std::stof(tempStr);
+					v1 = (float)std::stof(tempStr)/2;
 					
 					line.erase(0, tempLen+1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v2 = (float)std::stof(tempStr);
+					v2 = (float)std::stof(tempStr)/2;
 
 					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
-					v3 = (float)std::stof(tempStr);
+					v3 = (float)std::stof(tempStr)/2;
 
 					// this reads next line, which makes us only read half the verts
 					//objFile >> ignoreChar >> v1 >> v2 >> v3; //Will read v, x, y, z ignore v 
