@@ -19,6 +19,9 @@ private:
 	DirectX::XMMATRIX worldViewProjectionMatrix;
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
 
+	ID3D11Buffer* PSConstBuff = NULL;
+	PS_CONSTANT_LIGHT_BUFFER lightBuff;
+
 	HWND primaryWindow;
 
 	void createWindow();

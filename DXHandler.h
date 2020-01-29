@@ -36,6 +36,7 @@ const int CAMERA_CBUFFER_SLOT = 1;
 struct VS_CONSTANT_MATRIX_BUFFER
 {
 	DirectX::XMMATRIX worldViewProjectionMatrix;
+	DirectX::XMMATRIX worldMatrix;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER
@@ -50,8 +51,15 @@ struct VS_CONSTANT_CAMERA_BUFFER
 
 struct PS_CONSTANT_LIGHT_BUFFER
 {
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX cameraMatrix;
+	DirectX::XMVECTOR lightPos;
+	Color ambientMeshColor;
+	Color diffueMeshColor;
+	Color specularMeshColor;
+
+	DirectX::XMVECTOR camPos;
+	DirectX::XMMATRIX worldViewProjectionMatrix;
+
+	DirectX::XMVECTOR specularExponent;
 };
 
 class DxHandler
@@ -87,15 +95,19 @@ public:
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
 
+	static ID3D11Buffer* PSConstBuff;
+
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
 
-	template <typename T>
-	ID3D11Buffer*& createPSConstBuffer(T cStruct);
+	ID3D11Buffer*& createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER& matrix);
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
 	void setupInputLayout();
+
+	void setupLightBuffer();
+
 	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
 	ID3D11Buffer* createIndexBuffer(Mesh& mesh);
 

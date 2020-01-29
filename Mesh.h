@@ -16,7 +16,7 @@ struct Vertex
 
 struct Color //For entire mesh color, needed for mtl parsing
 {
-	float r, g, b = 1; //Between 0-1.
+	float r, g, b, a = 1; //Between 0-1.
 };
 
 class Mesh

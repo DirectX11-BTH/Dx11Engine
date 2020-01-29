@@ -66,6 +66,7 @@ void Engine::initialSetup()
 		1000.f							//FarZ how far we render
 	);
 
+	directXHandler->setupLightBuffer();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -124,7 +125,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
 	std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
 	const wchar_t* longCharArr = longString.c_str();
-	debugObject2->readTextureFromFile(longCharArr);
+	//debugObject2->readTextureFromFile(longCharArr);
+	debugObject2->readTextureFromFile(L"./Texture.png");
 	
 	std::cout << "Executed" << std::endl;
 	//CREATEING MESH WITH INDEXES ================================================================================
@@ -201,16 +203,17 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			(float)(viewportRect.right - viewportRect.left),
 			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
 		};
-		//port.MinDepth = 0.0f; //Closest possible to screen Z depth
-		//port.MaxDepth = 1.0f; //Furthest possible
+		port.MinDepth = 0.0f; //Closest possible to screen Z depth
+		port.MaxDepth = 1.0f; //Furthest possible
 
 		//Clear depth every frame - DEPTH
-		//DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);// , DxHandler::depthStencil); //DEPTH
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil); //DEPTH
+
 		directXHandler->draw(*debugObject2);
 		//directXHandler->draw(*debugObject);
 		//directXHandler->drawIndexedMesh(*debugIndexObject2);

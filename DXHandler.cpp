@@ -17,6 +17,8 @@ ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
 ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
 
+ID3D11Buffer* DxHandler::PSConstBuff;
+
 DxHandler::~DxHandler()
 {
 	for (int i = 0; i < loadedVSBuffers.size(); i++)
@@ -88,8 +90,7 @@ ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix)
 	return constantBuffer;
 }
 
-template <typename T>
-ID3D11Buffer*& DxHandler::createPSConstBuffer(T cStruct)
+ID3D11Buffer*& DxHandler::createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER &matrix)
 {
 	D3D11_BUFFER_DESC constPixelDesc;
 	constPixelDesc.ByteWidth = sizeof(PS_CONSTANT_LIGHT_BUFFER);
@@ -100,10 +101,9 @@ ID3D11Buffer*& DxHandler::createPSConstBuffer(T cStruct)
 	constPixelDesc.StructureByteStride = 0;
 
 	//PS_CONSTANT_LIGHT_BUFFER cPixelBuffer;
-	T cPixelBuffer;
 
 	D3D11_SUBRESOURCE_DATA InitDataPixel;
-	InitDataPixel.pSysMem = &cPixelBuffer;
+	InitDataPixel.pSysMem = &matrix;
 	InitDataPixel.SysMemPitch = 0;
 	InitDataPixel.SysMemSlicePitch = 0;
 	ID3D11Buffer* constantPixelBuffer = NULL;
@@ -112,12 +112,12 @@ ID3D11Buffer*& DxHandler::createPSConstBuffer(T cStruct)
 	assert(SUCCEEDED(buffPSucc));
 
 	//cPixelBuffer.light = DirectX::XMFLOAT4(0, 0, -3, 0);
-	contextPtr->UpdateSubresource(constantPixelBuffer, 0, NULL, &cPixelBuffer, 0, 0);
+	contextPtr->UpdateSubresource(constantPixelBuffer, 0, NULL, &matrix, 0, 0);
 	contextPtr->PSSetConstantBuffers(0, 1, &constantPixelBuffer);
 
-	loadedPSBuffers.push_back(cPixelBuffer);
+	loadedPSBuffers.push_back(constantPixelBuffer);
 
-	return cPixelBuffer;
+	return constantPixelBuffer;
 }
 
 void DxHandler::initalizeDeviceContextAndSwapChain()
@@ -350,8 +350,17 @@ void DxHandler::setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWind
 	//depthBuffer->Release();
 }
 
+void DxHandler::setupLightBuffer()
+{
+	//Init light
+	PS_CONSTANT_LIGHT_BUFFER lightBuff;
+	PSConstBuff = this->createPSConstBuffer(lightBuff);
+	DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
+}
+
 void DxHandler::draw(EngineObject& drawObject)
 {
+
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
 
@@ -366,12 +375,26 @@ void DxHandler::draw(EngineObject& drawObject)
 		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
 		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
 		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
 		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
 
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, & matrixBuff, 0, 0);
 
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+
+		//Update light stuff
+		PS_CONSTANT_LIGHT_BUFFER lightBuff;
+		lightBuff.lightPos = DirectX::XMVectorSet(0, 0, -3, 0);
+		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
+		lightBuff.diffueMeshColor = drawObject.meshes.at(i).diffueMeshColor;
+		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;
+		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
+		lightBuff.camPos = Camera::cameraPosition;
+		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
+
+		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
+
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
 	}
 	
