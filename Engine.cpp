@@ -67,6 +67,7 @@ void Engine::initialSetup()
 	);
 
 	directXHandler->setupLightBuffer();
+	directXHandler->setupDeferredBuffers(WIDTH,HEIGHT); //Deferred rendering magic
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -174,7 +175,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	//CREATEING MESH WITH END ================================================================================
 
 	//----------------------------------------------------------------------------------------------- END DEBUG
-
+	ID3D11RenderTargetView* renderTargetArr[2];
 	MSG msg;
 	while (true)
 	{
@@ -209,11 +210,22 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Clear depth every frame - DEPTH
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		directXHandler->contextPtr->RSSetViewports(1, &port);
+		//FOR NORMAL FORWARD RENDERING
+		/*directXHandler->contextPtr->RSSetViewports(1, &port);
 		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil); //DEPTH
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil);*/ //DEPTH
 
+		directXHandler->contextPtr->RSSetViewports(1, &port);
+		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
+		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::deferredNormalBuffer->renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::deferredVertexPositionBuffer->renderTargetView, background_color);
+		
+		renderTargetArr[0] = DxHandler::deferredNormalBuffer->renderTargetView;
+		renderTargetArr[1] = DxHandler::deferredVertexPositionBuffer->renderTargetView;
+
+		directXHandler->contextPtr->OMSetRenderTargets(2, renderTargetArr, DxHandler::deferredDepthStencilView);
+		
 		directXHandler->draw(*debugObject2);
 		//directXHandler->draw(*debugObject);
 		//directXHandler->drawIndexedMesh(*debugIndexObject2);

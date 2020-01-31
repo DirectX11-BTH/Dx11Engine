@@ -1,4 +1,7 @@
 #pragma once
+
+
+
 #include "DXHandler.h"
 #include "RenderWindow.h"
 #include "InputHandler.h"
@@ -8,10 +11,11 @@
 
 const int WIDTH = 600;
 const int HEIGHT = 500;
-
+	
 class Engine
 {
 private:
+	
 	InputHandler inputHandler;
 	RenderWindow window;
 	DxHandler* directXHandler;

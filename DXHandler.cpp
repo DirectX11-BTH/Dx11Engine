@@ -19,6 +19,13 @@ ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
 
 ID3D11Buffer* DxHandler::PSConstBuff;
 
+ID3D11Texture2D* DxHandler::deferredDepthStencilBuffer;
+ID3D11DepthStencilView* DxHandler::deferredDepthStencilView;
+D3D11_VIEWPORT DxHandler::deferredViewport;
+
+DeferredRenderBuffer* DxHandler::deferredVertexPositionBuffer;
+DeferredRenderBuffer* DxHandler::deferredNormalBuffer;
+
 DxHandler::~DxHandler()
 {
 	for (int i = 0; i < loadedVSBuffers.size(); i++)
@@ -356,6 +363,38 @@ void DxHandler::setupLightBuffer()
 	PS_CONSTANT_LIGHT_BUFFER lightBuff;
 	PSConstBuff = this->createPSConstBuffer(lightBuff);
 	DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
+}
+
+void DxHandler::setupDeferredBuffers(int width, int height)
+{
+	D3D11_TEXTURE2D_DESC depthBuffDesc{ 0 };
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthViewDesc;
+
+	//DeferredRenderBuffer deferredRenderNormals(width, height);
+	//DeferredRenderBuffer deferredRenderPositions(width, height);
+	deferredNormalBuffer->init(width, height);
+	deferredVertexPositionBuffer->init(width, height);
+
+	depthBuffDesc.Width = width;
+	depthBuffDesc.Height = height;
+
+	depthBuffDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBuffDesc.SampleDesc.Count = 1;
+	depthBuffDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBuffDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBuffDesc.MipLevels = 1;
+	depthBuffDesc.ArraySize = 1;
+
+	HRESULT depthTextureCreateSucc = DxHandler::devicePtr->CreateTexture2D(&depthBuffDesc, NULL, &deferredDepthStencilBuffer);
+	assert(SUCCEEDED(depthTextureCreateSucc));
+	
+	depthViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthViewDesc.Texture2D.MipSlice = 0;
+	depthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	HRESULT depthStencilSucc = DxHandler::devicePtr->CreateDepthStencilView(deferredDepthStencilBuffer, &depthViewDesc, &deferredDepthStencilView);
+	assert(SUCCEEDED(depthStencilSucc));
+
 }
 
 void DxHandler::draw(EngineObject& drawObject)
