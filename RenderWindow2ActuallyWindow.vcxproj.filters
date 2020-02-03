@@ -107,10 +107,22 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="DeferredPixel.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DeferredVertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="PShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="VShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DeferredLightVertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DeferredLightPixel.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -32,14 +32,17 @@ void Engine::initialSetup()
 	this->createWindow();
 	createInputHandler();
 	createDirectX();
-	directXHandler->setupPShader(L"PShader.hlsl");
-	directXHandler->setupVShader(L"VShader.hlsl");
+	//directXHandler->setupPShader(L"PShader.hlsl");
+	//directXHandler->setupVShader(L"VShader.hlsl");
+	directXHandler->setupFirstPassDeferredShaders(); //deferred rendering setting
+	directXHandler->setupSecondPassDeferredShaders();
+
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
 
 	DxHandler::contextPtr->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DxHandler::contextPtr->IASetInputLayout((ID3D11InputLayout*)DxHandler::input_layout_ptr);
-	DxHandler::contextPtr->VSSetShader((ID3D11VertexShader*)DxHandler::vertexPtr, NULL, 0);
+	DxHandler::contextPtr->VSSetShader((ID3D11VertexShader*)DxHandler::vertexPtr, NULL, 0); //Need to change these?
 	DxHandler::contextPtr->PSSetShader((ID3D11PixelShader*)DxHandler::pixelPtr, NULL, 0);
 
 	//Initiate constant buffers
@@ -52,9 +55,6 @@ void Engine::initialSetup()
 
 	//Camera setup & constant buffer that might not be used?
 	//Has to be created after perobject constant buffer so that index in vector (loadedVSBuffers) is equal to the constant CAMERA_CBUFFER_SLOT
-	VS_CONSTANT_CAMERA_BUFFER cameraMatrixBuff;
-	ID3D11Buffer* VSCameraConstBuff = NULL;
-	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
 
 	//Init camera
 	Camera::cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);
@@ -176,6 +176,18 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	//----------------------------------------------------------------------------------------------- END DEBUG
 	ID3D11RenderTargetView* renderTargetArr[2];
+
+	RECT viewportRect;
+	GetClientRect(primaryWindow, &viewportRect);
+	D3D11_VIEWPORT port = {
+		0.f,
+		0.f,
+		(float)(viewportRect.right - viewportRect.left),
+		(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
+	};
+	port.MinDepth = 0.0f; //Closest possible to screen Z depth
+	port.MaxDepth = 1.0f; //Furthest possible
+
 	MSG msg;
 	while (true)
 	{
@@ -191,24 +203,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		if (msg.message == WM_QUIT)
 		{
 			PostQuitMessage(0);
+			break;
 		}
 		// Run game code here
 		// ...
 		// ...
 
-		RECT viewportRect;
-		GetClientRect(primaryWindow, &viewportRect);
-		D3D11_VIEWPORT port = {
-			0.f,
-			0.f,
-			(float)(viewportRect.right - viewportRect.left),
-			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
-		};
-		port.MinDepth = 0.0f; //Closest possible to screen Z depth
-		port.MaxDepth = 1.0f; //Furthest possible
-
 		//Clear depth every frame - DEPTH
-		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		//DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		//FOR NORMAL FORWARD RENDERING
 		/*directXHandler->contextPtr->RSSetViewports(1, &port);
@@ -216,16 +218,31 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil);*/ //DEPTH
 
+		float clearColor[4] = { 0.7,0.0,0,0 };
 		directXHandler->contextPtr->RSSetViewports(1, &port);
-		float background_color[4] = { 0.7f, 0.f, 0.f, 0.5f };
-		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::deferredNormalBuffer->renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::deferredVertexPositionBuffer->renderTargetView, background_color);
 		
 		renderTargetArr[0] = DxHandler::deferredNormalBuffer->renderTargetView;
 		renderTargetArr[1] = DxHandler::deferredVertexPositionBuffer->renderTargetView;
-
-		directXHandler->contextPtr->OMSetRenderTargets(2, renderTargetArr, DxHandler::deferredDepthStencilView);
 		
+		//-------------------------------------------------------
+		//Deferred Stuff
+		DxHandler::contextPtr->VSSetShader((ID3D11VertexShader*)DxHandler::lightVertexPtr, NULL, 0);
+		DxHandler::contextPtr->PSSetShader((ID3D11PixelShader*)DxHandler::lightPixelPtr, NULL, 0);
+
+		DxHandler::contextPtr->PSSetShaderResources(0, 1, &DxHandler::deferredVertexPositionBuffer->shaderResourceView); //Actually color, not position, mmm deferred
+		DxHandler::contextPtr->PSSetShaderResources(1, 1, &DxHandler::deferredNormalBuffer->shaderResourceView);
+
+		float gBufferClearColor[4] = { 0,0,0.5,0 };
+		//Clear gbuffers
+		DxHandler::contextPtr->ClearRenderTargetView(DxHandler::deferredVertexPositionBuffer->renderTargetView, gBufferClearColor);
+		DxHandler::contextPtr->ClearRenderTargetView(DxHandler::deferredNormalBuffer->renderTargetView, gBufferClearColor);
+		DxHandler::contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, clearColor);
+
+		//Set render targets to gbuffers, i.e. we want to draw to them
+		ID3D11RenderTargetView* bufferRenderPointers[2] = { DxHandler::deferredVertexPositionBuffer->renderTargetView, DxHandler::deferredNormalBuffer->renderTargetView };
+		DxHandler::contextPtr->OMSetRenderTargets(2, renderTargetArr, NULL); //DxHandler::deferredDepthStencilView);
+		//-------------------------------------------------------
+
 		directXHandler->draw(*debugObject2);
 		//directXHandler->draw(*debugObject);
 		//directXHandler->drawIndexedMesh(*debugIndexObject2);

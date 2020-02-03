@@ -12,6 +12,12 @@ ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
 ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
+
+ID3D11VertexShader* DxHandler::lightVertexPtr = nullptr;
+ID3D11PixelShader* DxHandler::lightPixelPtr = nullptr;
+ID3DBlob* DxHandler::deferredVertexShaderBuffer = nullptr;
+ID3DBlob* DxHandler::deferredPixelShaderBuffer = nullptr;
+
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 
 ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
@@ -23,8 +29,12 @@ ID3D11Texture2D* DxHandler::deferredDepthStencilBuffer;
 ID3D11DepthStencilView* DxHandler::deferredDepthStencilView;
 D3D11_VIEWPORT DxHandler::deferredViewport;
 
+ID3D11SamplerState* DxHandler::deferredSamplerState;
+
 DeferredRenderBuffer* DxHandler::deferredVertexPositionBuffer;
 DeferredRenderBuffer* DxHandler::deferredNormalBuffer;
+
+ID3D11InputLayout* DxHandler::deferred_input_layout_ptr;
 
 DxHandler::~DxHandler()
 {
@@ -37,6 +47,12 @@ DxHandler::~DxHandler()
 	{
 		loadedPSBuffers.at(i)->Release();
 	}
+
+	if (deferredNormalBuffer)
+		delete deferredNormalBuffer;
+
+	if (deferredVertexPositionBuffer)
+		delete deferredVertexPositionBuffer;
 }
 
 ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
@@ -62,35 +78,6 @@ ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
 
 	//deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 	DxHandler::contextPtr->VSSetConstantBuffers(PER_OBJECT_CBUFFER_SLOT, 1, &constantBuffer);
-
-	loadedVSBuffers.push_back(constantBuffer);
-
-	return constantBuffer;
-}
-
-ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix)
-{
-	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
-
-	D3D11_BUFFER_DESC constBDesc;
-	constBDesc.ByteWidth = sizeof(matrix);
-	constBDesc.Usage = D3D11_USAGE_DEFAULT;
-	constBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	constBDesc.CPUAccessFlags = 0;
-	constBDesc.MiscFlags = 0;
-	constBDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &matrix;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-	ID3D11Buffer* constantBuffer = NULL;
-	HRESULT buffSucc = devicePtr->CreateBuffer(&constBDesc, &InitData,
-		&constantBuffer);
-	assert(SUCCEEDED(buffSucc));
-
-	//deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
-	DxHandler::contextPtr->VSSetConstantBuffers(CAMERA_CBUFFER_SLOT, 1, &constantBuffer);
 
 	loadedVSBuffers.push_back(constantBuffer);
 
@@ -221,7 +208,7 @@ void DxHandler::configureSwapChain(HWND& hWnd)
 	////
 
 }
-void DxHandler::setupInputLayout()
+void DxHandler::setupInputLayout() //Sets up vertex data layout.
 {
 	//ID3D11InputLayout* input_layout_ptr = NULL;
 
@@ -235,12 +222,41 @@ void DxHandler::setupInputLayout()
 
 	HRESULT inputLayoutSucc = devicePtr->CreateInputLayout
 	(
-		inputDesc, ARRAYSIZE(inputDesc),
+		inputDesc, 
+		ARRAYSIZE(inputDesc), 
 		vertexShaderBuffer->GetBufferPointer(),
 		vertexShaderBuffer->GetBufferSize(),
 		&input_layout_ptr
 	);
 	assert(SUCCEEDED(inputLayoutSucc));
+
+	//Deferred magic unicorn input layout
+	//The layout for reading from the g-buffers (textures)
+	D3D11_INPUT_ELEMENT_DESC deferredInputDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	HRESULT deferredInputLayoutSucc = devicePtr->CreateInputLayout
+	(
+		inputDesc,
+		ARRAYSIZE(inputDesc),
+		deferredVertexShaderBuffer->GetBufferPointer(),
+		deferredVertexShaderBuffer->GetBufferSize(),
+		&deferred_input_layout_ptr
+	);
+
+	vertexShaderBuffer->Release();
+	vertexShaderBuffer = nullptr;
+
+	pixelShaderBuffer->Release();
+	pixelShaderBuffer = nullptr;
+
+	deferredVertexShaderBuffer->Release();
+	deferredVertexShaderBuffer = nullptr;
+
+	deferredPixelShaderBuffer->Release();
+	deferredPixelShaderBuffer = nullptr;
 }
 ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 {
@@ -368,7 +384,9 @@ void DxHandler::setupLightBuffer()
 void DxHandler::setupDeferredBuffers(int width, int height)
 {
 	D3D11_TEXTURE2D_DESC depthBuffDesc{ 0 };
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthViewDesc;
+
+	deferredNormalBuffer = new DeferredRenderBuffer;
+	deferredVertexPositionBuffer = new DeferredRenderBuffer;
 
 	//DeferredRenderBuffer deferredRenderNormals(width, height);
 	//DeferredRenderBuffer deferredRenderPositions(width, height);
@@ -388,13 +406,105 @@ void DxHandler::setupDeferredBuffers(int width, int height)
 	HRESULT depthTextureCreateSucc = DxHandler::devicePtr->CreateTexture2D(&depthBuffDesc, NULL, &deferredDepthStencilBuffer);
 	assert(SUCCEEDED(depthTextureCreateSucc));
 	
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthViewDesc;
 	depthViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthViewDesc.Texture2D.MipSlice = 0;
 	depthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthViewDesc.Flags = 0;
+
 
 	HRESULT depthStencilSucc = DxHandler::devicePtr->CreateDepthStencilView(deferredDepthStencilBuffer, &depthViewDesc, &deferredDepthStencilView);
 	assert(SUCCEEDED(depthStencilSucc));
 
+}
+
+void DxHandler::setupFirstPassDeferredShaders()
+{
+	//Pixel shader
+	ID3DBlob* errorMessage;
+	HRESULT pixelShaderSucc = D3DCompileFromFile(
+		L"./DeferredPixel.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"ps_5_0", //Pixel shader
+		0,
+		0,
+		&DxHandler::pixelShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(pixelShaderSucc));
+
+	HRESULT createPShaderSucc = devicePtr->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &pixelPtr);
+	assert(SUCCEEDED(createPShaderSucc));
+
+	//Vertex shader
+	HRESULT	vertShaderSucc = D3DCompileFromFile(
+		L"./DeferredVertex.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"vs_5_0", //Vertex shader
+		0,
+		0,
+		&DxHandler::vertexShaderBuffer,
+		&errorMessage
+	);
+
+	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexPtr);
+	assert(SUCCEEDED(createVShaderSucc));
+}
+
+void DxHandler::setupSecondPassDeferredShaders()
+{
+	//Post processing shaders that read from the first pass shader buffers
+
+	//Pixel shader
+	ID3DBlob* errorMessage;
+	HRESULT pixelShaderSucc = D3DCompileFromFile(
+		L"./DeferredLightPixel.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"ps_5_0", //Pixel shader
+		0,
+		0,
+		&DxHandler::deferredPixelShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(pixelShaderSucc));
+
+	HRESULT createPShaderSucc = devicePtr->CreatePixelShader(deferredPixelShaderBuffer->GetBufferPointer(), deferredPixelShaderBuffer->GetBufferSize(), NULL, &lightPixelPtr);
+	assert(SUCCEEDED(createPShaderSucc));
+
+	//Vertex shader
+	HRESULT	vertShaderSucc = D3DCompileFromFile(
+		L"./DeferredLightVertex.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"vs_5_0", //Vertex shader
+		0,
+		0,
+		&DxHandler::deferredVertexShaderBuffer,
+		&errorMessage
+	);
+
+	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(deferredVertexShaderBuffer->GetBufferPointer(), deferredVertexShaderBuffer->GetBufferSize(), NULL, &lightVertexPtr);
+	assert(SUCCEEDED(createVShaderSucc));
+
+	D3D11_SAMPLER_DESC samDesc;
+	samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	samDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samDesc.MaxAnisotropy = 1;
+	//samDesc.BorderColor[4] = { 0 };
+	samDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	samDesc.MinLOD = 0;
+	samDesc.MipLODBias = 0.0f;
+	HRESULT samplerSucc = devicePtr->CreateSamplerState(&samDesc, &deferredSamplerState);
+	assert(SUCCEEDED(samplerSucc));
 }
 
 void DxHandler::draw(EngineObject& drawObject)
@@ -409,10 +519,6 @@ void DxHandler::draw(EngineObject& drawObject)
 			&stride, &offset);
 
 		VS_CONSTANT_MATRIX_BUFFER matrixBuff;
-		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
-		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
-		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
-		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
 		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
 		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
@@ -420,7 +526,9 @@ void DxHandler::draw(EngineObject& drawObject)
 
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, & matrixBuff, 0, 0);
 
-		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		//contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView); Normal texture
+		//-------------------------------------------------------
+		
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
@@ -433,8 +541,12 @@ void DxHandler::draw(EngineObject& drawObject)
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
-
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
+
+		//float clearColor[4] = { 0.5,0.5,0,0 };
+		//RESET BACK TO ORIGINAL RENDER BUFFER
+		//contextPtr->ClearRenderTargetView(renderTargetPtr, clearColor);
+		//contextPtr->OMSetRenderTargets(1, &renderTargetPtr, NULL);
 	}
 	
 	//swapChainPtr->Present(1, 0);

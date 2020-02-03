@@ -12,6 +12,7 @@ private:
 
 public:
     ~DeferredRenderBuffer();
+    DeferredRenderBuffer(); //Need to init this afterwards
 
     ID3D11Texture2D* renderTargetTexture;
     ID3D11RenderTargetView* renderTargetView;

@@ -91,9 +91,17 @@ public:
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
+
+	static ID3DBlob* deferredVertexShaderBuffer;
+	static ID3DBlob* deferredPixelShaderBuffer;
+
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
+	static ID3D11VertexShader* lightVertexPtr;
+	static ID3D11PixelShader* lightPixelPtr;
+
 	static ID3D11InputLayout* input_layout_ptr;
+	static ID3D11InputLayout* deferred_input_layout_ptr;
 
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
@@ -102,8 +110,9 @@ public:
 	static DeferredRenderBuffer* deferredVertexPositionBuffer;
 	static DeferredRenderBuffer* deferredNormalBuffer;
 
+	static ID3D11SamplerState* deferredSamplerState;
+
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
-	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
 	ID3D11Buffer*& createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER& matrix);
 
 	void initalizeDeviceContextAndSwapChain();
@@ -112,6 +121,8 @@ public:
 	void setupLightBuffer();
 
 	void setupDeferredBuffers(int width, int height);
+	void setupFirstPassDeferredShaders();
+	void setupSecondPassDeferredShaders();
 
 	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
 	ID3D11Buffer* createIndexBuffer(Mesh& mesh);

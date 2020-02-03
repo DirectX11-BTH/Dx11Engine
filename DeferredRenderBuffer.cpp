@@ -9,6 +9,10 @@ DeferredRenderBuffer::~DeferredRenderBuffer()
 
 }
 
+DeferredRenderBuffer::DeferredRenderBuffer()
+{
+}
+
 DeferredRenderBuffer::DeferredRenderBuffer(int textureWidth, int textureHeight)
 {
 	//init(textureWidth, textureHeight);
