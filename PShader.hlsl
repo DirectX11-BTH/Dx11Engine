@@ -17,6 +17,7 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 }
+
 struct VS_OUTPUT
 {
 	float4 vColour : COLOR;
@@ -26,9 +27,25 @@ struct VS_OUTPUT
 	float4 vInterpolatedPosition : POSITION;
 };
 
-float4 main(VS_OUTPUT input) : SV_Target
+struct PS_OUTPUT
 {
-	float4 textureColor = mytexture.Sample(mysampler, input.vUV);
+	float4 vPosition : SV_TARGET0;
+	float4 vColour : SV_TARGET1;
+	float4 vNormal : SV_TARGET2;
+	//float4 vInterpolatedPosition : POSITION;
+};
+
+PS_OUTPUT main(VS_OUTPUT input) : SV_Target
+{
+	PS_OUTPUT output;
+	
+	output.vPosition = input.vPosition;
+	output.vColour = mytexture.Sample(mysampler, input.vUV);
+	output.vNormal = input.vNormal;
+
+	return output;
+
+	/*float4 textureColor = mytexture.Sample(mysampler, input.vUV);
 	float3 surfaceToLightV = normalize(mul(lightPos - input.vInterpolatedPosition, worldViewProjectionMatrix));
 	float diffuseStrength = clamp(dot(input.vNormal, surfaceToLightV), 0, 1);
 	float ambientStrength = 0.2f;
@@ -37,12 +54,7 @@ float4 main(VS_OUTPUT input) : SV_Target
 	float4 lookVector = normalize(camPos - input.vInterpolatedPosition); //Specular
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV,0), input.vNormal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), specularExponent);
-	
-	//return input.vColour;
-	//return textureColor;
-	return  (diffuseStrength + ambientStrength+ specStrength) * textureColor;
-	//return ambientStrength * textureColor;
-	//return input.vColour;/diffuseStrength+ambientStrength)*textureColor; //Should be black when correct cause rgb -1?
+	return  (diffuseStrength + ambientStrength+ specStrength) * textureColor;*/
 
-	//return (input.vNormal);
+
 }

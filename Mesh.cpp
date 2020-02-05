@@ -4,7 +4,7 @@ Mesh::~Mesh()
 {
 	if (vertexBuffer)
 	{
-		//vertexBuffer->Release();
+		vertexBuffer->Release();
 	}
 
 	if (indexBuffer)

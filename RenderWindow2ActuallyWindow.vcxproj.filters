@@ -57,6 +57,9 @@
     <ClInclude Include="DeferredRenderBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GBufferHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -92,6 +95,9 @@
     <ClCompile Include="DeferredRenderBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GBufferHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RenderWindow2ActuallyWindow.rc">
@@ -107,12 +113,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="DeferredPixel.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DeferredVertex.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="PShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>

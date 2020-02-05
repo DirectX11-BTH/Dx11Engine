@@ -21,7 +21,6 @@
 #include "Mesh.h"
 #include "EngineObject.h"
 #include "Camera.h"
-#include "DeferredRenderBuffer.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
@@ -33,8 +32,6 @@ namespace wrl = Microsoft::WRL;
 
 const int PER_OBJECT_CBUFFER_SLOT = 0;
 const int CAMERA_CBUFFER_SLOT = 1;
-
-class DeferredRenderBuffer;
 
 struct VS_CONSTANT_MATRIX_BUFFER
 {
@@ -91,38 +88,25 @@ public:
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
-
-	static ID3DBlob* deferredVertexShaderBuffer;
-	static ID3DBlob* deferredPixelShaderBuffer;
-
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
-	static ID3D11VertexShader* lightVertexPtr;
-	static ID3D11PixelShader* lightPixelPtr;
-
 	static ID3D11InputLayout* input_layout_ptr;
-	static ID3D11InputLayout* deferred_input_layout_ptr;
 
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
+
 	static ID3D11Buffer* PSConstBuff;
 
-	static DeferredRenderBuffer* deferredVertexPositionBuffer;
-	static DeferredRenderBuffer* deferredNormalBuffer;
-
-	static ID3D11SamplerState* deferredSamplerState;
-
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
+	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
+
 	ID3D11Buffer*& createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER& matrix);
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
 	void setupInputLayout();
-	void setupLightBuffer();
 
-	void setupDeferredBuffers(int width, int height);
-	void setupFirstPassDeferredShaders();
-	void setupSecondPassDeferredShaders();
+	void setupLightBuffer();
 
 	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
 	ID3D11Buffer* createIndexBuffer(Mesh& mesh);
@@ -134,12 +118,7 @@ public:
 
 	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
-	void draw(EngineObject& drawObject);
+	void draw(EngineObject& drawObject, bool perspective = true, bool firstPass = true);
 	void drawIndexedMesh(EngineObject& drawObject);
-	///////FOR DEFERRED RENDERING/////
-	static ID3D11Texture2D* deferredDepthStencilBuffer;
-	static ID3D11DepthStencilView* deferredDepthStencilView;
-	static D3D11_VIEWPORT deferredViewport;
-	///////////////////////////////////
 };
 

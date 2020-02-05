@@ -36,7 +36,7 @@ void DeferredRenderBuffer::init(int width, int height)
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
-
+	
 	HRESULT texSucc = DxHandler::devicePtr->CreateTexture2D(&texDesc, NULL, &renderTargetTexture);
 	assert(SUCCEEDED(texSucc));
 	//RENDERTARGET DESC

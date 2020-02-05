@@ -1,11 +1,6 @@
-/*
-	Authors: Jakob Lidborn, Ghazi Hicheri, Christian Leo
-	February 1st 2020
-
-	Last pass, goes over the scene & calculates light and colors objects.
-	But how does it get information about the object?
-	Such as specular per mesh?
-*/
+Texture2D ColorTexture : register(t0);
+Texture2D NormalTexture : register(t1); 
+Texture2D PositionTexture : register(t2);
 
 cbuffer PS_CONSTANT_BUFFER
 {
@@ -18,22 +13,32 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 specularExponent; //Only use x value
 }
 
-Texture2D color : register(t0); //texture that holds the color information
-Texture2D normals : register(t1); //texture that holds the normals
-
-SamplerState mySampler : register(s0); //Since we need to sample points from both & combine into one output
-
-struct INPUT
+struct VS_OUTPUT
 {
-	float4 pos : SV_POSITION;
-	float2 textureCoord : TEXCOORD0; //Pixel coordinate fed to the shader
+	float4 vColour : COLOR;
+	float4 vPosition : SV_POSITION;
+	float4 vUV : UV;
+	float4 vNormal : NORMAL;
 };
 
-float4 main(INPUT input) : SV_TARGET
+float4 main(VS_OUTPUT input) : SV_TARGET
 {
-	//Per pixel attributes
-	float4 sampledColor = color.Sample(mySampler, input.textureCoord);
-	float4 sampledNormal = normals.Sample(mySampler, input.textureCoord);
+	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
+	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0);
+	float4 position = NormalTexture.Load(float3(input.vPosition.xy, 0), 0);
 
-	return sampledColor; //No light just for testing.
+
+	float3 surfaceToLightV = normalize(mul(lightPos - position, worldViewProjectionMatrix));
+	float diffuseStrength = clamp(dot(normal, surfaceToLightV), 0, 1);
+	float ambientStrength = 0.2f;
+
+	float4 lookVector = normalize(camPos - position); //Specular
+	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
+	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 10); // 10 being spec exponent
+
+	return  (diffuseStrength + ambientStrength + specStrength) * textureColor; 
 }
+//To do:
+//Render full screen quad to active all pixels
+//Compile Shaders
+//

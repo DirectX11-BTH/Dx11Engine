@@ -1,35 +1,27 @@
-/*
-	After DeferredVertex and DeferredPixel has written into their buffers, we now need to do the second pass.
-	This includes reading data through this vertex shader and then feeding it to the deferredLight pixel shader.
 
-	We're technically only reading 2D data here, as normals are stored in one of first pass buffers, so therefore
-	we only need to be passing positions.
-*/
-
-
-cbuffer VS_CONSTANT_BUFFER
+struct VS_INPUT
 {
-	row_major float4x4 worldViewProjectionMatrix;
-	row_major float4x4 worldMatrix;
-}
-
-struct INPUT
-{
-	float4 pos : POSITION;
-	float2 textureCoord : TEXCOORD0;
+	float3 vPosition : POSITION;
+	float4 vColour : COLOR;
+	float2 vUV : UV;
+	float3 vNormal : NORMAL;
 };
 
-struct OUTPUT_VS
+struct VS_OUTPUT
 {
-	float4 pos : SV_POSITION;
-	float2 textureCoord : TEXCOORD0;
+	float4 vColour : COLOR;
+	float4 vPosition : SV_POSITION;
+	float4 vUV : UV;
+	float4 vNormal : NORMAL;
 };
 
-OUTPUT_VS main(INPUT input) 
+VS_OUTPUT main(float4 VS_INPUT : POSITION) : SV_POSITION
 {
-	OUTPUT_VS output;
-	output.pos = mul(input.pos, worldViewProjectionMatrix);
-	output.textureCoord = input.textureCoord;
-
+	VS_OUTPUT output;
+	output.vColour = float4(input.vColour,1);
+	output.vPosition = float4(input.vPosition, 1);
+	output.vNormal = float4(input.vNormal, 0);
+	output.vUV = float4(input.vUV, 1, 1);
+	
 	return output;
 }
