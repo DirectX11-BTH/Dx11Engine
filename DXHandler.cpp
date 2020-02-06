@@ -10,6 +10,13 @@ DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
 ID3DBlob* DxHandler::vertexShaderBuffer = nullptr;
 ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
+
+ID3DBlob* DxHandler::deferredPixelShaderBuffer = nullptr;
+ID3DBlob* DxHandler::deferredVertexShaderBuffer = nullptr;
+
+
+ID3D11PixelShader* DxHandler::deferredPixelPtr = nullptr;
+ID3D11VertexShader* DxHandler::deferredVertexPtr = nullptr;
 ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
@@ -18,6 +25,7 @@ ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
 ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
 
 ID3D11Buffer* DxHandler::PSConstBuff;
+Mesh* DxHandler::fullscreenQuad = nullptr;
 
 DxHandler::~DxHandler()
 {
@@ -325,9 +333,50 @@ void DxHandler::setupVShader(const wchar_t fileName[])
 		&DxHandler::vertexShaderBuffer,
 		&errorMessage
 	);
+	assert(SUCCEEDED(vertShaderSucc));
 
 	HRESULT createVShaderSucc = devicePtr->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexPtr);
 	assert(SUCCEEDED(createVShaderSucc));
+}
+
+void DxHandler::setupDeferredShaders()
+{
+	//Pixel
+	ID3DBlob* errorMessage;
+
+	HRESULT deferredPixelShaderSucc = D3DCompileFromFile(
+		L"DeferredLightPixel.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"ps_5_0", //Pixel shader
+		0,
+		0,
+		&deferredPixelShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(deferredPixelShaderSucc));
+
+	HRESULT createDeferredPixelShaderSucc = devicePtr->CreatePixelShader(deferredPixelShaderBuffer->GetBufferPointer(), deferredPixelShaderBuffer->GetBufferSize(), NULL, &deferredPixelPtr);
+	assert(SUCCEEDED(createDeferredPixelShaderSucc));
+	//=============================================
+	//Vertex
+
+	HRESULT	deferredVertexShaderSucc = D3DCompileFromFile(
+		L"DeferredLightVertex.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"vs_5_0", //Vertex shader
+		0,
+		0,
+		&deferredVertexShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(deferredVertexShaderSucc));
+
+	HRESULT createDeferredVertexShaderSucc = devicePtr->CreateVertexShader(deferredVertexShaderBuffer->GetBufferPointer(), deferredVertexShaderBuffer->GetBufferSize(), NULL, &deferredVertexPtr);
+	assert(SUCCEEDED(createDeferredVertexShaderSucc));
 }
 
 void DxHandler::setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow)
@@ -342,7 +391,7 @@ void DxHandler::setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWind
 	depthDesc.SampleDesc.Count = 1;
 	depthDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
+	
 	devicePtr->CreateTexture2D(&depthDesc, NULL, &depthBuffer);
 	devicePtr->CreateDepthStencilView(DxHandler::depthBuffer, NULL, &depthStencil);
 
@@ -365,20 +414,13 @@ void DxHandler::draw(EngineObject& drawObject, bool perspective, bool firstPass)
 	UINT offset = 0u;
 
 	//Full screen quad ==================================================
-	Mesh fullscreenQuad;
-	fullscreenQuad.vertices.push_back(Vertex{ 1, -1, 0 });
-	fullscreenQuad.vertices.push_back(Vertex{ 1,  1, 0 });
-	fullscreenQuad.vertices.push_back(Vertex{ -1,  0, 0 });
+	if (!firstPass)
+	{
+		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &fullscreenQuad->vertexBuffer,
+			&stride, &offset);
 
-	fullscreenQuad.vertices.push_back(Vertex{ 1,  1, 0 });
-	fullscreenQuad.vertices.push_back(Vertex{ -1,  1, 0 });
-	fullscreenQuad.vertices.push_back(Vertex{ -1,  0, 0 });
-	createVertexBuffer(fullscreenQuad);
-
-	DxHandler::contextPtr->IASetVertexBuffers(0, 1, &fullscreenQuad.vertexBuffer,
-		&stride, &offset);
-
-	DxHandler::contextPtr->Draw(fullscreenQuad.vertices.size(), 0);
+		DxHandler::contextPtr->Draw(fullscreenQuad->vertices.size(), 0);
+	}
 	//====================================================================
 
 	for (int i = 0; i < drawObject.meshes.size(); i++)
@@ -391,14 +433,22 @@ void DxHandler::draw(EngineObject& drawObject, bool perspective, bool firstPass)
 		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
 		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
 		
-		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
-		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
-		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
+		if (perspective)
+		{
+			matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
+			matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+			//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
+			//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
+		}
+		else
+		{
+			matrixBuff.worldViewProjectionMatrix = DirectX::XMMatrixIdentity();
+			matrixBuff.worldMatrix = DirectX::XMMatrixIdentity();
+		}
+		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 
-		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, & matrixBuff, 0, 0);
-
-		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		if(firstPass)
+			contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
@@ -442,4 +492,25 @@ void DxHandler::drawIndexedMesh(EngineObject& drawObject)
 		DxHandler::contextPtr->DrawIndexed(drawObject.meshes.at(i).indicies.size(), 0, 0);
 	}
 	*/
+}
+
+void DxHandler::generateFullscreenQuad()
+{
+		/*
+		float x, y, z = 0;
+		float r, g, b, a = 1; //Default to white for debug
+		float u, v = 0;
+		float nx, ny, nz = 0;1
+		*/
+
+		DxHandler::fullscreenQuad = new Mesh;		//X Y  Z   R	 G  B  A, U, V  nX nY nZ
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1, 1, 0,    1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1,  -1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1,  1, 0,   1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  -1, 0, 1, 1, 1, 1, 0, 0, 0, 0, -1 });
+
+		createVertexBuffer(*fullscreenQuad);
 }

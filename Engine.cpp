@@ -68,6 +68,7 @@ void Engine::initialSetup()
 
 	directXHandler->setupLightBuffer();
 	gBuffHandler.init(WIDTH, HEIGHT);
+	directXHandler->generateFullscreenQuad();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -215,8 +216,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
-		ID3D11RenderTargetView* arr[3] = {
+		ID3D11RenderTargetView* arr[3] = 
+		{
 			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
 			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
@@ -226,15 +229,17 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
-		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 		//directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil); //DEPTH
+
+		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
+		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
 
 		directXHandler->draw(*debugObject2);
 		//First pass end -------------------------------------------------------------------
 
 
 		//Second pass -------------------------------------------------------------------
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 
 
 		//These are to 'read' from the textures
@@ -242,11 +247,16 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
 
+		//Do the actual drawing here
+		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL);
+		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
+
+		directXHandler->draw(*debugObject2, false, false); //Object EngineObject, Perspective Bool, First pass Bool
 
 		//Need to unbind for the next pass
-		DxHandler::contextPtr->PSSetShaderResources(0, 1, NULL); //Color
-		DxHandler::contextPtr->PSSetShaderResources(1, 1, NULL); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(2, 1, NULL); //Position
+		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
+		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
+		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);

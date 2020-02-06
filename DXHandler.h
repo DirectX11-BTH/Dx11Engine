@@ -88,14 +88,24 @@ public:
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
+	static ID3DBlob* deferredVertexShaderBuffer;
+	static ID3DBlob* deferredPixelShaderBuffer;
+
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
+
+	static ID3D11PixelShader* deferredPixelPtr;
+	static ID3D11VertexShader* deferredVertexPtr;
+
 	static ID3D11InputLayout* input_layout_ptr;
+	
 
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
 
 	static ID3D11Buffer* PSConstBuff;
+
+	static Mesh* fullscreenQuad;
 
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
@@ -116,9 +126,13 @@ public:
 	void setupPShader(const wchar_t fileName[]);
 	void setupVShader(const wchar_t fileName[]);
 
+	void setupDeferredShaders();
+
 	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
 	void draw(EngineObject& drawObject, bool perspective = true, bool firstPass = true);
 	void drawIndexedMesh(EngineObject& drawObject);
+
+	void generateFullscreenQuad();
 };
 
