@@ -34,6 +34,7 @@ private:
 	void createDebugMesh();
 public:
 	~Engine();
+	Engine();
 
 	void initialSetup();
 	void engineLoop();

@@ -18,7 +18,12 @@ void Engine::createDirectX()
 
 void Engine::createInputHandler()
 {
-	this->inputHandler = InputHandler();
+	this->inputHandler = InputHandler(primaryWindow);
+}
+
+Engine::Engine()
+{
+
 }
 
 Engine::~Engine()
@@ -30,12 +35,13 @@ void Engine::initialSetup()
 {
 
 	this->createWindow();
-	createInputHandler();
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");
 	directXHandler->setupVShader(L"VShader.hlsl");
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
+	
+	createInputHandler();
 
 	DxHandler::contextPtr->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DxHandler::contextPtr->IASetInputLayout((ID3D11InputLayout*)DxHandler::input_layout_ptr);
@@ -55,6 +61,8 @@ void Engine::initialSetup()
 	VS_CONSTANT_CAMERA_BUFFER cameraMatrixBuff;
 	ID3D11Buffer* VSCameraConstBuff = NULL;
 	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
+
+	directXHandler->setupDeferredShaders();
 
 	//Init camera
 	Camera::cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);
@@ -180,6 +188,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	MSG msg;
 	while (true)
 	{
+		//Update input magic
+		inputHandler.handleInput();
+		//
+
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -193,9 +205,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		{
 			PostQuitMessage(0);
 		}
-		// Run game code here
-		// ...
-		// ...
 
 		RECT viewportRect;
 		GetClientRect(primaryWindow, &viewportRect);
@@ -210,7 +219,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//Clear depth every frame - DEPTH
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		float background_color[4] = { 0.7f, 0.f, 0.f, 1.f };
+		float background_color[4] = { 0.f, 0.f, 0.f, 1.f };
 
 		//First pass -------------------------------------------------------------------
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
@@ -248,10 +257,12 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
 
 		//Do the actual drawing here
-		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL);
+		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
 		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
-
-		directXHandler->draw(*debugObject2, false, false); //Object EngineObject, Perspective Bool, First pass Bool
+		
+		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
+		
+		//directXHandler->draw(*debugObject2, false, false); //Object EngineObject, Perspective Bool, First pass Bool
 
 		//Need to unbind for the next pass
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color

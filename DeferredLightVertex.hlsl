@@ -1,4 +1,10 @@
 
+cbuffer VS_CONSTANT_BUFFER
+{
+	row_major float4x4 worldViewProjectionMatrix;
+	row_major float4x4 worldMatrix;
+}
+
 struct VS_INPUT
 {
 	float3 vPosition : POSITION;

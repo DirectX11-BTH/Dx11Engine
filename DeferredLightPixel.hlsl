@@ -21,7 +21,7 @@ struct VS_OUTPUT
 	float4 vNormal : NORMAL;
 };
 
-float4 main(VS_OUTPUT input) : SV_Target
+float4 main(VS_OUTPUT input) : SV_Target0
 {
 	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
 	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0);
@@ -36,9 +36,5 @@ float4 main(VS_OUTPUT input) : SV_Target
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 10); // 10 being spec exponent
 
-	return  float4(1, 1, 1, 1);//(diffuseStrength + ambientStrength + specStrength) * albedo; 
+	return (diffuseStrength + ambientStrength + specStrength) * albedo; 
 }
-//To do:
-//Render full screen quad to active all pixels
-//Compile Shaders
-//

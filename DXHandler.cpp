@@ -1,4 +1,4 @@
-#include "DXHandler.h"
+﻿#include "DXHandler.h"
 
 ID3D11Device* DxHandler::devicePtr = nullptr;
 ID3D11DeviceContext* DxHandler::contextPtr = nullptr;
@@ -23,6 +23,8 @@ ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
 
 ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
 ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
+
+HWND* DxHandler::hWnd = nullptr;
 
 ID3D11Buffer* DxHandler::PSConstBuff;
 Mesh* DxHandler::fullscreenQuad = nullptr;
@@ -407,21 +409,11 @@ void DxHandler::setupLightBuffer()
 	DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 }
 
-void DxHandler::draw(EngineObject& drawObject, bool perspective, bool firstPass)
+void DxHandler::draw(EngineObject& drawObject)
 {
 
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
-
-	//Full screen quad ==================================================
-	if (!firstPass)
-	{
-		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &fullscreenQuad->vertexBuffer,
-			&stride, &offset);
-
-		DxHandler::contextPtr->Draw(fullscreenQuad->vertices.size(), 0);
-	}
-	//====================================================================
 
 	for (int i = 0; i < drawObject.meshes.size(); i++)
 	{
@@ -433,22 +425,13 @@ void DxHandler::draw(EngineObject& drawObject, bool perspective, bool firstPass)
 		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
 		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
 		
-		if (perspective)
-		{
-			matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
-			matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-			//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
-			//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
-		}
-		else
-		{
-			matrixBuff.worldViewProjectionMatrix = DirectX::XMMatrixIdentity();
-			matrixBuff.worldMatrix = DirectX::XMMatrixIdentity();
-		}
+		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
+		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 
-		if(firstPass)
-			contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
@@ -494,23 +477,34 @@ void DxHandler::drawIndexedMesh(EngineObject& drawObject)
 	*/
 }
 
+void DxHandler::drawFullscreenQuad()
+{
+	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
+	UINT offset = 0u;
+
+	DxHandler::contextPtr->IASetVertexBuffers(0, 1, &fullscreenQuad->vertexBuffer,
+		&stride, &offset);
+
+	DxHandler::contextPtr->Draw(fullscreenQuad->vertices.size(), 0);
+}
+
 void DxHandler::generateFullscreenQuad()
 {
 		/*
 		float x, y, z = 0;
 		float r, g, b, a = 1; //Default to white for debug
 		float u, v = 0;
-		float nx, ny, nz = 0;1
+		float nx, ny, nz = 0;☺
 		*/
 
 		DxHandler::fullscreenQuad = new Mesh;		//X Y  Z   R	 G  B  A, U, V  nX nY nZ
-		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
-		fullscreenQuad->vertices.push_back(Vertex{ 1, 1, 0,    1, 1, 1, 1, 0, 0, 0, 0, -1 });
-		fullscreenQuad->vertices.push_back(Vertex{ 1,  -1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0.1f,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1, -1, 0.1f,    1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  -1, 0.1f,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
 
-		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
-		fullscreenQuad->vertices.push_back(Vertex{ 1,  1, 0,   1, 1, 1, 1, 0, 0, 0, 0, -1 });
-		fullscreenQuad->vertices.push_back(Vertex{ -1,  -1, 0, 1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ -1,  1, 0.1f,  1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1,  1, 0.1f,   1, 1, 1, 1, 0, 0, 0, 0, -1 });
+		fullscreenQuad->vertices.push_back(Vertex{ 1,  -1, 0.1f, 1, 1, 1, 1, 0, 0, 0, 0, -1 });
 
 		createVertexBuffer(*fullscreenQuad);
 }

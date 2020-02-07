@@ -70,13 +70,15 @@ public:
 	static  ID3D11Device* devicePtr;
 	static  ID3D11DeviceContext* contextPtr;
 	static  HINSTANCE hInstance;
+	static	HWND* hWnd;
 
 	std::vector<ID3D11Buffer*> loadedVSBuffers;
 	std::vector<ID3D11Buffer*> loadedPSBuffers;
 
 	DxHandler(HWND& hWnd)
 	{
-		configureSwapChain(hWnd);
+		DxHandler::hWnd = &hWnd;
+		configureSwapChain(*DxHandler::hWnd);
 		initalizeDeviceContextAndSwapChain();
 	}
 
@@ -130,8 +132,9 @@ public:
 
 	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
-	void draw(EngineObject& drawObject, bool perspective = true, bool firstPass = true);
+	void draw(EngineObject& drawObject);
 	void drawIndexedMesh(EngineObject& drawObject);
+	void drawFullscreenQuad();
 
 	void generateFullscreenQuad();
 };
