@@ -1,4 +1,9 @@
 #include "InputHandler.h"
+std::unique_ptr<DirectX::Mouse> InputHandler::mouse = nullptr;
+std::unique_ptr<DirectX::Keyboard> InputHandler::keyboard = nullptr;
+float2 InputHandler::lastMousePos;
+
+using namespace DirectX;
 
 InputHandler::InputHandler(HWND& primaryWindow)
 {
@@ -7,7 +12,8 @@ InputHandler::InputHandler(HWND& primaryWindow)
 	mouse = std::make_unique<DirectX::Mouse>();
 
 	assert(primaryWindow != nullptr);
-	//mouse->SetWindow(primaryWindow);
+	assert(keyboard != nullptr);
+	mouse->SetWindow(primaryWindow);
 }
 
 InputHandler::InputHandler()
@@ -16,19 +22,35 @@ InputHandler::InputHandler()
 
 void InputHandler::handleInput()
 {
-	auto keyboardState = keyboard->GetState();
-	auto mouseState = mouse->GetState();
-
-	if (keyboardState.W)
+	auto keyboardState = DirectX::Keyboard::Get().GetState();
+	if (keyboardState.W || keyboardState.Delete)
 	{
 		std::cout << "hello" << std::endl;
 	}
+
+	if (keyboardState.Back)
+		std::cout << "Back" << std::endl;
+	
+	auto mouseState = mouse->GetState();
+
+	if (mouseState.leftButton)
+		mouse.get()->SetMode(DirectX::Mouse::MODE_RELATIVE);
+	else
+		mouse.get()->SetMode(DirectX::Mouse::MODE_ABSOLUTE);
+
+	if (mouseState.leftButton)
+		std::cout << "CLICKED WOOO" << std::endl;
 }
 
 LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	//PAINTSTRUCT ps;
 	//HDC hdc; //HDC is to handle		 context.
+
+	float degToRad = (XM_PI * 2.f) / 380.f;
+	float deltaX = 0;
+	float deltaY = 0;
+
 
 	switch (message)
 	{
@@ -42,28 +64,105 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
 		DirectX::Mouse::ProcessMessage(message, wParam, lParam);
 		break;
+	case WM_CREATE:
+			
+		break;
 	case WM_DESTROY: //Destroy window
 		PostQuitMessage(0);
 		break;
 	case WM_MOUSEMOVE:
-		//ME MOUSE ME LYF
-		//MessageBox(hWnd, L"MOVED", L"TITLE", MB_OK); //hWnd is which app / window it belongs to
+		//float x = LOWORD(lParam);
+		//float y = HIWORD(lParam);
 
+		deltaX = LOWORD(lParam) - lastMousePos.x;
+		deltaY = HIWORD(lParam) - lastMousePos.y;
+
+		Camera::pitch += -15*deltaY / 600 * degToRad; //Up and down
+		Camera::yaw +=  -30*-deltaX / 500 * degToRad; //Side to side
+
+		XMFLOAT4 camPos;
+		XMStoreFloat4(&camPos, (Camera::cameraTarget + Camera::cameraPosition));
+		lastMousePos = { (float)LOWORD(lParam), (float)HIWORD(lParam) };
+		//SetCursorPos(600 / 2, 500 / 2);
+		//std::cout << LOWORD(lParam) << " : " << HIWORD(lParam) << std::endl;
+		std::cout << camPos.x << " " << camPos.y << " " << camPos.z << std::endl;
+
+		break;
 	case WM_LBUTTONDOWN: //If someone clicks left mouse button
-		//MessageBox(hWnd, L"CLICKED", L"TITLE", MB_OK); //hWnd is which app / window it belongs to
 		break;
 	case WM_MOUSEHOVER:
 		DirectX::Mouse::ProcessMessage(message, wParam, lParam);
 		break;
+	case WM_KEYDOWN:
+		//DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+		{
+			Camera::zTranslation = -0.05f;
+		}
+		if (wParam == 0x53) //S Button
+		{
+			Camera::zTranslation = 0.05f;
+		}
+
+		if (wParam == 0x41) //A Button
+		{
+			Camera::xTranslation = 0.05f;
+		}
+
+		if (wParam == 0x44) //D Button
+		{
+			Camera::xTranslation = -0.05f;
+		}
+
+		if (wParam == 0x45) //E Button, up
+		{
+			Camera::yTranslation = 0.05f;
+		}
+
+		if (wParam == 0x51) //Q Button, down
+		{
+			Camera::yTranslation = -0.05f;
+		}
+
+		break;	
 	case WM_KEYUP:
-		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+		{
+			Camera::zTranslation = 0.f;
+		}
+
+		if (wParam == 0x53) //S Button
+		{
+			Camera::zTranslation = 0.0f;
+		}
+
+		if (wParam == 0x41) //A Button
+		{
+			Camera::xTranslation = 0.0f;
+		}
+
+		if (wParam == 0x44) //D Button
+		{
+			Camera::xTranslation = 0.0f;
+		}
+
+		if (wParam == 0x45) //E Button, up
+		{
+			Camera::yTranslation = 0.0f;
+		}
+
+		if (wParam == 0x51) //Q Button, down
+		{
+			Camera::yTranslation = -0.0f;
+		}
+
+		break;
 	case WM_SYSKEYUP:
 		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
 		break;
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		//return DefWindowProc(hWnd, message, wParam, lParam);
 		break;
-
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);

@@ -26,6 +26,7 @@ Engine::Engine()
 
 }
 
+
 Engine::~Engine()
 {
 	delete directXHandler;
@@ -81,6 +82,7 @@ void Engine::initialSetup()
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
 {
+
 	//----------------------------------------------------------------------------------------------- DEBUG
 	float fArray[] =
 	{
@@ -188,10 +190,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	MSG msg;
 	while (true)
 	{
-		//Update input magic
-		inputHandler.handleInput();
-		//
-
+		Camera::updateCamera();
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -271,5 +270,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);
+
+		//Update input magic
+		inputHandler.handleInput();
+		//
+
 	}
 }

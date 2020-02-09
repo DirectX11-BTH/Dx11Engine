@@ -1,4 +1,8 @@
 #pragma once
+
+const int WIDTH = 600;
+const int HEIGHT = 500;
+
 #include "DXHandler.h"
 #include "RenderWindow.h"
 #include "InputHandler.h"
@@ -6,9 +10,6 @@
 #include "Camera.h"
 #include "ObjParser.h"
 #include "GBufferHandler.h"
-
-const int WIDTH = 600;
-const int HEIGHT = 500;
 
 class Engine
 {

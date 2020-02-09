@@ -5,17 +5,21 @@
 #include "DXHandler.h"
 #include <Mouse.h>
 #include <Keyboard.h>
-#include <Windows.h>
+
+struct float2
+{
+	float x, y = 0;
+};
 
 class InputHandler
 {
 private:
 
-	DirectX::XMVECTOR lastMousePos;
+	static float2 lastMousePos;
 
 public:
-	std::unique_ptr<DirectX::Mouse> mouse;
-	std::unique_ptr<DirectX::Keyboard> keyboard;
+	static std::unique_ptr<DirectX::Mouse> mouse;
+	static std::unique_ptr<DirectX::Keyboard> keyboard;
 
 	InputHandler(HWND& primaryWindow);
 	InputHandler();
