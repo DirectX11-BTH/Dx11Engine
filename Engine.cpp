@@ -34,7 +34,7 @@ Engine::~Engine()
 
 void Engine::initialSetup()
 {
-
+	ShowCursor(false);
 	this->createWindow();
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");

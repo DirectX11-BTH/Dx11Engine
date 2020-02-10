@@ -14,7 +14,7 @@ struct float2
 class InputHandler
 {
 private:
-
+	static bool justSetMouse;
 	static float2 lastMousePos;
 
 public:

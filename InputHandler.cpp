@@ -51,6 +51,11 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	float deltaX = 0;
 	float deltaY = 0;
 
+	RECT windowRect;
+	float windowPosX = 0.f;
+	float windowPosY = 0.f;
+	POINT currentMousePosition;
+	POINT mouseResetPosition = { 0, 0 };
 
 	switch (message)
 	{
@@ -74,19 +79,36 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		//float x = LOWORD(lParam);
 		//float y = HIWORD(lParam);
 
-		deltaX = LOWORD(lParam) - lastMousePos.x;
-		deltaY = HIWORD(lParam) - lastMousePos.y;
+		GetCursorPos(&currentMousePosition);
 
-		Camera::pitch += -15*deltaY / 600 * degToRad; //Up and down
-		Camera::yaw +=  -30*-deltaX / 500 * degToRad; //Side to side
+		if (currentMousePosition.x != mouseResetPosition.x && currentMousePosition.y != mouseResetPosition.y)
+		{
 
-		XMFLOAT4 camPos;
-		XMStoreFloat4(&camPos, (Camera::cameraTarget + Camera::cameraPosition));
-		lastMousePos = { (float)LOWORD(lParam), (float)HIWORD(lParam) };
-		//SetCursorPos(600 / 2, 500 / 2);
-		//std::cout << LOWORD(lParam) << " : " << HIWORD(lParam) << std::endl;
-		std::cout << camPos.x << " " << camPos.y << " " << camPos.z << std::endl;
+			deltaX = LOWORD(lParam) - lastMousePos.x;
+			deltaY = HIWORD(lParam) - lastMousePos.y;
 
+			Camera::pitch += -30 * deltaY / 600 * degToRad; //Up and down
+			Camera::yaw += -30 * -deltaX / 500 * degToRad; //Side to side
+
+			GetWindowRect(hWnd, &windowRect);
+			windowPosX = windowRect.left;
+			windowPosY = windowRect.top;
+
+			XMFLOAT4 camPos;
+			XMStoreFloat4(&camPos, (Camera::cameraTarget + Camera::cameraPosition));
+			lastMousePos = { (float)LOWORD(lParam), (float)HIWORD(lParam) };
+
+			mouseResetPosition.x = 600 / 2;
+			mouseResetPosition.y = 500 / 2;
+			ClientToScreen(hWnd, &mouseResetPosition);
+
+			std::cout << mouseResetPosition.x << " : " << mouseResetPosition.y << std::endl;
+			std::cout << currentMousePosition.x << " = " << currentMousePosition.y << std::endl;
+
+			//SetCursorPos(mouseResetPosition.y, mouseResetPosition.y);
+		}
+		else
+			std::cout << "-";
 		break;
 	case WM_LBUTTONDOWN: //If someone clicks left mouse button
 		break;
