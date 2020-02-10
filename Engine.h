@@ -10,6 +10,7 @@ const int HEIGHT = 500;
 #include "Camera.h"
 #include "ObjParser.h"
 #include "GBufferHandler.h"
+#include "TerrainGenerator.h"
 
 class Engine
 {
@@ -20,6 +21,9 @@ private:
 	Camera camera;
 	DirectX::XMMATRIX worldViewProjectionMatrix;
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
+
+	TerrainGenerator terrainGenerator;
+	EngineObject terrain;
 
 	ID3D11Buffer* PSConstBuff = NULL;
 	PS_CONSTANT_LIGHT_BUFFER lightBuff;

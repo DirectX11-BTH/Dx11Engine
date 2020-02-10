@@ -3,6 +3,11 @@ std::unique_ptr<DirectX::Mouse> InputHandler::mouse = nullptr;
 std::unique_ptr<DirectX::Keyboard> InputHandler::keyboard = nullptr;
 float2 InputHandler::lastMousePos;
 
+LPDIRECTINPUT8 InputHandler::DirectInput;
+DIMOUSESTATE InputHandler::lastMouseState;
+IDirectInputDevice8* InputHandler::DIMouse = nullptr;
+
+bool InputHandler::resetCursor = false;
 using namespace DirectX;
 
 InputHandler::InputHandler(HWND& primaryWindow)
@@ -14,6 +19,23 @@ InputHandler::InputHandler(HWND& primaryWindow)
 	assert(primaryWindow != nullptr);
 	assert(keyboard != nullptr);
 	mouse->SetWindow(primaryWindow);
+
+	HRESULT createInputSucc  = DirectInput8Create(DxHandler::hInstance,
+        DIRECTINPUT_VERSION,
+        IID_IDirectInput8,
+        (void**)&DirectInput,
+        NULL); 
+	assert(SUCCEEDED(createInputSucc));
+
+	HRESULT CreateDeviceSucc  = DirectInput->CreateDevice(GUID_SysMouse,
+    &DIMouse,
+    NULL);
+	assert(SUCCEEDED(CreateDeviceSucc));
+
+	HRESULT dataFormatMouseSucc = DIMouse->SetDataFormat(&c_dfDIMouse);
+	assert(SUCCEEDED(dataFormatMouseSucc));
+	HRESULT setCoopSucc = DIMouse->SetCooperativeLevel(primaryWindow, DISCL_EXCLUSIVE | DISCL_NOWINKEY | DISCL_FOREGROUND);
+	assert(SUCCEEDED(setCoopSucc));
 }
 
 InputHandler::InputHandler()
@@ -22,24 +44,14 @@ InputHandler::InputHandler()
 
 void InputHandler::handleInput()
 {
-	auto keyboardState = DirectX::Keyboard::Get().GetState();
-	if (keyboardState.W || keyboardState.Delete)
-	{
-		std::cout << "hello" << std::endl;
-	}
+	DIMOUSESTATE mouseState;
+	DIMouse->Acquire();
+	DIMouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 
-	if (keyboardState.Back)
-		std::cout << "Back" << std::endl;
-	
-	auto mouseState = mouse->GetState();
+	Camera::yaw += lastMouseState.lX * 0.002f;
+	Camera::pitch -= lastMouseState.lY * 0.002f;
 
-	if (mouseState.leftButton)
-		mouse.get()->SetMode(DirectX::Mouse::MODE_RELATIVE);
-	else
-		mouse.get()->SetMode(DirectX::Mouse::MODE_ABSOLUTE);
-
-	if (mouseState.leftButton)
-		std::cout << "CLICKED WOOO" << std::endl;
+	lastMouseState = mouseState;
 }
 
 LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -79,17 +91,19 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		//float x = LOWORD(lParam);
 		//float y = HIWORD(lParam);
 
-		GetCursorPos(&currentMousePosition);
+		//GetCursorPos(&currentMousePosition);
 
-		if (currentMousePosition.x != mouseResetPosition.x && currentMousePosition.y != mouseResetPosition.y)
+		//if (currentMousePosition.x != mouseResetPosition.x && currentMousePosition.y != mouseResetPosition.y && !resetCursor)
+		//if(leftMouseButtonDown)
+		/*if (LOWORD(lParam) != 600 / 2 && HIWORD(lParam) != 500/2)
 		{
 
-			deltaX = LOWORD(lParam) - lastMousePos.x;
-			deltaY = HIWORD(lParam) - lastMousePos.y;
+			deltaX = LOWORD(lParam) - lastMousePos.x; //LOWORD(lParam) = x in indow
+			deltaY = HIWORD(lParam) - lastMousePos.y; //HIWORD(lParam) = y in window
 
 			Camera::pitch += -30 * deltaY / 600 * degToRad; //Up and down
 			Camera::yaw += -30 * -deltaX / 500 * degToRad; //Side to side
-
+			
 			GetWindowRect(hWnd, &windowRect);
 			windowPosX = windowRect.left;
 			windowPosY = windowRect.top;
@@ -100,17 +114,21 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			mouseResetPosition.x = 600 / 2;
 			mouseResetPosition.y = 500 / 2;
-			ClientToScreen(hWnd, &mouseResetPosition);
-
+			ClientToScreen(hWnd, &mouseResetPosition); //From window space to your entire screen
 			std::cout << mouseResetPosition.x << " : " << mouseResetPosition.y << std::endl;
-			std::cout << currentMousePosition.x << " = " << currentMousePosition.y << std::endl;
 
-			//SetCursorPos(mouseResetPosition.y, mouseResetPosition.y);
+			SetCursorPos(mouseResetPosition.y, mouseResetPosition.y);
+			std::cout << currentMousePosition.x << " = " << currentMousePosition.y << std::endl;
+			resetCursor = true;
 		}
 		else
-			std::cout << "-";
-		break;
+			resetCursor = false;
+		break;*/
 	case WM_LBUTTONDOWN: //If someone clicks left mouse button
+		//leftMouseButtonDown = true;
+		break;
+	case WM_LBUTTONUP: //If someone clicks left mouse button
+		//leftMouseButtonDown = false;
 		break;
 	case WM_MOUSEHOVER:
 		DirectX::Mouse::ProcessMessage(message, wParam, lParam);

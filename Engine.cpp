@@ -34,14 +34,15 @@ Engine::~Engine()
 
 void Engine::initialSetup()
 {
-	ShowCursor(false);
+	//ShowCursor(false);
 	this->createWindow();
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");
 	directXHandler->setupVShader(L"VShader.hlsl");
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
-	
+	terrainGenerator.generateFromHeightMap("./heightmap.png");
+
 	createInputHandler();
 
 	DxHandler::contextPtr->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
