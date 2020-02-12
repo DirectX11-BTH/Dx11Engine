@@ -2,6 +2,9 @@
 #include <DirectXHelpers.h>
 #include <SimpleMath.h>
 #include <math.h>
+#include "TerrainGenerator.h"
+
+const bool WALK_ON_TERRAIN = true;
 
 class Camera
 {

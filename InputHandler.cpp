@@ -137,7 +137,7 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		//DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
 		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 		{
-			Camera::zTranslation = -0.05f;
+			Camera::zTranslation = -0.7f;
 		}
 		if (wParam == 0x53) //S Button
 		{

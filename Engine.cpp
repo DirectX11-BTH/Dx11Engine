@@ -41,7 +41,6 @@ void Engine::initialSetup()
 	directXHandler->setupVShader(L"VShader.hlsl");
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
-	terrainGenerator.generateFromHeightMap("./heightmap.png");
 
 	createInputHandler();
 
@@ -83,6 +82,9 @@ void Engine::initialSetup()
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
 {
+	terrainGenerator.generateFromHeightMap("./heightmap.png");
+	EngineObject terrainObject;
+	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 	float fArray[] =
@@ -191,7 +193,11 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	MSG msg;
 	while (true)
 	{
+
 		Camera::updateCamera();
+		//Update input magic
+		inputHandler.handleInput();
+		//
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -243,7 +249,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
 
-		directXHandler->draw(*debugObject2);
+		//directXHandler->draw(*debugObject2);
+		directXHandler->draw(terrainObject);
 		//First pass end -------------------------------------------------------------------
 
 
@@ -272,9 +279,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);
 
-		//Update input magic
-		inputHandler.handleInput();
-		//
 
 	}
 }

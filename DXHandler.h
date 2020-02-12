@@ -120,7 +120,7 @@ public:
 
 	void setupLightBuffer();
 
-	ID3D11Buffer* createVertexBuffer(Mesh& mesh);
+	static ID3D11Buffer* createVertexBuffer(Mesh& mesh);
 	ID3D11Buffer* createIndexBuffer(Mesh& mesh);
 
 	void setCullingMode(D3D11_CULL_MODE mode);

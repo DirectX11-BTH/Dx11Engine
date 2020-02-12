@@ -6,13 +6,22 @@
 
 //./heightmap.png
 
+std::vector<Vertex> generateQuad(DirectX::XMFLOAT3 corner0, DirectX::XMFLOAT3 corner1, DirectX::XMFLOAT3 corner2, DirectX::XMFLOAT3 corner3);
+
 class TerrainGenerator
 {
 	
 	
 public:
-	Mesh& generateFromHeightMap(std::string textureName);
+	void generateFromHeightMap(std::string textureName);
 	void readTexture(std::string textureName);
+
+	static Mesh heightTerrain;
+
+	static float scaling;
+	static float verticalScaling;
+	static int width;
+	static int height;
 
 	ID3D11Resource* texture;
 	ID3D11ShaderResourceView* textureView;

@@ -40,7 +40,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	PS_OUTPUT output;
 	
 	output.vPosition = input.vPosition;
-	output.vColour = mytexture.Sample(mysampler, input.vUV);
+	output.vColour = float4(1, 1, 1, 1);//mytexture.Sample(mysampler, input.vUV);
 	output.vNormal = input.vNormal;
 
 	return output;

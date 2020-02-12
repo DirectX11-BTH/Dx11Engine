@@ -427,6 +427,7 @@ void DxHandler::draw(EngineObject& drawObject)
 		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
 		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		//matrixBuff.
 		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
 		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
