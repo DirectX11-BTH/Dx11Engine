@@ -31,6 +31,7 @@ private:
 public:
 	static std::unique_ptr<DirectX::Mouse> mouse;
 	static std::unique_ptr<DirectX::Keyboard> keyboard;
+	static bool trackMouse;
 
 	static bool resetCursor;
 

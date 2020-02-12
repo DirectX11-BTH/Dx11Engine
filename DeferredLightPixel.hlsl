@@ -36,5 +36,5 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 10 being spec exponent
 
-	return -normal;//(diffuseStrength + ambientStrength + specStrength) * albedo; 
+	return normal;//(diffuseStrength + ambientStrength + specStrength) * albedo; 
 }

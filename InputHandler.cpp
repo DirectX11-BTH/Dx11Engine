@@ -6,6 +6,7 @@ float2 InputHandler::lastMousePos;
 LPDIRECTINPUT8 InputHandler::DirectInput;
 DIMOUSESTATE InputHandler::lastMouseState;
 IDirectInputDevice8* InputHandler::DIMouse = nullptr;
+bool  InputHandler::trackMouse = true;
 
 bool InputHandler::resetCursor = false;
 using namespace DirectX;
@@ -48,10 +49,13 @@ void InputHandler::handleInput()
 	DIMouse->Acquire();
 	DIMouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 
-	Camera::yaw += lastMouseState.lX * 0.002f;
-	Camera::pitch -= lastMouseState.lY * 0.002f;
+	if (trackMouse)
+	{
+		Camera::yaw += lastMouseState.lX * 0.002f;
+		Camera::pitch -= lastMouseState.lY * 0.002f;
+		lastMouseState = mouseState;
+	}
 
-	lastMouseState = mouseState;
 }
 
 LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -141,27 +145,27 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 		if (wParam == 0x53) //S Button
 		{
-			Camera::zTranslation = 0.05f;
+			Camera::zTranslation = 0.7f;
 		}
 
 		if (wParam == 0x41) //A Button
 		{
-			Camera::xTranslation = 0.05f;
+			Camera::xTranslation = 0.7f;
 		}
 
 		if (wParam == 0x44) //D Button
 		{
-			Camera::xTranslation = -0.05f;
+			Camera::xTranslation = -0.7f;
 		}
 
 		if (wParam == 0x45) //E Button, up
 		{
-			Camera::yTranslation = 0.05f;
+			Camera::yTranslation = 0.7f;
 		}
 
 		if (wParam == 0x51) //Q Button, down
 		{
-			Camera::yTranslation = -0.05f;
+			Camera::yTranslation = -0.7f;
 		}
 
 		break;	
@@ -199,6 +203,12 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	case WM_SYSKEYUP:
 		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+		break;
+	case WM_KILLFOCUS:
+		trackMouse = false;
+		break;
+	case WM_SETFOCUS:
+		trackMouse = true;
 		break;
 	default:
 		//return DefWindowProc(hWnd, message, wParam, lParam);

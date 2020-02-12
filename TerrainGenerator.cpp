@@ -139,7 +139,7 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	XMVECTOR c0Toc1 = corner1Vec - corner0Vec;
 	XMVECTOR c0Toc2 = corner2Vec - corner0Vec;
 	XMVECTOR normal1 = XMVector3Cross(c0Toc1, c0Toc2); //This is the first triangle's normal
-	normal1 = XMVector3Normalize(normal1);
+	normal1 = XMVector3Normalize(-normal1);
 
 	XMFLOAT4 normalFloatForm;
 	XMStoreFloat4(&normalFloatForm, normal1);
@@ -197,7 +197,7 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	XMVECTOR c3Toc1 = corner1Vec - corner3Vec;
 	XMVECTOR c3Toc2 = corner2Vec - corner3Vec;
 	XMVECTOR normal2 = XMVector3Cross(c3Toc2, c3Toc1); //This is the first trian
-	normal2 = XMVector3Normalize(normal2);
+	normal2 = XMVector3Normalize(-normal2);
 
 	XMStoreFloat4(&normalFloatForm, normal2);
 
