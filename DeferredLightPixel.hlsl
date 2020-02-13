@@ -28,7 +28,8 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0);
 
 
-	float3 surfaceToLightV = normalize(mul(lightPos - position, worldViewProjectionMatrix));
+	//float3 surfaceToLightV = normalize(mul(lightPos - position, worldViewProjectionMatrix)); //make to worldmatrix
+	float3 surfaceToLightV = normalize(lightPos - position);
 	float diffuseStrength = clamp(dot(normal, surfaceToLightV), 0, 1);
 	float ambientStrength = 0.2f;
 
@@ -36,5 +37,5 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 10 being spec exponent
 
-	return normal;//(diffuseStrength + ambientStrength + specStrength) * albedo; 
+	return (diffuseStrength + ambientStrength + specStrength) * albedo; 
 }

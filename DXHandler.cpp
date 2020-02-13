@@ -436,7 +436,7 @@ void DxHandler::draw(EngineObject& drawObject)
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
-		lightBuff.lightPos = DirectX::XMVectorSet(0, 0, -3, 0);
+		lightBuff.lightPos = DirectX::XMVectorSet(0, 25, 0, 0);
 		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
 		lightBuff.diffueMeshColor = drawObject.meshes.at(i).diffueMeshColor;
 		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;

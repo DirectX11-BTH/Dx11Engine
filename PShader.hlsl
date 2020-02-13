@@ -24,7 +24,8 @@ struct VS_OUTPUT
 	float4 vPosition : SV_POSITION;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
-	float4 vInterpolatedPosition : POSITION;
+	//float4 vInterpolatedPosition : POSITION;
+	float4 positionInWorldSpace : POSITION;
 };
 
 struct PS_OUTPUT
@@ -39,7 +40,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 {
 	PS_OUTPUT output;
 	
-	output.vPosition = input.vPosition;
+	output.vPosition = input.positionInWorldSpace;//input.vPosition;
 	output.vColour = float4(1, 1, 1, 1);//mytexture.Sample(mysampler, input.vUV);
 	output.vNormal = input.vNormal;
 
