@@ -10,6 +10,9 @@ DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
 ID3DBlob* DxHandler::vertexShaderBuffer = nullptr;
 ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
+float DxHandler::WIDTH;
+float DxHandler::HEIGHT;
+
 
 ID3DBlob* DxHandler::deferredPixelShaderBuffer = nullptr;
 ID3DBlob* DxHandler::deferredVertexShaderBuffer = nullptr;
@@ -385,6 +388,8 @@ void DxHandler::setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWind
 {
 	D3D11_TEXTURE2D_DESC depthDesc{ 0 };
 
+	
+
 	depthDesc.Width = widthOfRenderWindow;
 	depthDesc.Height = heightOfRenderWindow;
 	depthDesc.MipLevels = 1;
@@ -427,6 +432,9 @@ void DxHandler::draw(EngineObject& drawObject)
 		
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
 		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		matrixBuff.viewMatrix = Camera::cameraView;
+		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
+
 		//matrixBuff.
 		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
 		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
@@ -443,6 +451,11 @@ void DxHandler::draw(EngineObject& drawObject)
 		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
 		lightBuff.camPos = Camera::cameraPosition;
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
+		lightBuff.noiseScale = DirectX::XMFLOAT2(DxHandler::WIDTH / SsaoClass::noiseSize, DxHandler::HEIGHT / SsaoClass::noiseSize);
+
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		matrixBuff.viewMatrix = Camera::cameraView;
+		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 

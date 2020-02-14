@@ -7,6 +7,8 @@ cbuffer VS_CONSTANT_BUFFER
 {
 	row_major float4x4 worldViewProjectionMatrix;
 	row_major float4x4 worldMatrix;
+	row_major float4x4 viewMatrix;
+	row_major float4x4 projMatrix;
 }
 
 struct VS_INPUT
@@ -24,6 +26,7 @@ struct VS_OUTPUT
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
 	float4 positionInWorldSpace : POSITION;
+	float4 SsaoAcc : TEXCOORD2;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -42,6 +45,7 @@ VS_OUTPUT main(VS_INPUT input)
 
 	Output.vColour = input.vColour;
 	Output.vUV = float4(input.vUV, 1, 1);
+	Output.SsaoAcc = mul(Output.vPosition, worldViewProjectionMatrix);
 	//Output.vInterpolatedPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 	//Output.vNormal = input.vNormal;
 	return Output;

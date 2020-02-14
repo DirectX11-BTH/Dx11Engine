@@ -11,6 +11,7 @@ const int HEIGHT = 500;
 #include "ObjParser.h"
 #include "GBufferHandler.h"
 #include "TerrainGenerator.h"
+#include "SsaoClass.h"
 
 class Engine
 {

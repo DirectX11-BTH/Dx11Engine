@@ -16,6 +16,7 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 camPos;
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
+	float2 noiseScale;
 }
 
 struct VS_OUTPUT
@@ -43,7 +44,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
 	output.vColour = float4(1, 1, 1, 1);//mytexture.Sample(mysampler, input.vUV);
 	output.vNormal = input.vNormal;
-
+	
 	return output;
 
 	/*float4 textureColor = mytexture.Sample(mysampler, input.vUV);

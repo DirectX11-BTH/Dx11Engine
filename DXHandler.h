@@ -21,6 +21,7 @@
 #include "Mesh.h"
 #include "EngineObject.h"
 #include "Camera.h"
+#include "SsaoClass.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
@@ -37,6 +38,8 @@ struct VS_CONSTANT_MATRIX_BUFFER
 {
 	DirectX::XMMATRIX worldViewProjectionMatrix;
 	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projMatrix;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER
@@ -58,8 +61,12 @@ struct PS_CONSTANT_LIGHT_BUFFER
 
 	DirectX::XMVECTOR camPos;
 	DirectX::XMMATRIX worldViewProjectionMatrix;
-
 	DirectX::XMVECTOR specularExponent;
+	DirectX::XMFLOAT2 noiseScale;
+
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projMatrix;
 };
 
 class DxHandler
@@ -71,6 +78,9 @@ public:
 	static  ID3D11DeviceContext* contextPtr;
 	static  HINSTANCE hInstance;
 	static	HWND* hWnd;
+
+	static float WIDTH;
+	static float HEIGHT;
 
 	std::vector<ID3D11Buffer*> loadedVSBuffers;
 	std::vector<ID3D11Buffer*> loadedPSBuffers;

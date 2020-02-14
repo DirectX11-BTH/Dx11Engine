@@ -34,6 +34,8 @@ Engine::~Engine()
 
 void Engine::initialSetup()
 {
+	DxHandler::WIDTH = WIDTH;
+	DxHandler::HEIGHT = HEIGHT;
 	//ShowCursor(false);
 	this->createWindow();
 	createDirectX();
@@ -78,6 +80,9 @@ void Engine::initialSetup()
 	directXHandler->setupLightBuffer();
 	gBuffHandler.init(WIDTH, HEIGHT);
 	directXHandler->generateFullscreenQuad();
+
+	SsaoClass::generateNoiseTexture();
+	SsaoClass::generateRandomVectors();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -263,6 +268,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
 
+		DxHandler::contextPtr->PSSetShaderResources(3, 1, &SsaoClass::randomVecShaderResourceView); //Random vectors
+		DxHandler::contextPtr->PSSetShaderResources(4, 1, &SsaoClass::randomNoiseShaderResourceView); //Random noise
+
+
 		//Do the actual drawing here
 		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
 		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
@@ -275,6 +284,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
+
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Random vectors
+		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);
