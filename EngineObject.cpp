@@ -77,5 +77,5 @@ void EngineObject::readTextureFromFile(const wchar_t* textureName) //Kanske bör 
 	HRESULT createTextureResult = DxHandler::devicePtr->CreateTexture2D(&imageSampleDesc, NULL, &pTexture);
 	assert(SUCCEEDED(createTextureResult));
 
-
+	hasTexture = true;
 }

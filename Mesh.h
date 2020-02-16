@@ -31,9 +31,9 @@ public:
 	DirectX::XMMATRIX scalingMatrix = DirectX::XMMatrixIdentity();
 
 	//Needed to parse MTL, assuming one material per mesh
-	Color ambientMeshColor;
-	Color diffueMeshColor;
-	Color specularMeshColor;
+	DirectX::XMFLOAT4 ambientMeshColor;
+	DirectX::XMFLOAT4 diffuseMeshColor = DirectX::XMFLOAT4( 1, 1, 1, 1 );
+	DirectX::XMFLOAT4 specularMeshColor;
 	float shininess = 0.f;
 	float specularExponent = 10.f;
 

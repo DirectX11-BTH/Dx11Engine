@@ -34,9 +34,9 @@ void TerrainGenerator::readTexture(std::string textureName)
 	height = 200;
 	bpp = sizeof(uint8_t)*4; //RGBA, bits per pixel
 
-	heightTerrain.ambientMeshColor = Color{ 100/255,100/255,100/255 };
-	heightTerrain.diffueMeshColor= Color{ 100/255,100/255,100/255 };
-	Color specularMeshColor= Color{ 100/255,100/255,100/255 };
+	heightTerrain.ambientMeshColor = DirectX::XMFLOAT4( 100/255,100/255,100/255, 100/255 );
+	heightTerrain.diffuseMeshColor = DirectX::XMFLOAT4( 20/255,100/255,100/255, 100 / 255);
+	DirectX::XMFLOAT4 specularMeshColor = DirectX::XMFLOAT4(100/255,100/255,100/255, 100 / 255);
 
     uint8_t* rgb_image = stbi_load(textureName.data(), &width, &height, &bpp, 1);
 

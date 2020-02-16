@@ -435,27 +435,34 @@ void DxHandler::draw(EngineObject& drawObject)
 		matrixBuff.viewMatrix = Camera::cameraView;
 		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
 
-		//matrixBuff.
-		//matrixBuff.worldViewProjectionMatrix = Camera::cameraProjectionMatrix * Camera::cameraView * drawObject.meshes.at(i).worldMatrix;
-		//DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
-		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
+		DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(Camera::cameraView);
+		matrixBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, Camera::cameraView);
+		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
+		matrixBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
 
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		matrixBuff.viewMatrix = Camera::cameraView;
+		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
+
+		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
-		lightBuff.lightPos = DirectX::XMVectorSet(0, 25, 0, 0);
+		lightBuff.lightPos = DirectX::XMVectorSet(0, 25, 0, 1);
 		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
-		lightBuff.diffueMeshColor = drawObject.meshes.at(i).diffueMeshColor;
+		lightBuff.diffuseMeshColor = drawObject.meshes.at(i).diffuseMeshColor;
 		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;
 		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
 		lightBuff.camPos = Camera::cameraPosition;
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
 		lightBuff.noiseScale = DirectX::XMFLOAT2(DxHandler::WIDTH / SsaoClass::noiseSize, DxHandler::HEIGHT / SsaoClass::noiseSize);
 
-		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-		matrixBuff.viewMatrix = Camera::cameraView;
-		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
+		det = DirectX::XMMatrixDeterminant(Camera::cameraView);
+		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, Camera::cameraView);
+		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
+		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
+		lightBuff.hasTexture = false;//(drawObject.hasTexture);
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 

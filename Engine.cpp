@@ -83,6 +83,8 @@ void Engine::initialSetup()
 
 	SsaoClass::generateNoiseTexture();
 	SsaoClass::generateRandomVectors();
+	SsaoClass::setupShaders();
+	SsaoClass::generateOcclusionBuffer();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -90,6 +92,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
+	//terrainObject.readTextureFromFile(L"texture.png");
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 	float fArray[] =
@@ -107,7 +110,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	EngineObject* debugObject = new EngineObject;
 	debugObject->readMesh(fArray, 6);
-	debugObject->readTextureFromFile(L"./texture.png");
+	//debugObject->readTextureFromFile(L"./texture.png");
 	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(
 		0.f,    // Units translated on the x-axis
 		0.f,    // Units translated on the y-axis
@@ -116,83 +119,26 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).translationMatrix;
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
-	/*float fArray2[] =
-	{
-		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
-		-0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		-0.8f, -0.5f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-
-		-0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 0.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
-	};
-	EngineObject* debugObject2 = new EngineObject;
-	debugObject2->readMesh(fArray2, 6);
-	debugObject2->readTextureFromFile(L"./texture2.png");
-	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));*/
-	//delete debugObject;
-
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
-	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.0f);
-	//debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).worldMatrix * debugObject2->meshes.at(0).translationMatrix;
+	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
+	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).worldMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
 
 	//Get texture name from debugMesh, gotta convert string to wchar_t*
-	debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
-	std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
-	const wchar_t* longCharArr = longString.c_str();
-	//debugObject2->readTextureFromFile(longCharArr);
-	debugObject2->readTextureFromFile(L"./Texture.png");
+	if (debugObject2->meshes.at(0).textureName != "")
+	{
+		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
+		const wchar_t* longCharArr = longString.c_str();
+		debugObject2->readTextureFromFile(longCharArr);
+	}
+	
+	//debugObject2->readTextureFromFile(L"./Texture.png");
 	
 	std::cout << "Executed" << std::endl;
-	//CREATEING MESH WITH INDEXES ================================================================================
-	/*Mesh ourIndexMesh;
-
-	ourIndexMesh.vertices.push_back(Vertex{ -0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1 });
-	ourIndexMesh.vertices.push_back(Vertex{ 0.8f, -0.5f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1 });
-	ourIndexMesh.vertices.push_back(Vertex{ -0.8f, -0.5f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1 });
-	ourIndexMesh.vertices.push_back(Vertex{ 0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1 });
-
-	ourIndexMesh.indicies.push_back(0);
-	ourIndexMesh.indicies.push_back(1);
-	ourIndexMesh.indicies.push_back(2);
-	ourIndexMesh.indicies.push_back(0);
-	ourIndexMesh.indicies.push_back(3);
-	ourIndexMesh.indicies.push_back(1);
-
-	//Second debug object -----------------------------------------------------------------------------------
-	Mesh ourIndexMesh2;
-
-	ourIndexMesh2.vertices.push_back(Vertex{ -0.8f, 0.8f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1 });
-	ourIndexMesh2.vertices.push_back(Vertex{ 0.8f, -0.8f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1 });
-	ourIndexMesh2.vertices.push_back(Vertex{ -0.8f, -0.8f, 0.5f,	 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1 });
-	ourIndexMesh2.vertices.push_back(Vertex{ 0.8f, 0.8f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1 });
-
-	ourIndexMesh2.indicies.push_back(0);
-	ourIndexMesh2.indicies.push_back(1);
-	ourIndexMesh2.indicies.push_back(2);
-	ourIndexMesh2.indicies.push_back(0);
-	ourIndexMesh2.indicies.push_back(3);
-	ourIndexMesh2.indicies.push_back(1);
-	
-	EngineObject* debugIndexObject2 = new EngineObject;
-	//debugObject2->readMesh(fArray2, 6);
-	debugIndexObject2->meshes.push_back(ourIndexMesh);
-	debugIndexObject2->readTextureFromFile(L"./texture2.png");
-	directXHandler->createVertexBuffer(debugIndexObject2->meshes.at(0));
-	directXHandler->createIndexBuffer(debugIndexObject2->meshes.at(0));
-
-	EngineObject* debugIndexObject = new EngineObject;
-	debugIndexObject->readTextureFromFile(L"./texture.png");
-	debugIndexObject->meshes.push_back(ourIndexMesh2);
-	directXHandler->createVertexBuffer(debugIndexObject->meshes.at(0));
-	directXHandler->createIndexBuffer(debugIndexObject->meshes.at(0));*/
-	//CREATEING MESH WITH END ================================================================================
-
 	//----------------------------------------------------------------------------------------------- END DEBUG
 
 	MSG msg;
@@ -231,11 +177,13 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Clear depth every frame - DEPTH
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 		float background_color[4] = { 0.f, 0.f, 0.f, 1.f };
+		float background_color2[4] = { 0.9f, 0.6f, 0.6f, 1.f };
 
 		//First pass -------------------------------------------------------------------
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
 		ID3D11RenderTargetView* arr[3] = 
@@ -254,23 +202,41 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
 
-		//directXHandler->draw(*debugObject2);
+		directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
+
 		//First pass end -------------------------------------------------------------------
 
 
-		//Second pass -------------------------------------------------------------------
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 
 
-		//These are to 'read' from the textures
+		//Second Pass - SSAO Pass Begin ----------------------------------------------------
+		directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &SsaoClass::SSAOBuffRenderTargetView, NULL); //Draw to the occlusion buffer
+
+		//Need these to calculate the occlusion factor
 		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
 
+		DxHandler::contextPtr->PSSetShader(SsaoClass::SSAOPixelPtr, NULL, NULL); //set shaders
+		DxHandler::contextPtr->VSSetShader(SsaoClass::SSAOVertexPtr, NULL, NULL);
+
 		DxHandler::contextPtr->PSSetShaderResources(3, 1, &SsaoClass::randomVecShaderResourceView); //Random vectors
 		DxHandler::contextPtr->PSSetShaderResources(4, 1, &SsaoClass::randomNoiseShaderResourceView); //Random noise
 
+		directXHandler->drawFullscreenQuad();
+
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Random vectors
+		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise
+
+		//----------------------------------------------------------------------------------
+
+
+
+		//Third pass -------------------------------------------------------------------
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
+		DxHandler::contextPtr->PSSetShaderResources(3, 1, &SsaoClass::SSAOBuffShaderResourceView); //Output from SSAO
 
 		//Do the actual drawing here
 		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
@@ -278,15 +244,11 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		
 		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 		
-		//directXHandler->draw(*debugObject2, false, false); //Object EngineObject, Perspective Bool, First pass Bool
-
 		//Need to unbind for the next pass
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
-
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Random vectors
-		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Output from SSAO
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);

@@ -4,7 +4,7 @@
 #include <math.h>
 #include "TerrainGenerator.h"
 
-const bool WALK_ON_TERRAIN = true;
+const bool WALK_ON_TERRAIN = false;
 
 class Camera
 {

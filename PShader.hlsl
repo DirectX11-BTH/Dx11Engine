@@ -11,12 +11,18 @@ cbuffer PS_CONSTANT_BUFFER
 {
 	float4 lightPos;
 	float4 ambientMeshColor;
-	float4 diffueMeshColor;
+	float4 diffuseMeshColor;
 	float4 specularMeshColor;
 	float4 camPos;
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 	float2 noiseScale;
+
+	row_major float4x4 viewInverseMatrix;
+	row_major float4x4 worldInverseMatrix;
+
+	bool hasTexture;
+	float3 padding;
 }
 
 struct VS_OUTPUT
@@ -42,7 +48,18 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	PS_OUTPUT output;
 	
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
-	output.vColour = float4(1, 1, 1, 1);//mytexture.Sample(mysampler, input.vUV);
+
+	if (hasTexture == true) //Always returns true, rip
+	{
+		//output.vColour = mytexture.Sample(mysampler, input.vUV);
+		output.vColour = float4(1, 1, 1, 1);
+	}
+	else
+	{
+		output.vColour = diffuseMeshColor;
+	}
+		
+
 	output.vNormal = input.vNormal;
 	
 	return output;

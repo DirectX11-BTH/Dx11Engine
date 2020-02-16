@@ -40,6 +40,9 @@ struct VS_CONSTANT_MATRIX_BUFFER
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
+
+	DirectX::XMMATRIX viewInverseMatrix;
+	DirectX::XMMATRIX worldInverseMatrix;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER
@@ -55,9 +58,9 @@ struct VS_CONSTANT_CAMERA_BUFFER
 struct PS_CONSTANT_LIGHT_BUFFER
 {
 	DirectX::XMVECTOR lightPos;
-	Color ambientMeshColor;
-	Color diffueMeshColor;
-	Color specularMeshColor;
+	DirectX::XMFLOAT4 ambientMeshColor;
+	DirectX::XMFLOAT4 diffuseMeshColor;
+	DirectX::XMFLOAT4 specularMeshColor;
 
 	DirectX::XMVECTOR camPos;
 	DirectX::XMMATRIX worldViewProjectionMatrix;
@@ -67,6 +70,12 @@ struct PS_CONSTANT_LIGHT_BUFFER
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
+
+	DirectX::XMMATRIX viewInverseMatrix;
+	DirectX::XMMATRIX worldInverseMatrix;
+
+	bool hasTexture;
+	DirectX::XMFLOAT3 padding;
 };
 
 class DxHandler

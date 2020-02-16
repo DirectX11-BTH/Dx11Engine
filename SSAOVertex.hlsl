@@ -30,11 +30,14 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
+	//output.vPosition = mul((worldMatrix*viewMatrix), float4(input.vPosition, 1));
+	
 	output.vPosition = float4(input.vPosition, 1);
+	//output.vPosition = mul(float4(input.vPosition, 1), viewMatrix*worldMatrix);
 	output.vColour = input.vColour;
 	output.vUV = float4(input.vUV, 1, 1);
 	output.vNormal = float4(input.vNormal, 0);
-	
-	
+
+
 	return output;
 }

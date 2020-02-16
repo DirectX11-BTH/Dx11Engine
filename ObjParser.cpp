@@ -106,7 +106,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.ambientMeshColor = { r, g, b };
+							readMesh.ambientMeshColor = DirectX::XMFLOAT4( r, g, b, 1 );
 						}
 
 						if (mtlLine.find("Kd ") != -1 && mtlLine.find("map") == -1) //Diffuse light color
@@ -124,7 +124,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.diffueMeshColor = { r, g, b };
+							readMesh.diffuseMeshColor = DirectX::XMFLOAT4( r, g, b, 1);
 						}
 
 						if (mtlLine.find("Ks") != -1) //Specular light color
@@ -142,7 +142,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.specularMeshColor = { r, g, b };
+							readMesh.specularMeshColor = DirectX::XMFLOAT4( r, g, b, 1);
 						}
 
 						if (mtlLine.find("Ns") != -1) //Shininess of material
@@ -245,11 +245,11 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								}
 							}
 
-							std::cout << "Before " << line << std::endl;
+							//std::cout << "Before " << line << std::endl;
 							line.erase(0, tempLen+1); //removes number and slash from string
 							if(line.at(0) == ' ')
 								line.erase(0,1); //Remove the last space in between groups of v/vt/vn
-							std::cout << "After " << line << std::endl;
+							//std::cout << "After " << line << std::endl;
 						}
 						tempVert.r = 0.5;
 						tempVert.g = 1;
