@@ -462,7 +462,7 @@ void DxHandler::draw(EngineObject& drawObject)
 		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, Camera::cameraView);
 		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
 		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
-		lightBuff.hasTexture = false;//(drawObject.hasTexture);
+		lightBuff.hasTexture = (drawObject.hasTexture);
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 

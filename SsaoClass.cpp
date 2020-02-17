@@ -124,7 +124,10 @@ void SsaoClass::generateRandomVectors()
 		float vecScale = (float)i / (float)nrOfVecs;
 		vecScale = lerp(0.1, 1, vecScale*vecScale); //Make them bunch up closer to the origin point
 		randomVectors[i] *= vecScale;
+
+		//std::cout << randX << " " << randY << " " << randZ << std::endl;
 	}
+	std::cout << nrOfVecs << " vecs" << std::endl;
 
 	D3D11_TEXTURE2D_DESC texDesc{ 0 };
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;

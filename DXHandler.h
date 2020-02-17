@@ -43,6 +43,8 @@ struct VS_CONSTANT_MATRIX_BUFFER
 
 	DirectX::XMMATRIX viewInverseMatrix;
 	DirectX::XMMATRIX worldInverseMatrix;
+
+	DirectX::XMVECTOR randomVectors[SsaoClass::nrOfVecs * SsaoClass::nrOfVecs];
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER

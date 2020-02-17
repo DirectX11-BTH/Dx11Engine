@@ -5,6 +5,8 @@ Texture2D PositionTexture : register(t2);
 //SSAO magic
 Texture2D RandomVectorTexture : register(t3);
 Texture2D RandomNoiseTexture : register(t4);
+
+SamplerState mysampler;
 //
 
 
@@ -54,7 +56,8 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 	//normal = mul(normal, viewMatrix);
 
 	//This will give you a random vec to reflect or rotate things about.
-	float3 randomVector = RandomNoiseTexture.Load(float3(input.vPosition.xy*noiseScale*input.vUV, 0), 0).xyz; //Getting into the range of our noise and then randomly multiplying by our UV coords
+	float3 randomVector = RandomVectorTexture.Sample(mysampler, input.vUV*noiseScale).xyz;//RandomNoiseTexture.Load(float3(input.vPosition.xy*noiseScale*input.vUV, 0), 0).xyz; //Getting into the range of our noise and then randomly multiplying by our UV coords
+	//return float4(randomVector, 1)*4;
 
 	//create TBN which takes you from tangent space to view space
 	float3 tangent = randomVector - normal * dot(randomVector, normal); //Tangent is an orthogonal vector to the normal, i.e. 90 degrees offset
@@ -64,13 +67,16 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 	float3 bitangent = cross(tangent, normal);
 
 	float3x3 tbn = float3x3(tangent, bitangent, normal.xyz); //Transforms vectors into view space
-	tbn = transpose(tbn); //maybe?
+	//tbn = transpose(tbn); //maybe?
 
 	//time to calculate the occlusion with a loop, looping over all sample points
 	float occlusionFactor = 0.0f; //1 is completely occluded, 0 is not occluded
+
 	for (int i = 0; i < 32; i++)
 	{
-		float3 samplePoint = mul(RandomVectorTexture.Load(float3((input.vPosition.x/1080)*32, (int)(input.vPosition.y/720)*32, 0), 0).xyz, tbn);
+		//RandomVectorTexture.Load(float3((input.vUV.x/1080)*32, (int)(input.vPosition.y/720)*32, 0), 0).xyz
+		float3 samplePoint = RandomVectorTexture.Sample(mysampler, input.vUV*noiseScale).xyz;
+		samplePoint = mul(samplePoint, tbn);// mul(RandomVectorTexture.Sample(mysampler, input.vUV), tbn);
 		samplePoint = position + samplePoint * radius;
 
 		float4 offsetFromSample = float4(samplePoint, 1); //Cast to float4 after calculation actual sample point (point to test for occlusion).
@@ -78,8 +84,10 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 		offsetFromSample.xyz = offsetFromSample.xyz / offsetFromSample.w; //Move into normalized device coordinates
 		offsetFromSample.xyz = offsetFromSample.xyz * 0.5 + 0.5; //Guarantees 0-1 range.
 
+		offsetFromSample.y = 1.f - offsetFromSample.y;
+
 		float4 occludingPosition = PositionTexture.Load(float3(offsetFromSample.xy, 0), 0); //Sample the position we're trying for occlusion
-		occludingPosition = occludingPosition;
+		//occludingPosition = occludingPosition;
 
 		//This will check so that if something is out of range it won't count as occluding. Also smooths cutoff.
 		//float rangeInfluence = smoothstep(0.f, 1.0, radius / length(position - occludingPosition)); //If hardcoded to one, it still darkens the entire image. Not supposed to happen. Most likely transformation error.
@@ -92,5 +100,6 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 	}
 
 	float actualOcclusion = 1.f - (occlusionFactor / 32); //average the occlusion out
-	return float4(actualOcclusion, actualOcclusion, actualOcclusion, 1); //Divide by the nr of samples we took to average the entire thing out.
+	return float4(actualOcclusion, actualOcclusion, actualOcclusion, 1);
+	//return debugReturn;
 }

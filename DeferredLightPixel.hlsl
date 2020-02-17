@@ -37,8 +37,8 @@ struct VS_OUTPUT
 float4 main(VS_OUTPUT input) : SV_Target0
 {
 	//SSAO - move things to view space, world -> view -> proj -> perspective division
-	float4 lightPosViewspace = mul(lightPos, viewMatrix); //Light pos already starts in world
-	float4 camPosInView = mul(camPos, viewMatrix); //Same with camPos
+	float4 lightPosViewspace = lightPos;//mul(lightPos, viewMatrix); //Light pos already starts in world
+	float4 camPosInView = camPos;//mul(camPos, viewMatrix); //Same with camPos
 	//
 
 	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
@@ -46,8 +46,8 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
 	float4 ssaoOcclusion = SSAOTexture.Load(float3(input.vPosition.xy, 0), 0);
 
-	//position = mul(position, viewInverseMatrix);
-	//normal = mul(normal, viewInverseMatrix);
+	position = mul(position, viewInverseMatrix);
+	normal = mul(normal, viewInverseMatrix);
 
 
 	//float3 surfaceToLightV = normalize(mul(lightPos - position, worldViewProjectionMatrix)); //make to worldmatrix
@@ -59,6 +59,8 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 100 being spec exponent
 
-	return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+albedo*0.1;//
-	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
+	//return ssaoOcclusion;
+	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
+	return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
+	//return (diffuseStrength + (ambientStrength) + specStrength) * albedo;
 } 
