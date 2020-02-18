@@ -59,8 +59,8 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 100 being spec exponent
 
-	//return ssaoOcclusion;
+	return ssaoOcclusion;
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
-	return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
+	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
 	//return (diffuseStrength + (ambientStrength) + specStrength) * albedo;
 } 

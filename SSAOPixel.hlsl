@@ -55,9 +55,9 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 	//position = mul(position, viewMatrix);
 	//normal = mul(normal, viewMatrix);
 
-	//This will give you a random vec to reflect or rotate things about.
-	float3 randomVector = RandomVectorTexture.Sample(mysampler, input.vUV*noiseScale).xyz;//RandomNoiseTexture.Load(float3(input.vPosition.xy*noiseScale*input.vUV, 0), 0).xyz; //Getting into the range of our noise and then randomly multiplying by our UV coords
-	//return float4(randomVector, 1)*4;
+	//This will give you a random vec generated on the cpu, but seems to return the same?
+	float3 randomVector = RandomVectorTexture.Sample(mysampler, float2(input.vPosition.x / 1080, input.vPosition.y / 720)).xyz;//RandomNoiseTexture.Load(float3(input.vPosition.xy*noiseScale*input.vUV, 0), 0).xyz; //Getting into the range of our noise and then randomly multiplying by our UV coords
+
 
 	//create TBN which takes you from tangent space to view space
 	float3 tangent = randomVector - normal * dot(randomVector, normal); //Tangent is an orthogonal vector to the normal, i.e. 90 degrees offset
@@ -75,16 +75,15 @@ float4 main(PS_INPUT input) : SV_Target0 //svTarget being the occlusionBuffer
 	for (int i = 0; i < 32; i++)
 	{
 		//RandomVectorTexture.Load(float3((input.vUV.x/1080)*32, (int)(input.vPosition.y/720)*32, 0), 0).xyz
-		float3 samplePoint = RandomVectorTexture.Sample(mysampler, input.vUV*noiseScale).xyz;
+		float3 samplePoint = RandomVectorTexture.Sample(mysampler, float2(input.vPosition.x / 1080, input.vPosition.y / 720)).xyz;
 		samplePoint = mul(samplePoint, tbn);// mul(RandomVectorTexture.Sample(mysampler, input.vUV), tbn);
 		samplePoint = position + samplePoint * radius;
-
 		float4 offsetFromSample = float4(samplePoint, 1); //Cast to float4 after calculation actual sample point (point to test for occlusion).
 		offsetFromSample = mul(offsetFromSample, projMatrix); //Transforming to clip space
 		offsetFromSample.xyz = offsetFromSample.xyz / offsetFromSample.w; //Move into normalized device coordinates
 		offsetFromSample.xyz = offsetFromSample.xyz * 0.5 + 0.5; //Guarantees 0-1 range.
 
-		offsetFromSample.y = 1.f - offsetFromSample.y;
+		offsetFromSample.y = 1.f - offsetFromSample.y; //Invert because UV starts top left
 
 		float4 occludingPosition = PositionTexture.Load(float3(offsetFromSample.xy, 0), 0); //Sample the position we're trying for occlusion
 		//occludingPosition = occludingPosition;
