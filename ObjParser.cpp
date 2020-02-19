@@ -1,5 +1,7 @@
 #include "ObjParser.h"
 #include <algorithm>
+using namespace DirectX;
+
 struct float3
 {
 	float x, y, z = 0;
@@ -23,7 +25,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 
 	float v1, v2, v3;
 
-	while(!objFile.eof() && std::getline(objFile,line))
+	while (!objFile.eof() && std::getline(objFile, line))
 	{
 		//std::cout << line << std::endl;
 		if (line.size() > 0)
@@ -37,8 +39,8 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					int tempLen = line.find(' ');
 					std::string tempStr = line.substr(0, tempLen);
 					v1 = (float)std::stof(tempStr);
-					
-					line.erase(0, tempLen+1);
+
+					line.erase(0, tempLen + 1);
 					tempLen = line.find(' ');
 					tempStr = line.substr(0, tempLen);
 					v2 = (float)std::stof(tempStr);
@@ -84,7 +86,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					line.erase(0, 7); //Deletes usemtl + spaces
 					std::ifstream mtlFile;
 					//mtlFile.open(("./TestModel/cube.mtl"));
-					mtlFile.open(("./TestModel/"+line));
+					mtlFile.open(("./TestModel/" + line));
 					std::string mtlLine;
 
 					assert(mtlFile.is_open());
@@ -93,7 +95,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					{
 						if (mtlLine.find("Ka") != -1) //Ambient light color
 						{
-							mtlLine.erase(0, mtlLine.find("Ka")+3);
+							mtlLine.erase(0, mtlLine.find("Ka") + 3);
 							int numToEmpty = mtlLine.find(' ');
 							float r = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
@@ -106,7 +108,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.ambientMeshColor = DirectX::XMFLOAT4( r, g, b, 1 );
+							readMesh.ambientMeshColor = DirectX::XMFLOAT4(r, g, b, 1);
 						}
 
 						if (mtlLine.find("Kd ") != -1 && mtlLine.find("map") == -1) //Diffuse light color
@@ -124,7 +126,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.diffuseMeshColor = DirectX::XMFLOAT4( r, g, b, 1);
+							readMesh.diffuseMeshColor = DirectX::XMFLOAT4(r, g, b, 1);
 						}
 
 						if (mtlLine.find("Ks") != -1) //Specular light color
@@ -142,12 +144,12 @@ Mesh ObjParser::readFromObj(std::string fileName)
 							float b = stof(mtlLine.substr(0, numToEmpty));
 							mtlLine.erase(0, numToEmpty + 1);
 
-							readMesh.specularMeshColor = DirectX::XMFLOAT4( r, g, b, 1);
+							readMesh.specularMeshColor = DirectX::XMFLOAT4(r, g, b, 1);
 						}
 
 						if (mtlLine.find("Ns") != -1) //Shininess of material
 						{
-							mtlLine.erase(0, mtlLine.find("Ns")+3);
+							mtlLine.erase(0, mtlLine.find("Ns") + 3);
 							float shininess = 0;
 
 							shininess = stof(mtlLine);
@@ -156,7 +158,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 
 						if (mtlLine.find("map_Kd") != -1) //Texture
 						{
-							mtlLine.erase(0, mtlLine.find("map_Kd")+7);
+							mtlLine.erase(0, mtlLine.find("map_Kd") + 7);
 
 							readMesh.textureName = mtlLine;
 						}
@@ -204,15 +206,15 @@ Mesh ObjParser::readFromObj(std::string fileName)
 
 							}
 							tempString = line.substr(0, tempLen); //Want to go up to the slash, not including it
-							
+
 							if (i == 0) //It's v index
 							{
 								if (tempLen != 0) //Make sure there is a number
 								{
 									//std::cout << "Reading v index: " << (std::stof(tempString)) - 1 << std::endl;
-									tempVert.x = loadedVertsCoords.at((std::stoi(tempString))-1).x; //-1 to convert from index starting with 1 to 0
-									tempVert.y = loadedVertsCoords.at((std::stoi(tempString))-1).y;
-									tempVert.z = loadedVertsCoords.at((std::stoi(tempString))-1).z;
+									tempVert.x = loadedVertsCoords.at((std::stoi(tempString)) - 1).x; //-1 to convert from index starting with 1 to 0
+									tempVert.y = loadedVertsCoords.at((std::stoi(tempString)) - 1).y;
+									tempVert.z = loadedVertsCoords.at((std::stoi(tempString)) - 1).z;
 								}
 
 								//loadedVertsCoords.at((std::stoi(tempString))
@@ -224,8 +226,8 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								if (tempString.length() != 0)//(tempLen != 0)
 								{
 									//std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
-									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString))-1).x;
-									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString))-1).y;
+									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).x;
+									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).y;
 								}
 								else
 								{
@@ -239,16 +241,16 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								if (tempString.length() != 0)//(tempLen != 0)
 								{
 									//std::cout << "Reading vn index: " << (std::stoi(tempString)) - 1 << std::endl;
-									tempVert.nx = loadedVertNormals.at((std::stoi(tempString))-1).x;
-									tempVert.ny = loadedVertNormals.at((std::stoi(tempString))-1).y;
-									tempVert.nz = loadedVertNormals.at((std::stoi(tempString))-1).z;
+									tempVert.nx = loadedVertNormals.at((std::stoi(tempString)) - 1).x;
+									tempVert.ny = loadedVertNormals.at((std::stoi(tempString)) - 1).y;
+									tempVert.nz = loadedVertNormals.at((std::stoi(tempString)) - 1).z;
 								}
 							}
 
 							//std::cout << "Before " << line << std::endl;
-							line.erase(0, tempLen+1); //removes number and slash from string
-							if(line.at(0) == ' ')
-								line.erase(0,1); //Remove the last space in between groups of v/vt/vn
+							line.erase(0, tempLen + 1); //removes number and slash from string
+							if (line.at(0) == ' ')
+								line.erase(0, 1); //Remove the last space in between groups of v/vt/vn
 							//std::cout << "After " << line << std::endl;
 						}
 						tempVert.r = 0.5;
@@ -260,7 +262,56 @@ Mesh ObjParser::readFromObj(std::string fileName)
 				}
 			}
 		}
-		
+
+	}
+
+	for (size_t i = 0; i < readMesh.vertices.size(); i += 3) //Reading one triangle at a time
+	{
+		Vertex* vertex1 = &readMesh.vertices.at(i);
+		Vertex* vertex2 = &readMesh.vertices.at(i + 1);
+		Vertex* vertex3 = &readMesh.vertices.at(i + 2);
+
+		//Is tangent?
+		DirectX::XMVECTOR v1Tov2 = DirectX::XMVectorSet(vertex2->x - vertex1->x, vertex2->y - vertex1->y, vertex2->z - vertex1->z, 0);
+
+		DirectX::XMVECTOR v1Tov3 = DirectX::XMVectorSet(vertex3->x - vertex1->x, vertex3->y - vertex1->y, vertex3->z - vertex1->z, 0);
+		//DirectX::XMVECTOR normal = DirectX::XMVectorSet(vertex1->nx, vertex1->ny, vertex1->nz,0);
+		//Normal for entire face/triangle
+		DirectX::XMVECTOR normal = DirectX::XMVectorSet(vertex1->nx, vertex1->ny, vertex1->nz, 0);
+		DirectX::XMVECTOR textureSpaceVec1to2 = DirectX::XMVectorSet(vertex2->u - vertex1->u, vertex2->v - vertex1->v, 0, 0);
+		DirectX::XMVECTOR textureSpaceVec1to3 = DirectX::XMVectorSet(vertex3->u - vertex1->u, vertex3->v - vertex1->v, 0, 0);
+		/*
+		// Calculate the denominator of the tangent/binormal equation.
+		den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+		*/
+
+		/*
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+		glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*r;
+
+		*/
+
+		float denominator = 1.f / (DirectX::XMVectorGetX(textureSpaceVec1to2) * DirectX::XMVectorGetY(textureSpaceVec1to3) -
+			DirectX::XMVectorGetY(textureSpaceVec1to2) * DirectX::XMVectorGetX(textureSpaceVec1to3));
+
+		DirectX::XMVECTOR tangent = (v1Tov2 * DirectX::XMVectorGetY(textureSpaceVec1to3) - (v1Tov3 * DirectX::XMVectorGetY(textureSpaceVec1to2))) * denominator;
+		tangent = DirectX::XMVector3Normalize(tangent);
+
+		float tx = XMVectorGetX(tangent);
+		float ty = XMVectorGetY(tangent);
+		float tz = XMVectorGetZ(tangent);
+
+		vertex1->tx = tx;
+		vertex1->ty = ty;
+		vertex1->tz = tz;
+
+		vertex2->tx = tx;
+		vertex2->ty = ty;
+		vertex2->tz = tz;
+
+		vertex3->tx = tx;
+		vertex3->ty = ty;
+		vertex3->tz = tz;
 	}
 
 	objFile.close();

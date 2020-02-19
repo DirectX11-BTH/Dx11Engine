@@ -69,6 +69,9 @@
     <ClInclude Include="SsaoClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NormalMapHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -111,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SsaoClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NormalMapHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

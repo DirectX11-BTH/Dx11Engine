@@ -16,6 +16,7 @@ struct VS_INPUT
 	float4 vColour : COLOR;
 	float2 vUV : UV;
 	float3 vNormal : NORMAL;
+	float3 vTangent : TANGENT;
 };
 
 struct VS_OUTPUT
@@ -24,6 +25,7 @@ struct VS_OUTPUT
 	float4 vPosition : SV_POSITION;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
+	float4 vTangent : TANGENT;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -34,7 +36,7 @@ VS_OUTPUT main(VS_INPUT input)
 	output.vColour = input.vColour;
 	output.vUV = float4(input.vUV, 1, 1);
 	output.vNormal = float4(input.vNormal, 0);
-	
+	output.vTangent = float4(input.vTangent, 0);
 	
 	return output;
 }

@@ -20,19 +20,17 @@ cbuffer PS_CONSTANT_BUFFER
 
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
-
-	bool hasTexture;
-	float3 padding;
 }
 
 struct VS_OUTPUT
 {
+	float4 vPosition : SV_POSITION;	
 	float4 vColour : COLOR;
-	float4 vPosition : SV_POSITION;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
 	//float4 vInterpolatedPosition : POSITION;
 	float4 positionInWorldSpace : POSITION;
+	float4 vTangent : TANGENT;
 };
 
 struct PS_OUTPUT
@@ -40,6 +38,7 @@ struct PS_OUTPUT
 	float4 vPosition : SV_TARGET0;
 	float4 vColour : SV_TARGET1;
 	float4 vNormal : SV_TARGET2;
+	float vTangent : SV_TARGET3;
 	//float4 vInterpolatedPosition : POSITION;
 };
 
@@ -49,7 +48,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
 
-	if (hasTexture == true) //Always returns true, rip
+	/*if (hasTexture == true) //Always returns true, rip
 	{
 		//output.vColour = mytexture.Sample(mysampler, input.vUV);
 		output.vColour = float4(1, 1, 1, 1);
@@ -57,23 +56,13 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	else
 	{
 		output.vColour = diffuseMeshColor;
-	}
+	}*/
+
+	output.vColour = float4(1, 1, 1, 1);
 		
 
 	output.vNormal = input.vNormal;
-	
+	output.vTangent = input.vTangent;
 	return output;
-
-	/*float4 textureColor = mytexture.Sample(mysampler, input.vUV);
-	float3 surfaceToLightV = normalize(mul(lightPos - input.vInterpolatedPosition, worldViewProjectionMatrix));
-	float diffuseStrength = clamp(dot(input.vNormal, surfaceToLightV), 0, 1);
-	float ambientStrength = 0.2f;
-
-	//float4 camPos = float4(0, 0, 0, 0); //Since no camera matrix, specular
-	float4 lookVector = normalize(camPos - input.vInterpolatedPosition); //Specular
-	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV,0), input.vNormal)); //Specular
-	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), specularExponent);
-	return  (diffuseStrength + ambientStrength+ specStrength) * textureColor;*/
-
 
 }

@@ -1,7 +1,7 @@
 Texture2D ColorTexture : register(t0);
 Texture2D NormalTexture : register(t1); 
 Texture2D PositionTexture : register(t2);
-Texture2D SSAOTexture : register(t3);
+Texture2D TangentTexture : register(t3);
 
 
 cbuffer PS_CONSTANT_BUFFER
@@ -11,6 +11,7 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 diffueMeshColor;
 	float4 specularMeshColor;
 	float4 camPos;
+
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 	float2 noiseScale;
@@ -22,16 +23,17 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
 
-	bool hasTexture;
-	float3 padding;
+
 }
 
 struct VS_OUTPUT
 {
-	float4 vColour : COLOR;
+
 	float4 vPosition : SV_POSITION;
+	float4 vColour : COLOR;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
+	float4 vTangent : TANGENT;
 };
 
 float4 main(VS_OUTPUT input) : SV_Target0
@@ -44,7 +46,8 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
 	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
-	float4 ssaoOcclusion = SSAOTexture.Load(float3(input.vPosition.xy, 0), 0);
+	float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
+
 
 	position = mul(position, viewInverseMatrix);
 	normal = mul(normal, viewInverseMatrix);
@@ -59,8 +62,9 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
 	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 100 being spec exponent
 
-	return ssaoOcclusion;
+	//return ssaoOcclusion;
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
-	//return (diffuseStrength + (ambientStrength) + specStrength) * albedo;
+	return position;//(diffuseStrength + (ambientStrength) + specStrength) * albedo;
+	//return float4(specStrength, 0, 0, 0);
 } 

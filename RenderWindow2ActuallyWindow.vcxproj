@@ -166,6 +166,7 @@
     <ClInclude Include="GBufferHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="NormalMapHandler.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="PngLoader\stb_image.h" />
     <ClInclude Include="RenderWindow2ActuallyWindow.h">
@@ -188,6 +189,7 @@
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="NormalMapHandler.cpp" />
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="RenderWindow.cpp" />
     <ClCompile Include="RenderWindow2ActuallyWindow.cpp">

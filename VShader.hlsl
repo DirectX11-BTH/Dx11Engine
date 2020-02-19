@@ -20,15 +20,17 @@ struct VS_INPUT
 	float4 vColour : COLOR;
 	float2 vUV : UV;
 	float3 vNormal : NORMAL;
+	float3 vTangent : TANGENT;
 };
 
 struct VS_OUTPUT
 {
+	float4 vPosition : SV_POSITION;	
 	float4 vColour : COLOR;
-	float4 vPosition : SV_POSITION;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
 	float4 positionInWorldSpace : POSITION;
+	float4 vTangent : TANGENT;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -44,14 +46,16 @@ VS_OUTPUT main(VS_INPUT input)
 	//Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 0), worldMatrix));
 	//Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
 
-	//SSAO
 	Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
 	Output.positionInWorldSpace = mul(Output.positionInWorldSpace, viewMatrix);
 
 	Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 0), worldMatrix));
 	Output.vNormal = normalize(mul(normalize(Output.vNormal), viewMatrix));
-	//
 
+	Output.vTangent= normalize(mul(float4(normalize(input.vTangent), 0), worldMatrix));
+	Output.vTangent = normalize(mul(normalize(Output.vTangent), viewMatrix));
+	
+		
 	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 	Output.vColour = input.vColour;
 	Output.vUV = float4(input.vUV, 1, 1);

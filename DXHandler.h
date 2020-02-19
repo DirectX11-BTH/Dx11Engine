@@ -27,7 +27,7 @@
 #pragma comment(lib, "d3d11") 
 #pragma comment(lib, "d3dcompiler.lib")
 
-const float FLOATS_PER_VERTEX = 12.f;
+const int FLOATS_PER_VERTEX = 15;
 
 namespace wrl = Microsoft::WRL;
 
@@ -75,9 +75,6 @@ struct PS_CONSTANT_LIGHT_BUFFER
 
 	DirectX::XMMATRIX viewInverseMatrix;
 	DirectX::XMMATRIX worldInverseMatrix;
-
-	bool hasTexture;
-	DirectX::XMFLOAT3 padding;
 };
 
 class DxHandler

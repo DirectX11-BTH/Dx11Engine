@@ -204,17 +204,18 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Tangent].renderTargetView, background_color);
+		//directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
-		ID3D11RenderTargetView* arr[3] = 
+		ID3D11RenderTargetView* arr[4] = 
 		{
 			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
 			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
-			//DxHandler::renderTargetPtr
+			gBuffHandler.buffers[GBufferType::Tangent].renderTargetView
 		};
-		directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
+		directXHandler->contextPtr->OMSetRenderTargets(4, arr, DxHandler::depthStencil); //DEPTH
 
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
@@ -232,7 +233,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 
 		//Second Pass - SSAO Pass Begin ----------------------------------------------------
-		directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
+		/*directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
 		directXHandler->contextPtr->OMSetRenderTargets(1, &SsaoClass::SSAOBuffRenderTargetView, NULL); //Draw to the occlusion buffer
 
 		//Need these to calculate the occlusion factor
@@ -249,7 +250,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->drawFullscreenQuad();
 
 		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Random vectors
-		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise
+		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise*/
 
 		//----------------------------------------------------------------------------------
 
@@ -257,7 +258,13 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//Third pass -------------------------------------------------------------------
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
-		DxHandler::contextPtr->PSSetShaderResources(3, 1, &SsaoClass::SSAOBuffShaderResourceView); //Output from SSAO
+
+		//Need these to calculate the occlusion factor
+		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
+		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
+		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
+		DxHandler::contextPtr->PSSetShaderResources(3, 1, &gBuffHandler.buffers[GBufferType::Tangent].shaderResourceView); //Tangent
+
 
 		//Do the actual drawing here
 		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
@@ -269,7 +276,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Output from SSAO
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Tangent
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);
