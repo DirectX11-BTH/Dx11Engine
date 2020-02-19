@@ -1,6 +1,5 @@
 #pragma once
-//^(?!(\s*\*))(?!(\s*\-\-\>))(?!(\s*\<\!\-\-))(?!(\s*\n))(?!(\s*\*\/))(?!(\s*\/\*))(?!(\s*\/\/\/))(?!(\s*\/\/))(?!(\s*\}))(?!(\s*\{))(?!(\s(using))).*$
-//Will calculate lines of code, excludes comments using regex
+
 
 const int WIDTH = 1080;
 const int HEIGHT = 720;
