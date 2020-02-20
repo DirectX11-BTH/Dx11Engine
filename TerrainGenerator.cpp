@@ -213,7 +213,25 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert5.nx = normalFloatForm.x;
 	vert5.ny = normalFloatForm.y;
 	vert5.nz = normalFloatForm.z;
-	
+	vert1.tx = 0;
+	vert1.ty = 0;
+	vert1.tz = 0;
+
+	vert2.tx = 0;
+	vert2.ty = 0;
+	vert2.tz = 0;
+	vert3.tx = 0;
+	vert3.ty = 0;
+	vert3.tz = 0;
+	vert4.tx = 0;
+	vert4.ty = 0;
+	vert4.tz = 0;
+	vert5.tx = 0;
+	vert5.ty = 0;
+	vert5.tz = 0;
+	vert0.tx = 0;
+	vert0.ty = 0;
+	vert0.tz = 0;
 	quadVertices.push_back(vert0);
 	quadVertices.push_back(vert1);
 	quadVertices.push_back(vert2);

@@ -36,6 +36,7 @@ struct VS_OUTPUT
 	float4 vTangent : TANGENT;
 };
 
+
 float4 main(VS_OUTPUT input) : SV_Target0
 {
 	//SSAO - move things to view space, world -> view -> proj -> perspective division
@@ -48,7 +49,6 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
 	float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
 
-
 	position = mul(position, viewInverseMatrix);
 	normal = mul(normal, viewInverseMatrix);
 
@@ -60,11 +60,11 @@ float4 main(VS_OUTPUT input) : SV_Target0
 
 	float4 lookVector = normalize(position - camPosInView); //Specular
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
-	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 100); // 100 being spec exponent
+	float specStrength = pow(clamp(dot(reflectionVec, lookVector), 0, 1), 32); // 100 being spec exponent
 
 	//return ssaoOcclusion;
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
-	return position;//(diffuseStrength + (ambientStrength) + specStrength) * albedo;
+	return (diffuseStrength + ambientStrength + specStrength) * albedo;
 	//return float4(specStrength, 0, 0, 0);
 } 

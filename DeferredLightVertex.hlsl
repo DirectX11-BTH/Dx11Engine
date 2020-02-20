@@ -34,7 +34,7 @@ VS_OUTPUT main(VS_INPUT input)
 
 	output.vPosition = float4(input.vPosition, 1);
 	output.vColour = input.vColour;
-	output.vUV = float4(input.vUV, 1, 1);
+	output.vUV = float4(input.vUV, 0, 1);
 	output.vNormal = float4(input.vNormal, 0);
 	output.vTangent = float4(input.vTangent, 0);
 	
