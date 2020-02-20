@@ -75,6 +75,11 @@ struct PS_CONSTANT_LIGHT_BUFFER
 
 	DirectX::XMMATRIX viewInverseMatrix;
 	DirectX::XMMATRIX worldInverseMatrix;
+
+	BOOL hasNormalMap = false;
+	BOOL hasTexture = false;
+	//XMFLOAT4 padding3234234;
+	//XMFLOAT4 padding34234234;
 };
 
 class DxHandler

@@ -17,6 +17,7 @@ public:
 	~EngineObject();
 
 	bool hasTexture = false;
+	bool hasNormalMap = false;
 
 	ID3D11Resource* texture;
 	ID3D11ShaderResourceView* textureView = nullptr;

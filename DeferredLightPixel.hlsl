@@ -2,6 +2,9 @@ Texture2D ColorTexture : register(t0);
 Texture2D NormalTexture : register(t1); 
 Texture2D PositionTexture : register(t2);
 Texture2D TangentTexture : register(t3);
+Texture2D NormalMapTexture : register(t4);
+
+SamplerState mySampler;
 
 
 cbuffer PS_CONSTANT_BUFFER
@@ -23,7 +26,10 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
 
-
+	bool hasNormalMap;
+	bool hasTexture;
+	float4 padding;
+	float4 padding2;
 }
 
 struct VS_OUTPUT

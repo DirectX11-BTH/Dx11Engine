@@ -132,6 +132,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		const wchar_t* longCharArr = longString.c_str();
 		debugObject->readTextureFromFile(longCharArr);
 	}
+	debugObject->hasTexture = debugObject->normalMapContainer.loadNormalTextureFromFile(L"./normalMap.png");
 
 
 	EngineObject* debugObject2 = new EngineObject;
@@ -218,7 +219,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
 
+		//DxHandler::contextPtr->PSSetShaderResources(1, 1, &debugObject->normalMapContainer.textureView); //NormalMap
 		directXHandler->draw(*debugObject);
+
 		directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
 

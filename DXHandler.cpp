@@ -447,6 +447,7 @@ void DxHandler::draw(EngineObject& drawObject)
 
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		contextPtr->PSGetShaderResources(1, 1, &drawObject.normalMapContainer.textureView);
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
@@ -463,7 +464,8 @@ void DxHandler::draw(EngineObject& drawObject)
 		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, Camera::cameraView);
 		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
 		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
-		//lightBuff.hasTexture = (drawObject.hasTexture);
+		lightBuff.hasTexture = (drawObject.hasTexture);
+		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 

@@ -28,8 +28,10 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
 
+	bool hasNormalMap;
 	bool hasTexture;
-	float3 padding;
+	float4 padding;
+	float4 padding2;
 }
 
 struct PS_INPUT

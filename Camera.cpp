@@ -1,6 +1,6 @@
 #include "Camera.h"
 DirectX::XMVECTOR Camera::cameraPosition = DirectX::XMVectorSet(200.0f, 200.f, 1.0f, 0);
-DirectX::XMVECTOR Camera::cameraTarget =  DirectX::XMVectorSet(0.2000f, 0.f, 0.0f, -4.f);
+DirectX::XMVECTOR Camera::cameraTarget =  DirectX::XMVectorSet(0.2000f, 0.f, 1.0f, 0.f);
 DirectX::XMVECTOR Camera::cameraUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 DirectX::XMVECTOR Camera::cameraRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 DirectX::XMVECTOR Camera::cameraForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
@@ -42,7 +42,7 @@ void Camera::updateCamera()
 		std::cout << xpos << " : " << zpos << std::endl;
 		//std::cout << cameraPosInFloats.x << " : " << cameraPosInFloats.y << " : " << cameraPosInFloats.z  << std::endl;
 
-		cameraPosition = DirectX::XMVectorSet(cameraPosInFloats.x, heightOfTriangle, cameraPosInFloats.z, 0.0f);
+		cameraPosition = DirectX::XMVectorSet(cameraPosInFloats.x, heightOfTriangle, cameraPosInFloats.z, 1.0f);
 	}
 	XMMATRIX cameraRotationMatrix = XMMatrixRotationRollPitchYaw(Camera::pitch, Camera::yaw, 0.f);
 	Camera::cameraTarget = XMVector3TransformCoord(XMVectorSet(0, 0, 1, 0), cameraRotationMatrix); //Spinning the target around us

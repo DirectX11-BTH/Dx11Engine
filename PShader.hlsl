@@ -4,7 +4,8 @@
 */
 
 
-Texture2D mytexture;
+Texture2D mytexture : register(t0);
+Texture2D NormalMapTexture : register(t1);
 SamplerState mysampler;
 
 cbuffer PS_CONSTANT_BUFFER
@@ -20,6 +21,11 @@ cbuffer PS_CONSTANT_BUFFER
 
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
+
+	bool hasNormalMap;
+	bool hasTexture;
+	float4 padding;
+	float4 padding2;
 }
 
 struct VS_OUTPUT
@@ -60,6 +66,17 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 	output.vColour = float4(1, 1, 1, 1);
 		
+	if (hasNormalMap)
+	{
+		float3 loadedNormal = NormalMapTexture.Sample(mysampler, input.vUV);//NormalMapTexture.Load(float3(input.vPosition.xy, 0), 0).xyz;
+		//float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
+		float3 tangent = normalize(input.vTangent - dot(input.vTangent, input.vNormal) * input.vNormal);
+		float3 bitangent = normalize(cross(loadedNormal, tangent));
+
+		float3x3 tbn = float3x3(tangent, bitangent, loadedNormal); //This will move things into 'texture space' or 'tangent space'.
+
+		//input.vNormal = normalize(float4(mul(loadedNormal, tbn), 0));
+	}
 
 	output.vNormal = input.vNormal;
 	output.vTangent = input.vTangent;
