@@ -117,6 +117,23 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
+	EngineObject* debugObject = new EngineObject; //cube
+	debugObject->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
+	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
+	debugObject->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
+	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).worldMatrix * debugObject->meshes.at(0).translationMatrix * debugObject->meshes.at(0).scalingMatrix;
+	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
+	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject->meshes.at(0).vertices.size() << std::endl;
+	//Get texture name from debugMesh, gotta convert string to wchar_t*
+	if (debugObject->meshes.at(0).textureName != "")
+	{
+		debugObject->meshes.at(0).textureName = "./TestModel/" + debugObject->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject->meshes.at(0).textureName.begin(), debugObject->meshes.at(0).textureName.end());
+		const wchar_t* longCharArr = longString.c_str();
+		debugObject->readTextureFromFile(longCharArr);
+	}
+
+
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
 	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
@@ -201,6 +218,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
 
+		directXHandler->draw(*debugObject);
 		directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
 

@@ -8,6 +8,8 @@
 #include <dxgi.h>
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1);
 #include <WICTextureLoader.h>
+#include "NormalMapHandler.h"
+
 class EngineObject
 {
 private:
@@ -21,6 +23,8 @@ public:
 	ID3D11Texture2D* pTexture = NULL;
 	D3D11_SAMPLER_DESC textureSamplerDesc;
 	D3D11_TEXTURE2D_DESC  imageSampleDesc = { 0 };
+
+	NormalMapHandler normalMapContainer;
 
 	Mesh readMesh(float mesh[], int nrOfVertices);
 	void readTextureFromFile(const wchar_t* textureName);

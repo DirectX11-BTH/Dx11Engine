@@ -141,31 +141,31 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		//DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
 		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 		{
-			Camera::zTranslation = -0.7f;
+			Camera::zTranslation = -2.5f;
 		}
 		if (wParam == 0x53) //S Button
 		{
-			Camera::zTranslation = 0.7f;
+			Camera::zTranslation = 2.5f;
 		}
 
 		if (wParam == 0x41) //A Button
 		{
-			Camera::xTranslation = 0.7f;
+			Camera::xTranslation = 2.5f;
 		}
 
 		if (wParam == 0x44) //D Button
 		{
-			Camera::xTranslation = -0.7f;
+			Camera::xTranslation = -2.5f;
 		}
 
 		if (wParam == 0x45) //E Button, up
 		{
-			Camera::yTranslation = 0.7f;
+			Camera::yTranslation = 2.5f;
 		}
 
 		if (wParam == 0x51) //Q Button, down
 		{
-			Camera::yTranslation = -0.7f;
+			Camera::yTranslation = -2.5f;
 		}
 
 		break;	
