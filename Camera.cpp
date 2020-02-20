@@ -1,6 +1,6 @@
 #include "Camera.h"
-DirectX::XMVECTOR Camera::cameraPosition = DirectX::XMVectorSet(2000.f, 200.0f, 2000.f, 1.0f);
-DirectX::XMVECTOR Camera::cameraTarget =  DirectX::XMVectorSet(0.f, 0.0f, -4.f, 0.0);
+DirectX::XMVECTOR Camera::cameraPosition = DirectX::XMVectorSet(200.0f, 200.f, 1.0f, 0);
+DirectX::XMVECTOR Camera::cameraTarget =  DirectX::XMVectorSet(0.2000f, 0.f, 0.0f, -4.f);
 DirectX::XMVECTOR Camera::cameraUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 DirectX::XMVECTOR Camera::cameraRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 DirectX::XMVECTOR Camera::cameraForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);

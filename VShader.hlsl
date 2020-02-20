@@ -47,13 +47,13 @@ VS_OUTPUT main(VS_INPUT input)
 	//Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
 
 	Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
-	Output.positionInWorldSpace = mul(Output.positionInWorldSpace, viewMatrix);
+	//Output.positionInWorldSpace = mul(Output.positionInWorldSpace, viewMatrix);
 
 	Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 0), worldMatrix));
-	Output.vNormal = normalize(mul(normalize(Output.vNormal), viewMatrix));
+	//Output.vNormal = normalize(mul(normalize(Output.vNormal), viewMatrix));
 
 	Output.vTangent= normalize(mul(float4(normalize(input.vTangent), 0), worldMatrix));
-	Output.vTangent = normalize(mul(normalize(Output.vTangent), viewMatrix));
+	//Output.vTangent = normalize(mul(normalize(Output.vTangent), viewMatrix));
 	
 		
 	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);

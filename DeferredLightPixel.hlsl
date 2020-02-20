@@ -49,14 +49,16 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
 	float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
 
-	position = mul(position, viewInverseMatrix);
-	normal = mul(normal, viewInverseMatrix);
+	//position = mul(position, viewInverseMatrix);
+	//normal = normalize(mul(normal, viewInverseMatrix));
 
 
 	//float3 surfaceToLightV = normalize(mul(lightPos - position, worldViewProjectionMatrix)); //make to worldmatrix
 	float3 surfaceToLightV = normalize(lightPosViewspace - position);
 	float diffuseStrength = clamp(dot(normal, surfaceToLightV), 0, 1);
 	float ambientStrength = 0.2f;
+
+	//mul(surfaceToLightV, viewInverseMatrix);
 
 	float4 lookVector = normalize(position - camPosInView); //Specular
 	float4 reflectionVec = normalize(reflect(float4(surfaceToLightV, 0), normal)); //Specular
@@ -66,5 +68,6 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
 	return (diffuseStrength + ambientStrength + specStrength) * albedo;
+	//return (specStrength + (ambientStrength*0.5)) * albedo;
 	//return float4(specStrength, 0, 0, 0);
 } 

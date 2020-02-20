@@ -74,7 +74,7 @@ void Engine::initialSetup()
 		0.35f * 3.14f,					//FovAngleY, height angle of perspective in radians
 		(float)WIDTH / (float)HEIGHT,	//AspectRatio, width/height of window
 		0.1f,							//NearZ, how close we render
-		1000.f							//FarZ how far we render
+		10000.f							//FarZ how far we render
 	);
 
 	directXHandler->setupLightBuffer();
@@ -116,29 +116,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	//terrainObject.readTextureFromFile(L"texture.png");
 
 	//----------------------------------------------------------------------------------------------- DEBUG
-	float fArray[] =
-	{
-		//		XYZ		//		//       RGBA     //	//  UV  //	//nX nY nZ//
-		-0.7f, 0.7f, 0.5f,		 1.f, 0.f, 0.f, 1.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.7f, -0.7f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		-0.7f, -0.7f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	0.0f, 1.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-
-		-0.7f, 0.7f, 0.5f,		 1.f, 0.f, 0.f, 0.f,	0.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.7f, 0.7f, 0.5f,		 0.f, 0.f, 1.f, 1.f,	1.f, 0.f,	0, 0, -1,//XYZ RGBA UV nXnYnZ
-		0.7f, -0.7f, 0.5f,		 0.f, 1.f, 0.f, 1.f,	1.0f, 1.f,	0, 0, -1//XYZ RGBA UV nXnYnZ
-	};
-	
-
-	EngineObject* debugObject = new EngineObject;
-	debugObject->readMesh(fArray, 6);
-	//debugObject->readTextureFromFile(L"./texture.png");
-	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(
-		0.f,    // Units translated on the x-axis
-		0.f,    // Units translated on the y-axis
-		0.f    // Units translated on the z-axis
-	);
-	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).translationMatrix;
-	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 
 	EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
