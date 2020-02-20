@@ -2,12 +2,7 @@ Texture2D ColorTexture : register(t0);
 Texture2D NormalTexture : register(t1);
 Texture2D PositionTexture : register(t2);
 
-//SSAO magic
-Texture2D RandomVectorTexture : register(t3);
-Texture2D RandomNoiseTexture : register(t4);
-
 SamplerState mysampler;
-//
 
 
 cbuffer PS_CONSTANT_BUFFER

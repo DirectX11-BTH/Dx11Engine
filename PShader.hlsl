@@ -18,14 +18,13 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 	float2 noiseScale;
-
+	row_major float4x4 worldMatrix;
+	row_major float4x4 viewMatrix;
+	row_major float4x4 projMatrix;
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
-
 	bool hasNormalMap;
 	bool hasTexture;
-	float4 padding;
-	float4 padding2;
 }
 
 struct VS_OUTPUT
@@ -44,7 +43,6 @@ struct PS_OUTPUT
 	float4 vPosition : SV_TARGET0;
 	float4 vColour : SV_TARGET1;
 	float4 vNormal : SV_TARGET2;
-	float vTangent : SV_TARGET3;
 	//float4 vInterpolatedPosition : POSITION;
 };
 
@@ -54,17 +52,17 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
 
-	/*if (hasTexture == true) //Always returns true, rip
+	if (hasTexture == true) //Always returns true, rip
 	{
-		//output.vColour = mytexture.Sample(mysampler, input.vUV);
-		output.vColour = float4(1, 1, 1, 1);
+		output.vColour = mytexture.Sample(mysampler, input.vUV);
+		//output.vColour = float4(0, 1, 1, 1);
 	}
 	else
 	{
-		output.vColour = diffuseMeshColor;
-	}*/
+		output.vColour = float4(1, 1, 1, 1);
+	}
 
-	output.vColour = float4(1, 1, 1, 1);
+	//output.vColour = mytexture.Sample(mysampler, input.vUV);//float4(1, 1, 1, 1);
 		
 	if (hasNormalMap)
 	{
@@ -75,11 +73,10 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 		float3x3 tbn = float3x3(tangent, bitangent, loadedNormal); //This will move things into 'texture space' or 'tangent space'.
 
-		//input.vNormal = normalize(float4(mul(loadedNormal, tbn), 0));
+		input.vNormal = normalize(float4(mul(loadedNormal, tbn), 0));
 	}
 
 	output.vNormal = input.vNormal;
-	output.vTangent = input.vTangent;
 	return output;
 
 }

@@ -102,10 +102,10 @@ void Engine::initialSetup()
 
 	DxHandler::contextPtr->PSSetSamplers(0, 1, &sampleState);
 
-	SsaoClass::generateNoiseTexture();
-	SsaoClass::generateRandomVectors();
-	SsaoClass::setupShaders();
-	SsaoClass::generateOcclusionBuffer();
+	//SsaoClass::generateNoiseTexture();
+	//SsaoClass::generateRandomVectors();
+	//SsaoClass::setupShaders();
+	//SsaoClass::generateOcclusionBuffer();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -113,15 +113,20 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
+	terrainObject.readTextureFromFile(L"texture.png");
 	//terrainObject.readTextureFromFile(L"texture.png");
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
 	EngineObject* debugObject = new EngineObject; //cube
-	debugObject->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
+	debugObject->meshes.push_back(ObjParser::readFromObj("./TestModel/plane.obj"));
 	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
 	debugObject->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
-	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).worldMatrix * debugObject->meshes.at(0).translationMatrix * debugObject->meshes.at(0).scalingMatrix;
+
+	DirectX::XMVECTOR rotAxis = DirectX::XMVectorSet(1, 0, 0, 0);
+	debugObject->meshes.at(0).rotationMatrix = DirectX::XMMatrixRotationAxis(rotAxis, 1.78); //radians
+
+	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).rotationMatrix * debugObject->meshes.at(0).translationMatrix * debugObject->meshes.at(0).scalingMatrix;
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
 	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject->meshes.at(0).vertices.size() << std::endl;
 	//Get texture name from debugMesh, gotta convert string to wchar_t*
@@ -132,25 +137,26 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		const wchar_t* longCharArr = longString.c_str();
 		debugObject->readTextureFromFile(longCharArr);
 	}
-	debugObject->hasTexture = debugObject->normalMapContainer.loadNormalTextureFromFile(L"./normalMap.png");
+	debugObject->hasNormalMap = debugObject->normalMapContainer.loadNormalTextureFromFile(L"./normalMap.png");
+	debugObject->readTextureFromFile(L"texture.png");
 
 
-	EngineObject* debugObject2 = new EngineObject;
+	/*EngineObject* debugObject2 = new EngineObject;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
 	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
 	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
 	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).worldMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
-	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;
+	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;*/
 
 	//Get texture name from debugMesh, gotta convert string to wchar_t*
-	if (debugObject2->meshes.at(0).textureName != "")
+	/*if (debugObject2->meshes.at(0).textureName != "")
 	{
 		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
 		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
 		const wchar_t* longCharArr = longString.c_str();
 		debugObject2->readTextureFromFile(longCharArr);
-	}
+	}*/
 	
 	//debugObject2->readTextureFromFile(L"./Texture.png");
 	
@@ -196,21 +202,19 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		float background_color2[4] = { 0.9f, 0.6f, 0.6f, 1.f };
 
 		//First pass -------------------------------------------------------------------
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Tangent].renderTargetView, background_color);
 		//directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
-		ID3D11RenderTargetView* arr[4] = 
+		ID3D11RenderTargetView* arr[3] = 
 		{
 			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
 			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
-			gBuffHandler.buffers[GBufferType::Tangent].renderTargetView
 		};
-		directXHandler->contextPtr->OMSetRenderTargets(4, arr, DxHandler::depthStencil); //DEPTH
+		directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
 
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
@@ -222,7 +226,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//DxHandler::contextPtr->PSSetShaderResources(1, 1, &debugObject->normalMapContainer.textureView); //NormalMap
 		directXHandler->draw(*debugObject);
 
-		directXHandler->draw(*debugObject2);
+		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
 
 		//First pass end -------------------------------------------------------------------
@@ -261,7 +265,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
-		DxHandler::contextPtr->PSSetShaderResources(3, 1, &gBuffHandler.buffers[GBufferType::Tangent].shaderResourceView); //Tangent
 
 
 		//Do the actual drawing here
@@ -274,7 +277,6 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Tangent
 
 		//Second pass end -------------------------------------------------------------------
 		directXHandler->swapChainPtr->Present(1, 0);

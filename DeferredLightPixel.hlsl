@@ -1,8 +1,6 @@
 Texture2D ColorTexture : register(t0);
 Texture2D NormalTexture : register(t1); 
 Texture2D PositionTexture : register(t2);
-Texture2D TangentTexture : register(t3);
-Texture2D NormalMapTexture : register(t4);
 
 SamplerState mySampler;
 
@@ -11,25 +9,19 @@ cbuffer PS_CONSTANT_BUFFER
 {
 	float4 lightPos;
 	float4 ambientMeshColor;
-	float4 diffueMeshColor;
+	float4 diffuseMeshColor;
 	float4 specularMeshColor;
 	float4 camPos;
-
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 	float2 noiseScale;
-
 	row_major float4x4 worldMatrix;
 	row_major float4x4 viewMatrix;
 	row_major float4x4 projMatrix;
-
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
-
 	bool hasNormalMap;
 	bool hasTexture;
-	float4 padding;
-	float4 padding2;
 }
 
 struct VS_OUTPUT
@@ -53,7 +45,6 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
 	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space
 	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
-	float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
 
 	//position = mul(position, viewInverseMatrix);
 	//normal = normalize(mul(normal, viewInverseMatrix));
@@ -74,6 +65,7 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
 	return (diffuseStrength + ambientStrength + specStrength) * albedo;
+	//return normal;
 	//return (specStrength + (ambientStrength*0.5)) * albedo;
 	//return float4(specStrength, 0, 0, 0);
 } 

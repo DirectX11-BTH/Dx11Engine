@@ -108,6 +108,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert0.x = corner0.x;
 	vert0.y = corner0.y;
 	vert0.z = corner0.z;
+	vert0.u = corner0.x / (200*TerrainGenerator::scaling);;
+	vert0.v = corner0.z / (200*TerrainGenerator::scaling);;
 
 	vert0.r = 0.5;
 	vert0.g = 0;
@@ -117,6 +119,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert1.x = corner1.x;
 	vert1.y = corner1.y;
 	vert1.z = corner1.z;
+	vert1.u = corner1.x / (200*TerrainGenerator::scaling);;
+	vert1.v = corner1.z / (200*TerrainGenerator::scaling);;
 
 	vert1.r = 0.7;
 	vert1.g = 0;
@@ -126,6 +130,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert2.x = corner2.x;
 	vert2.y = corner2.y;
 	vert2.z = corner2.z;
+	vert2.u = corner2.x / (200*TerrainGenerator::scaling);;
+	vert2.v = corner2.z / (200*TerrainGenerator::scaling);;
 
 	vert2.r = 0;
 	vert2.g = 0.5;
@@ -163,6 +169,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert3.x = corner1.x;
 	vert3.y = corner1.y;
 	vert3.z = corner1.z;
+	vert3.u = corner1.x / (200*TerrainGenerator::scaling);
+	vert3.v = corner1.z / (200*TerrainGenerator::scaling);;
 
 	vert3.r = 1;
 	vert3.g = 1;
@@ -172,6 +180,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert4.x = corner3.x;
 	vert4.y = corner3.y;
 	vert4.z = corner3.z;
+	vert4.u = corner3.x / (200*TerrainGenerator::scaling);;
+	vert4.v = corner3.z / (200*TerrainGenerator::scaling);;
 
 	vert4.r = 0;
 	vert4.g = 1;
@@ -181,6 +191,8 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert5.x = corner2.x;
 	vert5.y = corner2.y;
 	vert5.z = corner2.z;
+	vert5.u = corner2.x / (200*TerrainGenerator::scaling);;
+	vert5.v = corner2.z / (200*TerrainGenerator::scaling);;
 
 	vert5.r = 1;
 	vert5.g = 1;
