@@ -6,6 +6,7 @@
 
 Texture2D mytexture : register(t0);
 Texture2D NormalMapTexture : register(t1);
+Texture3D EnvironmentTexture : register(t2);
 SamplerState mysampler;
 
 cbuffer PS_CONSTANT_BUFFER
@@ -25,6 +26,7 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 worldInverseMatrix;
 	bool hasNormalMap;
 	bool hasTexture;
+	bool environmentMap;
 }
 
 struct VS_OUTPUT
@@ -75,6 +77,14 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 		input.vNormal = normalize(float4(mul(loadedNormal, tbn), 0));
 	}
+
+	if (environmentMap)
+	{
+		float3 camToPixelVec = input.vPosition.xyz - camPos.xyz;
+		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
+		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
+	}
+		
 
 	output.vNormal = input.vNormal;
 	return output;

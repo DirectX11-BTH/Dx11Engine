@@ -66,6 +66,8 @@ void Engine::initialSetup()
 	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
 
 	directXHandler->setupDeferredShaders();
+	directXHandler->setupGShader(L"GeometryShader.hlsl");
+	directXHandler->createGSConstBuffer();
 
 	//Init camera
 	Camera::cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);
@@ -118,11 +120,12 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
-	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 50.f, -10.0f);
-	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixTranslation(25.f, 25.f, 25.0f);
+	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(50.f, 5.f, 50.0f);
+	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
 	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).rotationMatrix * reflectingCube.object.meshes.at(0).translationMatrix * reflectingCube.object.meshes.at(0).scalingMatrix;
-	//reflectingCube.buildCubeMap();
-	//reflectingCube.buildCameras(0, 50, -10);
+	reflectingCube.buildCubeMap();
+	reflectingCube.buildCameras(50.f, 25.f, 50.f);
+	DxHandler::createVertexBuffer(reflectingCube.object.meshes.at(0));
 
 	EngineObject* debugObject = new EngineObject; //cube
 	debugObject->meshes.push_back(ObjParser::readFromObj("./TestModel/plane.obj"));
@@ -130,7 +133,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	debugObject->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
 
 	DirectX::XMVECTOR rotAxis = DirectX::XMVectorSet(1, 0, 0, 0);
-	//debugObject->meshes.at(0).rotationMatrix = DirectX::XMMatrixRotationAxis(rotAxis, 1.58); //radians
+	//debugObject->meshes.at(0).rotationMatrix = DirectX::XMMatrixRotationAxis(rotAxis, 1.57); //radians
 
 	debugObject->meshes.at(0).worldMatrix = debugObject->meshes.at(0).rotationMatrix * debugObject->meshes.at(0).translationMatrix * debugObject->meshes.at(0).scalingMatrix;
 	directXHandler->createVertexBuffer(debugObject->meshes.at(0));
@@ -169,6 +172,18 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	std::cout << "Executed" << std::endl;
 	//----------------------------------------------------------------------------------------------- END DEBUG
 
+	RECT viewportRect;
+	GetClientRect(primaryWindow, &viewportRect);
+	D3D11_VIEWPORT port = {
+		0.f,
+		0.f,
+		(float)(viewportRect.right - viewportRect.left),
+		(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
+	};
+	port.MinDepth = 0.0f; //Closest possible to screen Z depth
+	port.MaxDepth = 1.0f; //Furthest possible
+	float background_color[4] = { 0.f, 0.f, 0.f, 1.f };
+
 	MSG msg;
 	bool quit = false;
 	while (!quit)
@@ -192,21 +207,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			quit = true;
 		}
 
-		RECT viewportRect;
-		GetClientRect(primaryWindow, &viewportRect);
-		D3D11_VIEWPORT port = {
-			0.f,
-			0.f,
-			(float)(viewportRect.right - viewportRect.left),
-			(float)(viewportRect.bottom - viewportRect.top),0.f,1.f
-		};
-		port.MinDepth = 0.0f; //Closest possible to screen Z depth
-		port.MaxDepth = 1.0f; //Furthest possible
-
 		//Clear depth every frame - DEPTH
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		float background_color[4] = { 0.f, 0.f, 0.f, 1.f };
-		float background_color2[4] = { 0.9f, 0.6f, 0.6f, 1.f };
 
 
 		//First pass -------------------------------------------------------------------
@@ -236,38 +238,13 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
-		directXHandler->draw(reflectingCube.object);
+
+		
+		directXHandler->draw(reflectingCube.object, true);
 
 		//First pass end -------------------------------------------------------------------
 
-
-
-
-		//Second Pass - SSAO Pass Begin ----------------------------------------------------
-		/*directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
-		directXHandler->contextPtr->OMSetRenderTargets(1, &SsaoClass::SSAOBuffRenderTargetView, NULL); //Draw to the occlusion buffer
-
-		//Need these to calculate the occlusion factor
-		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
-		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
-
-		DxHandler::contextPtr->PSSetShader(SsaoClass::SSAOPixelPtr, NULL, NULL); //set shaders
-		DxHandler::contextPtr->VSSetShader(SsaoClass::SSAOVertexPtr, NULL, NULL);
-
-		DxHandler::contextPtr->PSSetShaderResources(3, 1, &SsaoClass::randomVecShaderResourceView); //Random vectors
-		DxHandler::contextPtr->PSSetShaderResources(4, 1, &SsaoClass::randomNoiseShaderResourceView); //Random noise
-
-		directXHandler->drawFullscreenQuad();
-
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Random vectors
-		DxHandler::contextPtr->PSSetShaderResources(4, 0, NULL); //Random noise*/
-
-		//----------------------------------------------------------------------------------
-
-
-
-		//Third pass -------------------------------------------------------------------
+		//Second pass -------------------------------------------------------------------
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 
 		//Need these to calculate the occlusion factor
@@ -284,7 +261,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		
 		//===================================================================================
 		//Cube map stuff --------------------------------------------------------------------
-		/*directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
+		directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
+
+		//DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
 		for (int i = 0; i < 6; i++)
 		{
 			//First pass ---------------------------------------------------------------------------------------------------------------------
@@ -293,7 +272,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
-			directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
+			//directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
 			//Repeat first and second pass for cube
 			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
@@ -307,8 +286,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 				gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
 			};
 			directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
-			directXHandler->draw(*debugObject);
-			directXHandler->draw(terrainObject);
+			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
+			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject);
 
 			//Second pass again -------------------------------------------------------------------------------------------------------------
 			directXHandler->contextPtr->ClearRenderTargetView(reflectingCube.renderTargetView[i], background_color);
@@ -325,7 +304,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 			directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 		}
-		directXHandler->contextPtr->RSSetViewports(1, &port);*/
+		directXHandler->contextPtr->RSSetViewports(1, &port);
+		//DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 		//End cube stuff --------------------------------------------------------------------
 		//===================================================================================
 

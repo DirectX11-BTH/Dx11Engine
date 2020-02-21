@@ -22,6 +22,7 @@ cbuffer PS_CONSTANT_BUFFER
 	row_major float4x4 worldInverseMatrix;
 	bool hasNormalMap;
 	bool hasTexture;
+	bool environmentMap;
 }
 
 struct VS_OUTPUT

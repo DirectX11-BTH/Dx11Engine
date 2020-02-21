@@ -22,10 +22,13 @@
 #include "EngineObject.h"
 #include "Camera.h"
 #include "SsaoClass.h"
+#include "EnvironmentCube.h"
 
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11") 
 #pragma comment(lib, "d3dcompiler.lib")
+
+struct cubeCamera;
 
 const int FLOATS_PER_VERTEX = 15;
 
@@ -45,6 +48,14 @@ struct VS_CONSTANT_MATRIX_BUFFER
 	DirectX::XMMATRIX worldInverseMatrix;
 
 	//DirectX::XMVECTOR randomVectors[SsaoClass::nrOfVecs * SsaoClass::nrOfVecs];
+};
+
+struct GS_CONSTANT_MATRIX_BUFFER
+{
+	DirectX::XMMATRIX worldViewProjectionMatrix;
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projMatrix;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER
@@ -78,6 +89,7 @@ struct PS_CONSTANT_LIGHT_BUFFER
 
 	BOOL hasNormalMap = false;
 	BOOL hasTexture = false;
+	BOOL environmentMap = false;
 	//XMFLOAT4 padding3234234;
 	//XMFLOAT4 padding34234234;
 };
@@ -116,6 +128,9 @@ public:
 	static ID3DBlob* deferredVertexShaderBuffer;
 	static ID3DBlob* deferredPixelShaderBuffer;
 
+	static ID3DBlob* geometryShaderBuffer;
+	static ID3D11GeometryShader* geometryPtr;
+
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
 
@@ -129,6 +144,7 @@ public:
 	static ID3D11Texture2D* depthBuffer;
 
 	static ID3D11Buffer* PSConstBuff;
+	static ID3D11Buffer* GSConstBuff;
 
 	static Mesh* fullscreenQuad;
 
@@ -136,6 +152,7 @@ public:
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
 
 	ID3D11Buffer*& createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER& matrix);
+	ID3D11Buffer*& createGSConstBuffer();
 
 	void initalizeDeviceContextAndSwapChain();
 	void configureSwapChain(HWND& hWnd);
@@ -150,12 +167,14 @@ public:
 
 	void setupPShader(const wchar_t fileName[]);
 	void setupVShader(const wchar_t fileName[]);
+	void setupGShader(const wchar_t fileName[]);
 
 	void setupDeferredShaders();
 
 	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
-	void draw(EngineObject& drawObject);
+	void draw(EngineObject& drawObject, bool environmentMapping = false);
+	void draw(cubeCamera& cubeCam, EngineObject& drawObject);
 	void drawIndexedMesh(EngineObject& drawObject);
 	void drawFullscreenQuad();
 

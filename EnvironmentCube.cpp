@@ -7,29 +7,28 @@ void EnvironmentCube::buildCubeMap()
 	D3D11_RENDER_TARGET_VIEW_DESC  renderTargetDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
 
+
+
 	//TEXTURE DESC
 	texDesc.Width = 256;
 	texDesc.Height = 256;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //RGBA 4 lyf
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
 	texDesc.MipLevels = 0;
 	texDesc.ArraySize = 6;
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+	texDesc.SampleDesc = DXGI_SAMPLE_DESC{ 1, 0 };
 
 	HRESULT texSucc = DxHandler::devicePtr->CreateTexture2D(&texDesc, NULL, &renderTargetTexture);
 	assert(SUCCEEDED(texSucc));
 
 	//RENDERTARGET DESC
 	renderTargetDesc.Format = texDesc.Format;
-	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY; //Means it'll be handled as a 2D array
+	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY; //Means it'll be handled as an array of textures
 	renderTargetDesc.Texture2DArray.ArraySize = 1;
-
-	renderTargetDesc = D3D11_RENDER_TARGET_VIEW_DESC{
-		texDesc.Format,
-		D3D11_RTV_DIMENSION_TEXTURE2DARRAY
-	};
+	renderTargetDesc.Texture2DArray.MipSlice = 0;
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -42,8 +41,8 @@ void EnvironmentCube::buildCubeMap()
 	////
 	shaderResourceDesc.Format = texDesc.Format;
 	shaderResourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-	shaderResourceDesc.Texture2D.MostDetailedMip = 1;
-	shaderResourceDesc.Texture2D.MipLevels = 0;
+	shaderResourceDesc.Texture2DArray.MostDetailedMip = 0;
+	shaderResourceDesc.Texture2DArray.MipLevels = -1;
 	HRESULT shaderResourceSucc = DxHandler::devicePtr->CreateShaderResourceView(renderTargetTexture, &shaderResourceDesc, &shaderResourceView);
 	assert(SUCCEEDED(shaderResourceSucc));
 
@@ -57,11 +56,18 @@ void EnvironmentCube::buildCubeMap()
 	depthDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
+
 	DxHandler::devicePtr->CreateTexture2D(&depthDesc, NULL, &depthBuffer);
-	DxHandler::devicePtr->CreateDepthStencilView(DxHandler::depthBuffer, NULL, &depthStencilView);
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	depthStencilViewDesc.Format = depthDesc.Format;
+	depthStencilViewDesc.Flags = 0;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+	HRESULT depthStencilViewSucc = DxHandler::devicePtr->CreateDepthStencilView(depthBuffer, &depthStencilViewDesc, &depthStencilView);
+
+	depthBuffer->Release(); 
 
 	port = {0, 0, (float)texDesc.Width, (float)texDesc.Height, 0, 1.f};
-
 }
 
 void EnvironmentCube::buildCameras(float x, float y, float z)
@@ -78,12 +84,12 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 
 	XMVECTOR upVectors[6] =
 	{
-		XMVectorSet(0, 1, 0, 1),
-		XMVectorSet(0, 1, 0, 1),
-		XMVectorSet(0, 0, -1, 1),
-		XMVectorSet(0, 0, 1, 1),
-		XMVectorSet(0, 1, 0, 1),
-		XMVectorSet(0, 1, 0, 1),
+		XMVectorSet(0, 1, 0, 0),
+		XMVectorSet(0, 1, 0, 0),
+		XMVectorSet(0, 0, -1, 0),
+		XMVectorSet(0, 0, 1, 0),
+		XMVectorSet(0, 1, 0, 0),
+		XMVectorSet(0, 1, 0, 0),
 	};
 
 	XMVECTOR position = XMVectorSet(x, y, z, 1);
@@ -105,7 +111,7 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 
 EnvironmentCube::EnvironmentCube()
 {
-	object.meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
+	object.meshes.push_back(ObjParser::readFromObj("./TestModel/envCube.obj"));
 }
 
 void EnvironmentCube::render()

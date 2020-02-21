@@ -44,6 +44,7 @@ public:
 	~Engine();
 	Engine();
 
+	void drawEnvironmentCube(D3D11_VIEWPORT &originalViewport);
 	void initialSetup();
 	void engineLoop();
 };

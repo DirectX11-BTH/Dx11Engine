@@ -54,7 +54,6 @@ VS_OUTPUT main(VS_INPUT input)
 
 	Output.vTangent= normalize(mul(float4(normalize(input.vTangent), 0), worldMatrix));
 	//Output.vTangent = normalize(mul(normalize(Output.vTangent), viewMatrix));
-	
 		
 	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 	Output.vColour = input.vColour;

@@ -17,6 +17,8 @@ float DxHandler::HEIGHT;
 ID3DBlob* DxHandler::deferredPixelShaderBuffer = nullptr;
 ID3DBlob* DxHandler::deferredVertexShaderBuffer = nullptr;
 
+ID3DBlob* DxHandler::geometryShaderBuffer = nullptr;
+ID3D11GeometryShader* DxHandler::geometryPtr = nullptr;
 
 ID3D11PixelShader* DxHandler::deferredPixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::deferredVertexPtr = nullptr;
@@ -30,6 +32,8 @@ ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
 HWND* DxHandler::hWnd = nullptr;
 
 ID3D11Buffer* DxHandler::PSConstBuff;
+ID3D11Buffer* DxHandler::GSConstBuff;
+
 Mesh* DxHandler::fullscreenQuad = nullptr;
 
 DxHandler::~DxHandler()
@@ -131,6 +135,31 @@ ID3D11Buffer*& DxHandler::createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER &matrix)
 	loadedPSBuffers.push_back(constantPixelBuffer);
 
 	return constantPixelBuffer;
+}
+
+ID3D11Buffer*& DxHandler::createGSConstBuffer()
+{
+	D3D11_BUFFER_DESC constGeometryDesc;
+	constGeometryDesc.ByteWidth = sizeof(GS_CONSTANT_MATRIX_BUFFER);
+	constGeometryDesc.Usage = D3D11_USAGE_DEFAULT;
+	constGeometryDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constGeometryDesc.CPUAccessFlags = 0;
+	constGeometryDesc.MiscFlags = 0;
+	constGeometryDesc.StructureByteStride = 0;
+
+	ID3D11Buffer* constantGeometryBuffer = NULL;
+	HRESULT buffPSucc = devicePtr->CreateBuffer(&constGeometryDesc, NULL,
+		&constantGeometryBuffer);
+	assert(SUCCEEDED(buffPSucc));
+
+	//cGeometryBuffer.light = DirectX::XMFLOAT4(0, 0, -3, 0);
+	//contextPtr->UpdateSubresource(constantGeometryBuffer, 0, NULL, NULL, 0, 0);
+	contextPtr->PSSetConstantBuffers(0, 1, &constantGeometryBuffer);
+
+	loadedPSBuffers.push_back(constantGeometryBuffer);
+	GSConstBuff = constantGeometryBuffer;
+
+	return constantGeometryBuffer;
 }
 
 void DxHandler::initalizeDeviceContextAndSwapChain()
@@ -345,6 +374,28 @@ void DxHandler::setupVShader(const wchar_t fileName[])
 	assert(SUCCEEDED(createVShaderSucc));
 }
 
+void DxHandler::setupGShader(const wchar_t fileName[])
+{
+	//Pixel
+	ID3DBlob* errorMessage;
+
+	HRESULT GeometryShaderSucc = D3DCompileFromFile(
+		L"GeometryShader.hlsl",
+		nullptr,
+		nullptr,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",//"ColorVertexShader",
+		"gs_5_0", //Geometry shader
+		0,
+		0,
+		&geometryShaderBuffer,
+		&errorMessage
+	);
+	assert(SUCCEEDED(GeometryShaderSucc));
+
+	HRESULT createGeometryShaderSucc = devicePtr->CreateGeometryShader(geometryShaderBuffer->GetBufferPointer(), geometryShaderBuffer->GetBufferSize(), NULL, &geometryPtr);
+	assert(SUCCEEDED(createGeometryShaderSucc));
+}
+
 void DxHandler::setupDeferredShaders()
 {
 	//Pixel
@@ -415,7 +466,7 @@ void DxHandler::setupLightBuffer()
 	DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 }
 
-void DxHandler::draw(EngineObject& drawObject)
+void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 {
 
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
@@ -466,10 +517,80 @@ void DxHandler::draw(EngineObject& drawObject)
 		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
 		lightBuff.hasTexture = (drawObject.hasTexture);
 		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
+		lightBuff.environmentMap = environmentMapping;
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
+
+		GS_CONSTANT_MATRIX_BUFFER geometryBuff;
+		geometryBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		geometryBuff.viewMatrix = Camera::cameraView;
+		geometryBuff.projMatrix = Camera::cameraProjectionMatrix;
+		DxHandler::contextPtr->UpdateSubresource(GSConstBuff, 0, NULL, &geometryBuff, 0, 0);
+	}
+}
+
+void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
+{
+	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
+	UINT offset = 0u;
+
+	for (int i = 0; i < drawObject.meshes.size(); i++)
+	{
+		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(i).vertexBuffer,
+			&stride, &offset);
+
+		VS_CONSTANT_MATRIX_BUFFER matrixBuff;
+		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
+		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
+		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
+
+		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * cubeCam.cameraView * cubeCam.cameraProjectionMatrix;
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		matrixBuff.viewMatrix = cubeCam.cameraView;
+		matrixBuff.projMatrix = cubeCam.cameraProjectionMatrix;
+
+		DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(cubeCam.cameraView);
+		matrixBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, cubeCam.cameraView);
+		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
+		matrixBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
+
+		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		matrixBuff.viewMatrix = cubeCam.cameraView;
+		matrixBuff.projMatrix = cubeCam.cameraProjectionMatrix;
+
+		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
+		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
+		contextPtr->PSSetShaderResources(1, 1, &drawObject.normalMapContainer.textureView);
+
+		//Update light stuff
+		PS_CONSTANT_LIGHT_BUFFER lightBuff;
+		lightBuff.lightPos = DirectX::XMVectorSet(200, 50, 700, 1);
+		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
+		lightBuff.diffuseMeshColor = drawObject.meshes.at(i).diffuseMeshColor;
+		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;
+		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
+		lightBuff.camPos = cubeCam.cameraPosition;
+		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
+		lightBuff.noiseScale = DirectX::XMFLOAT2(DxHandler::WIDTH / SsaoClass::noiseSize, DxHandler::HEIGHT / SsaoClass::noiseSize);
+
+
+		det = DirectX::XMMatrixDeterminant(cubeCam.cameraView);
+		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, cubeCam.cameraView);
+		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
+		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
+		lightBuff.hasTexture = (drawObject.hasTexture);
+		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
+
+		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
+		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
+
+		GS_CONSTANT_MATRIX_BUFFER geometryBuff;
+		geometryBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		geometryBuff.viewMatrix = cubeCam.cameraView;
+		geometryBuff.projMatrix = cubeCam.cameraProjectionMatrix;
+		DxHandler::contextPtr->UpdateSubresource(GSConstBuff, 0, NULL, &geometryBuff, 0, 0);
 	}
 }
 

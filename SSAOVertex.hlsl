@@ -8,6 +8,8 @@ cbuffer VS_CONSTANT_BUFFER
 
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
+
+	BOOL environmentMap;
 }
 
 struct VS_INPUT
