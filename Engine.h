@@ -13,6 +13,7 @@ const int HEIGHT = 720;
 #include "GBufferHandler.h"
 #include "TerrainGenerator.h"
 #include "SsaoClass.h"
+#include "EnvironmentCube.h"
 
 class Engine
 {
@@ -38,7 +39,7 @@ private:
 	void createDirectX();
 	void createInputHandler();
 
-	void createDebugMesh();
+	EnvironmentCube reflectingCube;
 public:
 	~Engine();
 	Engine();

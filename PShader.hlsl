@@ -71,7 +71,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		float3 tangent = normalize(input.vTangent - dot(input.vTangent, input.vNormal) * input.vNormal);
 		float3 bitangent = normalize(cross(loadedNormal, tangent));
 
-		float3x3 tbn = float3x3(tangent, bitangent, loadedNormal); //This will move things into 'texture space' or 'tangent space'.
+		float3x3 tbn = float3x3(tangent, bitangent, loadedNormal); //This will move things into 'texture space' or 'tangent space' in order to support rotations of the object without distortion.
 
 		input.vNormal = normalize(float4(mul(loadedNormal, tbn), 0));
 	}

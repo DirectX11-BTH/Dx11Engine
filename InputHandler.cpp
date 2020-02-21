@@ -91,6 +91,9 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_DESTROY: //Destroy window
 		PostQuitMessage(0);
 		break;
+	case VK_ESCAPE:
+		PostQuitMessage(0);
+		break;
 	case WM_MOUSEMOVE:
 		//float x = LOWORD(lParam);
 		//float y = HIWORD(lParam);

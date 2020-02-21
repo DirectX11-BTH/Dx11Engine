@@ -37,7 +37,10 @@ void Camera::updateCamera()
 		int zpos = cameraPosInFloats.z / TerrainGenerator::scaling;	
 		int whichVertex = (zpos *6* (TerrainGenerator::width-1)+(xpos*6));
 
-		float heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+30.f;
+		float heightOfTriangle = 0;
+
+		if (whichVertex < TerrainGenerator::heightTerrain.vertices.size())
+			heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+30.f;
 
 		std::cout << xpos << " : " << zpos << std::endl;
 		//std::cout << cameraPosInFloats.x << " : " << cameraPosInFloats.y << " : " << cameraPosInFloats.z  << std::endl;
