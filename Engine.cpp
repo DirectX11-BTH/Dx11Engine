@@ -211,57 +211,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 
-		//First pass -------------------------------------------------------------------
-		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
-		//directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
-		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
-
-		ID3D11RenderTargetView* arr[3] = 
-		{
-			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
-			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
-			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
-		};
-		directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
-
-
-		directXHandler->contextPtr->RSSetViewports(1, &port);
-		//directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil); //DEPTH
-
-		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
-		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
-
-		//DxHandler::contextPtr->PSSetShaderResources(1, 1, &debugObject->normalMapContainer.textureView); //NormalMap
-		directXHandler->draw(*debugObject);
-
-		//directXHandler->draw(*debugObject2);
-		directXHandler->draw(terrainObject);
-
-		
-		directXHandler->draw(reflectingCube.object, true);
-
-		//First pass end -------------------------------------------------------------------
-
-		//Second pass -------------------------------------------------------------------
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
-
-		//Need these to calculate the occlusion factor
-		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
-		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
-
-
-		//Do the actual drawing here
-		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
-		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
-		
-		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
-		
 		//===================================================================================
 		//Cube map stuff --------------------------------------------------------------------
-		directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
+		/*directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
 
 		//DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
 		for (int i = 0; i < 6; i++)
@@ -304,10 +256,61 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 			directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 		}
-		directXHandler->contextPtr->RSSetViewports(1, &port);
+		directXHandler->contextPtr->RSSetViewports(1, &port);*/
 		//DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 		//End cube stuff --------------------------------------------------------------------
 		//===================================================================================
+
+
+
+		//First pass -------------------------------------------------------------------
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
+		//directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
+
+		ID3D11RenderTargetView* arr[3] = 
+		{
+			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
+			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
+			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
+		};
+		directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
+
+
+		directXHandler->contextPtr->RSSetViewports(1, &port);
+		//directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, DxHandler::depthStencil); //DEPTH
+
+		DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
+		DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
+
+		//DxHandler::contextPtr->PSSetShaderResources(1, 1, &debugObject->normalMapContainer.textureView); //NormalMap
+		DxHandler::contextPtr->PSSetShaderResources(2, 1, &reflectingCube.shaderResourceView); //Slot 3 for reflectingCubeTexture
+		directXHandler->draw(*debugObject);
+
+		//directXHandler->draw(*debugObject2);
+		directXHandler->draw(terrainObject);
+
+		
+		directXHandler->draw(reflectingCube.object, true);
+
+		//First pass end -------------------------------------------------------------------
+
+		//Second pass -------------------------------------------------------------------
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
+
+		//Need these to calculate the occlusion factor
+		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
+		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
+		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
+
+
+		//Do the actual drawing here
+		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
+		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
+		
+		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 
 		//Need to unbind for the next pass
