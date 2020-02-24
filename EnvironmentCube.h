@@ -24,6 +24,7 @@ public:
 	ID3D11RenderTargetView* renderTargetView[6]; //6 sides of a cube
 	ID3D11ShaderResourceView* shaderResourceView;
 
+	ID3D11DepthStencilState* depthStencilState;
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthBuffer;
 

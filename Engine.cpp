@@ -66,7 +66,7 @@ void Engine::initialSetup()
 	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
 
 	directXHandler->setupDeferredShaders();
-	directXHandler->setupGShader(L"GeometryShader.hlsl");
+	//directXHandler->setupGShader(L"GeometryShader.hlsl");
 	directXHandler->createGSConstBuffer();
 
 	//Init camera
@@ -120,11 +120,11 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
-	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(50.f, 5.f, 50.0f);
+	reflectingCube.buildCameras(200.f, 200.f, 200.f);
+	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(200.f, 200.f, 200.f);
 	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
-	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).rotationMatrix * reflectingCube.object.meshes.at(0).translationMatrix * reflectingCube.object.meshes.at(0).scalingMatrix;
+	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).scalingMatrix * reflectingCube.object.meshes.at(0).translationMatrix;
 	reflectingCube.buildCubeMap();
-	reflectingCube.buildCameras(50.f, 25.f, 50.f);
 	DxHandler::createVertexBuffer(reflectingCube.object.meshes.at(0));
 
 	EngineObject* debugObject = new EngineObject; //cube
@@ -213,7 +213,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//===================================================================================
 		//Cube map stuff --------------------------------------------------------------------
-		/*directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
+		directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
 
 		//DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
 		for (int i = 0; i < 6; i++)
@@ -224,7 +224,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
-			//directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
+			directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
 			//Repeat first and second pass for cube
 			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
@@ -239,7 +239,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			};
 			directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
-			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject);
+			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject); //Draw the terrain
 
 			//Second pass again -------------------------------------------------------------------------------------------------------------
 			directXHandler->contextPtr->ClearRenderTargetView(reflectingCube.renderTargetView[i], background_color);
@@ -255,8 +255,13 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
 
 			directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
+
+			//Need to unbind for the next pass
+			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
+			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
+			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
 		}
-		directXHandler->contextPtr->RSSetViewports(1, &port);*/
+		directXHandler->contextPtr->RSSetViewports(1, &port);
 		//DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 		//End cube stuff --------------------------------------------------------------------
 		//===================================================================================

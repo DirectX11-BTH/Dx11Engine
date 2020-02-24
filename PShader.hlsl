@@ -38,6 +38,8 @@ struct VS_OUTPUT
 	//float4 vInterpolatedPosition : POSITION;
 	float4 positionInWorldSpace : POSITION;
 	float4 vTangent : TANGENT;
+
+	float3 texCoordsForCube : TEXCOORD;
 };
 
 struct PS_OUTPUT
@@ -80,12 +82,13 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 	if (environmentMap)
 	{
-		float3 camToPixelVec = input.vPosition.xyz - camPos.xyz;
-		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
-		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
+		float3 pixelToCamVec =  normalize(camPos.xyz - input.vPosition.xyz);
+		float3 pixelToCameraReflected = normalize(reflect(pixelToCamVec, input.vNormal.xyz));
+		
+		output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
 	}
 		
-
+	//output.vColour = float4(input.vUV.x, input.vUV.y, 0, 0);
 	output.vNormal = input.vNormal;
 	return output;
 

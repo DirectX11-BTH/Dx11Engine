@@ -65,6 +65,13 @@ void EnvironmentCube::buildCubeMap()
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	HRESULT depthStencilViewSucc = DxHandler::devicePtr->CreateDepthStencilView(depthBuffer, &depthStencilViewDesc, &depthStencilView);
 
+	DxHandler::devicePtr->CreateTexture2D(&depthDesc, NULL, &depthBuffer);
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	HRESULT depthStencilStateSucc = DxHandler::devicePtr->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+
 	depthBuffer->Release(); 
 
 	port = {0, 0, (float)texDesc.Width, (float)texDesc.Height, 0, 1.f};
@@ -74,12 +81,12 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 {
 	XMVECTOR targets[6] =
 	{
-		XMVectorSet(x + 1, y, z, 1),
-		XMVectorSet(x - 1, y, z, 1),
-		XMVectorSet(x, y + 1, z, 1),
-		XMVectorSet(x, y - 1, z, 1),
-		XMVectorSet(x, y, z + 1, 1),
-		XMVectorSet(x, y, z - 1, 1)
+		XMVectorSet(x + 1, y, z, 1), //right x
+		XMVectorSet(x - 1, y, z, 1), //left x
+		XMVectorSet(x, y + 1, z, 1), //up
+		XMVectorSet(x, y - 1, z, 1), //down
+		XMVectorSet(x, y, z + 1, 1), //front
+		XMVectorSet(x, y, z - 1, 1) //back
 	};
 
 	XMVECTOR upVectors[6] =
@@ -111,7 +118,7 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 
 EnvironmentCube::EnvironmentCube()
 {
-	object.meshes.push_back(ObjParser::readFromObj("./TestModel/envCube.obj"));
+	object.meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj")); //Fix this
 }
 
 void EnvironmentCube::render()

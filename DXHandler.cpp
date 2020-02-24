@@ -288,16 +288,14 @@ ID3D11Buffer* DxHandler::createVertexBuffer(Mesh& mesh)
 	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.ByteWidth = sizeof(float) * FLOATS_PER_VERTEX * mesh.vertices.size();
-	bufferDesc.StructureByteStride = sizeof(float) * FLOATS_PER_VERTEX;
+	//bufferDesc.StructureByteStride = sizeof(float) * FLOATS_PER_VERTEX;
 
 	D3D11_SUBRESOURCE_DATA subResData = D3D11_SUBRESOURCE_DATA{0};
 	subResData.pSysMem = mesh.vertices.data();
 	subResData.SysMemPitch = FLOATS_PER_VERTEX * sizeof(float) * mesh.vertices.size();
 
-	MSG msg;
-
 	HRESULT succ2 = devicePtr->CreateBuffer(&bufferDesc, &subResData, &vertexBufferPtr);
-	assert(succ2 == S_OK);
+	assert(SUCCEEDED(succ2));
 
 	mesh.vertexBuffer = vertexBufferPtr;
 	
@@ -573,7 +571,6 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
 		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
 		lightBuff.camPos = cubeCam.cameraPosition;
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
-		lightBuff.noiseScale = DirectX::XMFLOAT2(DxHandler::WIDTH / SsaoClass::noiseSize, DxHandler::HEIGHT / SsaoClass::noiseSize);
 
 
 		det = DirectX::XMMatrixDeterminant(cubeCam.cameraView);

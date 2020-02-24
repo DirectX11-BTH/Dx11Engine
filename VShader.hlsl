@@ -31,6 +31,8 @@ struct VS_OUTPUT
 	float4 vNormal : NORMAL;
 	float4 positionInWorldSpace : POSITION;
 	float4 vTangent : TANGENT;
+
+	float3 texCoordsForCube : TEXCOORD;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -58,5 +60,7 @@ VS_OUTPUT main(VS_INPUT input)
 	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 	Output.vColour = input.vColour;
 	Output.vUV = float4(input.vUV, 1, 1);
+	Output.texCoordsForCube = mul(Output.vPosition, viewInverseMatrix);
+
 	return Output;
 }
