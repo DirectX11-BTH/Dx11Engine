@@ -500,14 +500,13 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
-		lightBuff.lightPos = DirectX::XMVectorSet(200, 50, 700, 1);
+		lightBuff.lightPos = DirectX::XMVectorSet(50, 100, 50, 1);
 		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
 		lightBuff.diffuseMeshColor = drawObject.meshes.at(i).diffuseMeshColor;
 		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;
 		lightBuff.worldViewProjectionMatrix = matrixBuff.worldViewProjectionMatrix;
 		lightBuff.camPos = Camera::cameraPosition;
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
-		lightBuff.noiseScale = DirectX::XMFLOAT2(DxHandler::WIDTH / SsaoClass::noiseSize, DxHandler::HEIGHT / SsaoClass::noiseSize);
 
 		det = DirectX::XMMatrixDeterminant(Camera::cameraView);
 		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, Camera::cameraView);
@@ -564,7 +563,7 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
 
 		//Update light stuff
 		PS_CONSTANT_LIGHT_BUFFER lightBuff;
-		lightBuff.lightPos = DirectX::XMVectorSet(200, 50, 700, 1);
+		lightBuff.lightPos = DirectX::XMVectorSet(50, 100, 50, 1);
 		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
 		lightBuff.diffuseMeshColor = drawObject.meshes.at(i).diffuseMeshColor;
 		lightBuff.specularMeshColor = drawObject.meshes.at(i).specularMeshColor;

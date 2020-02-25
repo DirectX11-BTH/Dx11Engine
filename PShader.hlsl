@@ -82,10 +82,16 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 	if (environmentMap)
 	{
-		float3 pixelToCamVec =  normalize(camPos.xyz - input.vPosition.xyz);
+		//try the inverse projection matrix on pos?
+		//https://github.com/pravic/rust-gfx-sciter/blob/master/examples/skybox/shader/cubemap.hlsl
+		float3 pixelToCamVec =  camPos.xyz - input.vPosition.xyz;
 		float3 pixelToCameraReflected = normalize(reflect(pixelToCamVec, input.vNormal.xyz));
 		
-		output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
+		float3 camToPixelVec = input.vPosition.xyz - camPos.xyz;
+		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
+
+		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
+		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
 	}
 		
 	//output.vColour = float4(input.vUV.x, input.vUV.y, 0, 0);

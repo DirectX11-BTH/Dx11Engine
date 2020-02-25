@@ -115,13 +115,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
-	terrainObject.readTextureFromFile(L"shrekTexture.jpg");
+	terrainObject.meshes.at(0).worldMatrix = DirectX::XMMatrixTranslation(0, -200, 0);
+	//terrainObject.readTextureFromFile(L"shrekTexture.jpg");
 	//terrainObject.readTextureFromFile(L"texture.png");
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
-	reflectingCube.buildCameras(200.f, 200.f, 200.f);
-	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(200.f, 200.f, 200.f);
+	reflectingCube.buildCameras(0.f, 0.f, 0.f);
+	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.f);
 	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
 	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).scalingMatrix * reflectingCube.object.meshes.at(0).translationMatrix;
 	reflectingCube.buildCubeMap();
@@ -218,6 +219,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
 		for (int i = 0; i < 6; i++)
 		{
+			DxHandler::contextPtr->ClearDepthStencilView(reflectingCube.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 			//First pass ---------------------------------------------------------------------------------------------------------------------
 			DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 			DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
@@ -237,13 +240,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 				gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 				gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
 			};
-			directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
+			//
+			directXHandler->contextPtr->OMSetRenderTargets(3, arr, reflectingCube.depthStencilView); //DEPTH
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
 			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject); //Draw the terrain
 
 			//Second pass again -------------------------------------------------------------------------------------------------------------
 			directXHandler->contextPtr->ClearRenderTargetView(reflectingCube.renderTargetView[i], background_color);
-			DxHandler::contextPtr->ClearDepthStencilView(reflectingCube.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+			//DxHandler::contextPtr->ClearDepthStencilView(reflectingCube.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 			directXHandler->contextPtr->OMSetRenderTargets(1, &reflectingCube.renderTargetView[i], reflectingCube.depthStencilView);
 
 			DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
@@ -258,8 +262,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 			//Need to unbind for the next pass
 			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
+			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal			
 			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
-			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
 		}
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		//DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
@@ -297,10 +301,11 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
 
-		
+		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
 
 		//First pass end -------------------------------------------------------------------
+
 
 		//Second pass -------------------------------------------------------------------
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);

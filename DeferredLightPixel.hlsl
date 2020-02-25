@@ -11,15 +11,19 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 ambientMeshColor;
 	float4 diffuseMeshColor;
 	float4 specularMeshColor;
+
 	float4 camPos;
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
 	float2 noiseScale;
+
 	row_major float4x4 worldMatrix;
 	row_major float4x4 viewMatrix;
 	row_major float4x4 projMatrix;
+
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
+
 	bool hasNormalMap;
 	bool hasTexture;
 	bool environmentMap;
