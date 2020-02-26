@@ -490,10 +490,6 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
 		matrixBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
 
-		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-		matrixBuff.viewMatrix = Camera::cameraView;
-		matrixBuff.projMatrix = Camera::cameraProjectionMatrix;
-
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
 		contextPtr->PSSetShaderResources(1, 1, &drawObject.normalMapContainer.textureView);
@@ -515,6 +511,10 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 		lightBuff.hasTexture = (drawObject.hasTexture);
 		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
 		lightBuff.environmentMap = environmentMapping;
+
+		lightBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		lightBuff.viewMatrix = Camera::cameraView;
+		lightBuff.projMatrix = Camera::cameraProjectionMatrix;
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 
@@ -545,17 +545,13 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
 
 		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * cubeCam.cameraView * cubeCam.cameraProjectionMatrix;
 		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-		matrixBuff.viewMatrix = cubeCam.cameraView;
-		matrixBuff.projMatrix = cubeCam.cameraProjectionMatrix;
+		matrixBuff.viewMatrix = cubeCam.cameraView;//Camera::cameraView;
+		matrixBuff.projMatrix = cubeCam.cameraProjectionMatrix;//Camera::cameraProjectionMatrix;
 
 		DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(cubeCam.cameraView);
 		matrixBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, cubeCam.cameraView);
 		det = DirectX::XMMatrixDeterminant(drawObject.meshes.at(i).worldMatrix);
 		matrixBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
-
-		matrixBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
-		matrixBuff.viewMatrix = cubeCam.cameraView;
-		matrixBuff.projMatrix = cubeCam.cameraProjectionMatrix;
 
 		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
 		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
@@ -571,6 +567,9 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
 		lightBuff.camPos = cubeCam.cameraPosition;
 		lightBuff.specularExponent = DirectX::XMVectorSet(drawObject.meshes.at(i).specularExponent, 0, 0, 0);
 
+		lightBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
+		lightBuff.viewMatrix = cubeCam.cameraView;
+		lightBuff.projMatrix = cubeCam.cameraProjectionMatrix;
 
 		det = DirectX::XMMatrixDeterminant(cubeCam.cameraView);
 		lightBuff.viewInverseMatrix = DirectX::XMMatrixInverse(&det, cubeCam.cameraView);

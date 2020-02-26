@@ -10,8 +10,8 @@ void EnvironmentCube::buildCubeMap()
 
 
 	//TEXTURE DESC
-	texDesc.Width = 256;
-	texDesc.Height = 256;
+	texDesc.Width = 720;
+	texDesc.Height = 720;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
 	texDesc.MipLevels = 0;
 	texDesc.ArraySize = 6;
@@ -104,16 +104,15 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 	for (int i = 0; i < 6; i++)
 	{
 		faceCameras[i] = cubeCamera();
+		faceCameras[i].cameraPosition = position;
 		faceCameras[i].cameraView = DirectX::XMMatrixLookAtLH(position, targets[i], upVectors[i]);
 		faceCameras[i].cameraProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH( //Creates projection space
 			3.14f / 2,					//FovAngleY, height angle of perspective in radians, should be 90 deg
-			(float)256 / (float)256,	//AspectRatio, width/height of window
+			(float)720 / (float)720,	//AspectRatio, width/height of window
 			0.1f,							//NearZ, how close we render
 			10000.f							//FarZ how far we render
 		);
 	}
-
-	
 }
 
 EnvironmentCube::EnvironmentCube()

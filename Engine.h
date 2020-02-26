@@ -1,7 +1,7 @@
 #pragma once
 
 
-const int WIDTH = 1080;
+const int WIDTH = 720;
 const int HEIGHT = 720;
 
 #include "DXHandler.h"
