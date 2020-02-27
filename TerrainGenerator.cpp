@@ -61,15 +61,15 @@ void TerrainGenerator::readTexture(std::string textureName)
 			temp0.y = (float)rgb_image[y*width + x + 0]/255.f;
 			temp0.y *= verticalScaling;
 					
-			temp1.x = (x+1)* sizeMultiplier;
-			temp1.z = (y) *sizeMultiplier;
-			temp1.y = (float)rgb_image[y * width + x +1]/255.f;
-			temp1.y *= verticalScaling;
-			
-			temp2.x = (x)*sizeMultiplier;
-			temp2.z = (y+1) * sizeMultiplier;
-			temp2.y = (float)rgb_image[(y+1)*width + x]/255.f;
+			temp2.x = (x+1)* sizeMultiplier;
+			temp2.z = (y) *sizeMultiplier;
+			temp2.y = (float)rgb_image[y * width + x +1]/255.f;
 			temp2.y *= verticalScaling;
+			
+			temp1.x = (x)*sizeMultiplier;
+			temp1.z = (y+1) * sizeMultiplier;
+			temp1.y = (float)rgb_image[(y+1)*width + x]/255.f;
+			temp1.y *= verticalScaling;
 
 			temp3.x = (x+1)* sizeMultiplier;
 			temp3.z = (y+1) * sizeMultiplier;
@@ -145,7 +145,7 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	XMVECTOR c0Toc1 = corner1Vec - corner0Vec;
 	XMVECTOR c0Toc2 = corner2Vec - corner0Vec;
 	XMVECTOR normal1 = XMVector3Cross(c0Toc1, c0Toc2); //This is the first triangle's normal
-	normal1 = XMVector3Normalize(-normal1);
+	normal1 = XMVector3Normalize(normal1);
 
 	XMFLOAT4 normalFloatForm;
 	XMStoreFloat4(&normalFloatForm, normal1);
@@ -209,7 +209,7 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	XMVECTOR c3Toc1 = corner1Vec - corner3Vec;
 	XMVECTOR c3Toc2 = corner2Vec - corner3Vec;
 	XMVECTOR normal2 = XMVector3Cross(c3Toc2, c3Toc1); //This is the first trian
-	normal2 = XMVector3Normalize(-normal2);
+	normal2 = XMVector3Normalize(normal2);
 
 	XMStoreFloat4(&normalFloatForm, normal2);
 

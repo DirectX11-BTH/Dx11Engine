@@ -40,7 +40,7 @@ void Camera::updateCamera()
 		float heightOfTriangle = 0;
 
 		if (whichVertex < TerrainGenerator::heightTerrain.vertices.size())
-			heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+30.f;
+			heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+150.f;
 
 		std::cout << xpos << " : " << zpos << std::endl;
 		//std::cout << cameraPosInFloats.x << " : " << cameraPosInFloats.y << " : " << cameraPosInFloats.z  << std::endl;
@@ -64,6 +64,11 @@ void Camera::updateCamera()
 
 	Camera::cameraForward = XMVector3TransformCoord(XMVectorSet(0, 0, 1, 0), tempYMatrix);
 	Camera::cameraForward = XMVector3Normalize(Camera::cameraForward);
+
+	XMFLOAT4 cameraPosInFloats;
+	XMStoreFloat4(&cameraPosInFloats, cameraPosition);
+	cameraPosition = DirectX::XMVectorSet(cameraPosInFloats.x, cameraPosInFloats.y, cameraPosInFloats.z, 1.0f);
+
 
 	Camera::cameraPosition += Camera::cameraRight * xTranslation;
 	Camera::cameraPosition += Camera::cameraForward * zTranslation;

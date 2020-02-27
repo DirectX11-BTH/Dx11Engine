@@ -52,10 +52,7 @@ struct VS_CONSTANT_MATRIX_BUFFER
 
 struct GS_CONSTANT_MATRIX_BUFFER
 {
-	DirectX::XMMATRIX worldViewProjectionMatrix;
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX viewMatrix;
-	DirectX::XMMATRIX projMatrix;
+	DirectX::XMVECTOR camPos;
 };
 
 struct VS_CONSTANT_CAMERA_BUFFER

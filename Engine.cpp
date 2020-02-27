@@ -66,7 +66,7 @@ void Engine::initialSetup()
 	VSCameraConstBuff = directXHandler->createVSConstBuffer(cameraMatrixBuff);
 
 	directXHandler->setupDeferredShaders();
-	//directXHandler->setupGShader(L"GeometryShader.hlsl");
+	directXHandler->setupGShader(L"GeometryShader.hlsl");
 	directXHandler->createGSConstBuffer();
 
 	//Init camera
@@ -115,14 +115,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
-	terrainObject.meshes.at(0).worldMatrix = DirectX::XMMatrixTranslation(0, -200, 0);
+	terrainObject.meshes.at(0).worldMatrix = DirectX::XMMatrixTranslation(0, 100, 0);
 	//terrainObject.readTextureFromFile(L"shrekTexture.jpg");
 	//terrainObject.readTextureFromFile(L"texture.png");
 
 	//----------------------------------------------------------------------------------------------- DEBUG
 
-	reflectingCube.buildCameras(1000.f, -100.f, 1000.f);
-	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(1000.f, -100.f, 1000.f);
+	reflectingCube.buildCameras(1000.f, 200.f, 1000.f);
+	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(1000.f, 200.f, 1000.f);
 	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
 	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).scalingMatrix * reflectingCube.object.meshes.at(0).translationMatrix;
 	reflectingCube.buildCubeMap();
@@ -211,12 +211,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Clear depth every frame - DEPTH
 		DxHandler::contextPtr->ClearDepthStencilView(DxHandler::depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-
 		//===================================================================================
 		//Cube map stuff --------------------------------------------------------------------
 		directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
-
-		//DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
 		for (int i = 0; i < 6; i++)
 		{
 			//First pass ---------------------------------------------------------------------------------------------------------------------
@@ -267,13 +264,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 		}
 		directXHandler->contextPtr->RSSetViewports(1, &port);
-		//DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 		//End cube stuff --------------------------------------------------------------------
 		//===================================================================================
 
 
 
 		//First pass -------------------------------------------------------------------
+		DxHandler::contextPtr->GSSetShader(DxHandler::geometryPtr, NULL, NULL);
+		
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
@@ -304,6 +302,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
+		DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 
 		//First pass end -------------------------------------------------------------------
 
