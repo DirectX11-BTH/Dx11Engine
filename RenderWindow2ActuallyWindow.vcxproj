@@ -179,6 +179,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="RenderWindow.h" />
     <ClInclude Include="TerrainGenerator.h" />
+    <ClInclude Include="WaterPlane.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -200,6 +201,7 @@
     </ClCompile>
     <ClCompile Include="SsaoClass.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />
+    <ClCompile Include="WaterPlane.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RenderWindow2ActuallyWindow.rc" />

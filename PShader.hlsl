@@ -6,7 +6,7 @@
 
 Texture2D mytexture : register(t0);
 Texture2D NormalMapTexture : register(t1);
-Texture3D EnvironmentTexture : register(t2);
+TextureCube EnvironmentTexture : register(t2);
 SamplerState mysampler;
 
 cbuffer PS_CONSTANT_BUFFER
@@ -27,6 +27,9 @@ cbuffer PS_CONSTANT_BUFFER
 	bool hasNormalMap;
 	bool hasTexture;
 	bool environmentMap;
+
+	bool isWater;
+	float4 uvDisplacement;
 }
 
 struct VS_OUTPUT
@@ -53,6 +56,12 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	PS_OUTPUT output;
 	
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
+
+	if (isWater)
+	{
+		input.vUV = input.vUV + uvDisplacement;
+		//output.vColour = float4(0, 1, 1, 1);
+	}
 
 	if (hasTexture == true) //Always returns true, rip
 	{
@@ -85,7 +94,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		
 		float3 camToPixelVec = (input.positionInWorldSpace.xyz - camPos.xyz);
 		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
-		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz, 1.52)); //Refraction test
+		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz, 3.52)); //Refraction test
 
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
 		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);

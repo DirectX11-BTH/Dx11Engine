@@ -122,16 +122,24 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	//----------------------------------------------------------------------------------------------- DEBUG
 
 	reflectingCube.buildCameras(1000.f, 200.f, 1000.f);
-	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(1000.f, 200.f, 1000.f);
+	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(1000.f, 300.f, 1000.f);
 	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
 	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).scalingMatrix * reflectingCube.object.meshes.at(0).translationMatrix;
 	reflectingCube.buildCubeMap();
 	DxHandler::createVertexBuffer(reflectingCube.object.meshes.at(0));
 
-	EngineObject* debugObject = new EngineObject; //cube
+	EngineObject* debugObject = new EngineObject; //normal mapped plane
 	debugObject->meshes.push_back(ObjParser::readFromObj("./TestModel/plane.obj"));
-	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
+	debugObject->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-10.f, 50.f, -10.0f);
 	debugObject->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
+
+	waterGenerator.generateWaterPlane();
+	waterObject.meshes.push_back(waterGenerator.waterGeometry); 
+	waterObject.readTextureFromFile(L"waterTexture.png");
+	waterObject.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(40.f, 1.f, 40.0f);
+	waterObject.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(-900.f, 120.f, -900.0f);
+	waterObject.meshes.at(0).worldMatrix = waterObject.meshes.at(0).scalingMatrix * waterObject.meshes.at(0).translationMatrix;
+
 
 	DirectX::XMVECTOR rotAxis = DirectX::XMVectorSet(1, 0, 0, 0);
 	//debugObject->meshes.at(0).rotationMatrix = DirectX::XMMatrixRotationAxis(rotAxis, 1.57); //radians
@@ -228,9 +236,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			DxHandler::contextPtr->ClearDepthStencilView(reflectingCube.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 			//Repeat first and second pass for cube
-			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color			
-			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
-			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
+			//DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color			
+			//DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
+			//DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 
 			ID3D11RenderTargetView* arr[3] =
 			{
@@ -240,6 +248,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			};
 			//
 			directXHandler->contextPtr->OMSetRenderTargets(3, arr, reflectingCube.depthStencilView); //DEPTH
+			directXHandler->draw(reflectingCube.faceCameras[i], waterObject, true); //Draw the terrain
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
 			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject); //Draw the terrain
 
@@ -296,6 +305,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//DxHandler::contextPtr->PSSetShaderResources(1, 1, &debugObject->normalMapContainer.textureView); //NormalMap
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &reflectingCube.shaderResourceView); //Slot 3 for reflectingCubeTexture
 		directXHandler->draw(*debugObject);
+
+		directXHandler->draw(waterObject, false, true);
 
 		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);

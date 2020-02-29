@@ -14,6 +14,7 @@ const int HEIGHT = 720;
 #include "TerrainGenerator.h"
 #include "SsaoClass.h"
 #include "EnvironmentCube.h"
+#include "WaterPlane.h"
 
 class Engine
 {
@@ -27,6 +28,9 @@ private:
 
 	TerrainGenerator terrainGenerator;
 	EngineObject terrain;
+
+	WaterPlane waterGenerator;
+	EngineObject waterObject;
 
 	ID3D11Buffer* PSConstBuff = NULL;
 	PS_CONSTANT_LIGHT_BUFFER lightBuff;

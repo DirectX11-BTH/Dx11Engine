@@ -467,7 +467,7 @@ void DxHandler::setupLightBuffer()
 	DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 }
 
-void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
+void DxHandler::draw(EngineObject& drawObject, bool environmentMapping, bool isWater)
 {
 
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
@@ -498,7 +498,7 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 		contextPtr->PSSetShaderResources(1, 1, &drawObject.normalMapContainer.textureView);
 
 		//Update light stuff
-		PS_CONSTANT_LIGHT_BUFFER lightBuff;
+		
 		lightBuff.lightPos = DirectX::XMVectorSet(300, 300, 300, 1);
 		lightBuff.ambientMeshColor = drawObject.meshes.at(i).ambientMeshColor;
 		lightBuff.diffuseMeshColor = drawObject.meshes.at(i).diffuseMeshColor;
@@ -518,6 +518,9 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 		lightBuff.worldMatrix = drawObject.meshes.at(i).worldMatrix;
 		lightBuff.viewMatrix = Camera::cameraView;
 		lightBuff.projMatrix = Camera::cameraProjectionMatrix;
+		lightBuff.isWater = isWater;
+		if (isWater)
+			lightBuff.uvDisplacement = DirectX::XMFLOAT4(lightBuff.uvDisplacement.x += 0.0001, lightBuff.uvDisplacement.y += 0.0001, 0, 0);
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 
 		GS_CONSTANT_MATRIX_BUFFER geometryBuff;
@@ -528,7 +531,7 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping)
 	}
 }
 
-void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
+void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater)
 {
 	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
 	UINT offset = 0u;
@@ -577,6 +580,9 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject)
 		lightBuff.worldInverseMatrix = DirectX::XMMatrixInverse(&det, drawObject.meshes.at(i).worldMatrix);
 		lightBuff.hasTexture = (drawObject.hasTexture);
 		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
+		lightBuff.isWater = isWater;
+		if (isWater)
+			lightBuff.uvDisplacement = DirectX::XMFLOAT4(0, 0, 0, 0);
 
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);

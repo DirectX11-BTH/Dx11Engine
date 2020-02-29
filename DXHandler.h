@@ -89,6 +89,9 @@ struct PS_CONSTANT_LIGHT_BUFFER
 	BOOL environmentMap = false;
 	//XMFLOAT4 padding3234234;
 	//XMFLOAT4 padding34234234;
+
+	BOOL isWater;
+	DirectX::XMFLOAT4 uvDisplacement;
 };
 
 class DxHandler
@@ -106,6 +109,8 @@ public:
 
 	std::vector<ID3D11Buffer*> loadedVSBuffers;
 	std::vector<ID3D11Buffer*> loadedPSBuffers;
+
+	PS_CONSTANT_LIGHT_BUFFER lightBuff;
 
 	DxHandler(HWND& hWnd)
 	{
@@ -170,8 +175,8 @@ public:
 
 	void setupDepthBuffer(int widthOfRenderWindow, int heightOfRenderWindow);
 
-	void draw(EngineObject& drawObject, bool environmentMapping = false);
-	void draw(cubeCamera& cubeCam, EngineObject& drawObject);
+	void draw(EngineObject& drawObject, bool environmentMapping = false, bool isWater = false);
+	void draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater = false);
 	void drawIndexedMesh(EngineObject& drawObject);
 	void drawFullscreenQuad();
 
