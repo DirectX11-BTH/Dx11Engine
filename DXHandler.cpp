@@ -20,6 +20,10 @@ ID3DBlob* DxHandler::deferredVertexShaderBuffer = nullptr;
 ID3DBlob* DxHandler::geometryShaderBuffer = nullptr;
 ID3D11GeometryShader* DxHandler::geometryPtr = nullptr;
 
+ID3D11ComputeShader* DxHandler::computeShaderPtr = nullptr;
+ID3DBlob* DxHandler::computeShaderBuffer = nullptr;
+ID3DBlob* DxHandler::csErrorBlob = nullptr;
+
 ID3D11PixelShader* DxHandler::deferredPixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::deferredVertexPtr = nullptr;
 ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
@@ -630,6 +634,47 @@ void DxHandler::drawFullscreenQuad()
 		&stride, &offset);
 
 	DxHandler::contextPtr->Draw(fullscreenQuad->vertices.size(), 0);
+}
+
+void DxHandler::setupComputeShader()
+{
+	UINT flags = D3DCOMPILE_DEBUG;
+	LPCSTR profile = "cs_5_0";
+
+	HRESULT csCompileSucc = D3DCompileFromFile(
+		L"GaussianComputeShader.hlsl",
+		NULL,
+		NULL,//D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",
+		profile,
+		flags, 0,
+		&DxHandler::computeShaderBuffer,
+		&csErrorBlob
+	);
+	assert(SUCCEEDED(csCompileSucc));
+	
+	HRESULT csCreatedSucc = DxHandler::devicePtr->CreateComputeShader(DxHandler::computeShaderBuffer->GetBufferPointer(),
+		computeShaderBuffer->GetBufferSize(),
+		NULL, &computeShaderPtr);
+
+	assert(SUCCEEDED(csCreatedSucc));
+
+	contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, NULL);
+}
+
+ID3D11UnorderedAccessView*& DxHandler::textureToUAV(ID3D11Texture2D* texture)
+{
+	ID3D11UnorderedAccessView* uav;
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+
+	HRESULT succ = devicePtr->CreateUnorderedAccessView(texture, &uavDesc, &uav);
+	assert(SUCCEEDED(succ));
+
+	return uav;
 }
 
 void DxHandler::generateFullscreenQuad()

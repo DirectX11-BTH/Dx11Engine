@@ -2,11 +2,10 @@
 using namespace DirectX;
 
 void EnvironmentCube::buildCubeMap()
-{
+{	
 	D3D11_TEXTURE2D_DESC texDesc{ 0 };
 	D3D11_RENDER_TARGET_VIEW_DESC  renderTargetDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
-
 
 
 	//TEXTURE DESC

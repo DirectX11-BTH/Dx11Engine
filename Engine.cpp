@@ -41,6 +41,7 @@ void Engine::initialSetup()
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");
 	directXHandler->setupVShader(L"VShader.hlsl");
+	directXHandler->setupComputeShader();
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
 
@@ -103,7 +104,7 @@ void Engine::initialSetup()
 	assert(SUCCEEDED(samplerStateSucc));
 
 	DxHandler::contextPtr->PSSetSamplers(0, 1, &sampleState);
-
+	DxHandler::setupComputeShader();
 	//SsaoClass::generateNoiseTexture();
 	//SsaoClass::generateRandomVectors();
 	//SsaoClass::setupShaders();
@@ -321,6 +322,17 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Second pass -------------------------------------------------------------------
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 
+		//Try magical compute shader - DO NOT DELETE
+		/*
+		DxHandler::contextPtr->CSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Read from blur
+		//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
+		UINT val = -1;
+		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &DxHandler::textureToUAV(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetTexture), &val);
+		DxHandler::contextPtr->Dispatch(36, 20, 1);
+
+		*/
+		//Try magical compute shader
+
 		//Need these to calculate the occlusion factor
 		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
@@ -330,9 +342,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//Do the actual drawing here
 		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
 		DxHandler::contextPtr->VSSetShader(DxHandler::deferredVertexPtr, NULL, NULL);
-		
-		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
+
+		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 		//Need to unbind for the next pass
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color

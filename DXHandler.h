@@ -133,6 +133,10 @@ public:
 	static ID3DBlob* geometryShaderBuffer;
 	static ID3D11GeometryShader* geometryPtr;
 
+	static ID3D11ComputeShader* computeShaderPtr;
+	static ID3DBlob* computeShaderBuffer;
+	static ID3DBlob* csErrorBlob;
+
 	static ID3D11PixelShader* pixelPtr;
 	static ID3D11VertexShader* vertexPtr;
 
@@ -179,6 +183,9 @@ public:
 	void draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater = false);
 	void drawIndexedMesh(EngineObject& drawObject);
 	void drawFullscreenQuad();
+
+	static void setupComputeShader();
+	static ID3D11UnorderedAccessView*& textureToUAV(ID3D11Texture2D* texture);
 
 	void generateFullscreenQuad();
 };
