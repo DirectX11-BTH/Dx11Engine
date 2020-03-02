@@ -84,19 +84,19 @@ void Engine::initialSetup()
 	directXHandler->generateFullscreenQuad();
 
 	D3D11_SAMPLER_DESC textureSamplerDesc;
-	textureSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	textureSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;//D3D11_FILTER_MIN_MAG_MIP_POINT;
 	textureSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.MipLODBias = 0.0f;
 	textureSamplerDesc.MaxAnisotropy = 1;
-	textureSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	textureSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	textureSamplerDesc.BorderColor[0] = 0.f;
 	textureSamplerDesc.BorderColor[1] = 0.f;
 	textureSamplerDesc.BorderColor[2] = 0.f;
 	textureSamplerDesc.BorderColor[3] = 0.f;
 	textureSamplerDesc.MinLOD = 0;
-	textureSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	textureSamplerDesc.MaxLOD = 0;
 
 	ID3D11SamplerState* sampleState;
 	HRESULT samplerStateSucc = DxHandler::devicePtr->CreateSamplerState(&textureSamplerDesc, &sampleState);
