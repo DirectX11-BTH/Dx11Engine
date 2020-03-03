@@ -53,6 +53,56 @@ DxHandler::~DxHandler()
 	}
 }
 
+ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically generate this
+{
+	float* gaussianArr; 
+	gaussianArr = new float[15*15];
+
+	int kernelSize = 15;
+	float sigma = 10.f; //How intensive blur is
+
+	float PI = 3.14;
+
+	for (int y = 0; y < kernelSize; y++)
+	{
+		for (int x = 0; x < kernelSize; x++)
+		{
+			float xDist = abs(x - kernelSize / 2);
+			float yDist = abs(x - kernelSize / 2);
+			float val = exp(-(xDist * xDist + yDist * yDist) / (2 * sigma * sigma)) / (2 * PI * sigma * sigma);
+			
+			gaussianArr[x + y * kernelSize] = val;
+		}
+	}
+
+	return textureFromGaussian(gaussianArr, 15);
+}
+
+ID3D11Texture2D* DxHandler::textureFromGaussian(float* gaussianArr, int kernelSize)
+{
+	ID3D11Texture2D* returnTexture;
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = &gaussianArr;
+	data.SysMemPitch = sizeof(float);
+	data.SysMemSlicePitch = 0;
+	
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width = kernelSize;
+	textureDesc.Height = kernelSize;
+	textureDesc.MipLevels = textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	devicePtr->CreateTexture2D(&textureDesc, &data, &returnTexture);
+
+	return returnTexture;
+}
+
 ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
 {
 	//make the magic shit happen

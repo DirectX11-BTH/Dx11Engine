@@ -143,7 +143,6 @@ public:
 	static ID3D11VertexShader* deferredVertexPtr;
 
 	static ID3D11InputLayout* input_layout_ptr;
-	
 
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
@@ -152,6 +151,9 @@ public:
 	static ID3D11Buffer* GSConstBuff;
 
 	static Mesh* fullscreenQuad;
+
+	static ID3D11Texture2D* generateGaussianKernel();
+	static ID3D11Texture2D* textureFromGaussian(float* gaussianArr, int kernelSize);
 
 	static ID3D11Texture2D* blurTexture(ID3D11ShaderResourceView*& readTexture);
 
