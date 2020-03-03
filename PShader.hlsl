@@ -27,6 +27,7 @@ cbuffer PS_CONSTANT_BUFFER
 	bool hasNormalMap;
 	bool hasTexture;
 	bool environmentMap;
+	bool glowingObject;
 
 	bool isWater;
 	float4 uvDisplacement;
@@ -48,6 +49,7 @@ struct PS_OUTPUT
 	float4 vPosition : SV_TARGET0;
 	float4 vColour : SV_TARGET1;
 	float4 vNormal : SV_TARGET2;
+	float4 vGlow : SV_TARGET3;
 	//float4 vInterpolatedPosition : POSITION;
 };
 
@@ -99,6 +101,13 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
 		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
 	}
+
+	if (glowingObject)
+	{
+		output.vGlow = float4(1, 1, 1, 1);
+	}
+	else
+		output.vGlow = float4(0, 0, 0, 0);
 		
 	//output.vColour = float4(input.vUV.x, input.vUV.y, 0, 0);
 	output.vNormal = input.vNormal;

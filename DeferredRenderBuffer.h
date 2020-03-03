@@ -18,6 +18,7 @@ public:
     ID3D11RenderTargetView* renderTargetView;
 
     ID3D11ShaderResourceView* shaderResourceView;
+    ID3D11UnorderedAccessView* unorderedAccessView;
     //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 
     DeferredRenderBuffer(int textureWidth, int textureHeight);

@@ -1,6 +1,7 @@
 Texture2D ColorTexture : register(t0);
 Texture2D NormalTexture : register(t1); 
 Texture2D PositionTexture : register(t2);
+Texture2D GlowTexture : register(t3);
 
 SamplerState mySampler;
 
@@ -27,6 +28,10 @@ cbuffer PS_CONSTANT_BUFFER
 	bool hasNormalMap;
 	bool hasTexture;
 	bool environmentMap;
+	bool glowingObject;
+
+	bool isWater;
+	float4 uvDisplacement;
 }
 
 struct VS_OUTPUT
@@ -48,8 +53,9 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//
 
 	float4 albedo = ColorTexture.Load(float3(input.vPosition.xy, 0), 0);
-	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space
-	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); //in view space now, due to SSAO
+	float4 normal = NormalTexture.Load(float3(input.vPosition.xy, 0), 0); 
+	float4 position = PositionTexture.Load(float3(input.vPosition.xy, 0), 0); 
+	float4 glow = GlowTexture.Load(float3(input.vPosition.xy, 0), 0);
 
 	//position = mul(position, viewInverseMatrix);
 	//normal = normalize(mul(normal, viewInverseMatrix));
@@ -69,7 +75,7 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//return ssaoOcclusion;
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
-	return (diffuseStrength + ambientStrength + specStrength) * albedo;
+	return ((diffuseStrength + ambientStrength + specStrength) * albedo) + glow;
 	//return normal;
 	//return (specStrength + (ambientStrength*0.5)) * albedo;
 	//return float4(specStrength, 0, 0, 0);

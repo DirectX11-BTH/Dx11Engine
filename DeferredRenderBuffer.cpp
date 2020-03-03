@@ -33,7 +33,7 @@ void DeferredRenderBuffer::init(int width, int height)
 	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; //RGBA 4 lyf
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
-	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	
@@ -54,5 +54,11 @@ void DeferredRenderBuffer::init(int width, int height)
 	HRESULT shaderResourceSucc = DxHandler::devicePtr->CreateShaderResourceView(renderTargetTexture, &shaderResourceDesc, &shaderResourceView);
 	assert(SUCCEEDED(shaderResourceSucc));
 
-	
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+
+	HRESULT succ = DxHandler::devicePtr->CreateUnorderedAccessView(renderTargetTexture, &uavDesc, &unorderedAccessView);
+	assert(SUCCEEDED(succ));
 }

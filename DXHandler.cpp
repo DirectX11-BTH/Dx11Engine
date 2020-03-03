@@ -53,6 +53,58 @@ DxHandler::~DxHandler()
 	}
 }
 
+ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
+{
+	//make the magic shit happen
+	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
+	ID3D11ShaderResourceView* nullSRV[1] = { NULL };
+	D3D11_TEXTURE2D_DESC texDesc{ 0 };
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
+
+	ID3D11Texture2D* returnTexture;
+	ID3D11UnorderedAccessView* uav;
+
+	int texWidth = 720;
+	int texHeight = 720;
+	//TEXTURE DESC
+	texDesc.Width = texWidth;
+	texDesc.Height = texHeight;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; //RGBA 4 lyf
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	
+	HRESULT texSucc = DxHandler::devicePtr->CreateTexture2D(&texDesc, NULL, &returnTexture);
+	assert(SUCCEEDED(texSucc));
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+
+	HRESULT succ = DxHandler::devicePtr->CreateUnorderedAccessView(returnTexture, &uavDesc, &uav);
+	assert(SUCCEEDED(succ));
+
+	//Try magical compute shader - DO NOT DELETE ------------------------------------
+	DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
+	DxHandler::contextPtr->CSSetShaderResources(0, 1, &readTexture); //Read from blur
+	//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
+
+	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &uav, NULL);
+	DxHandler::contextPtr->Dispatch(40, 40, 1);
+
+	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, nullUAV, NULL);
+	DxHandler::contextPtr->CSSetShaderResources(0, 1, nullSRV); //Read from blur
+	DxHandler::contextPtr->CSSetShader(NULL, NULL, 0);
+	//Try magical compute shader ----------------------------------------------------
+
+	uav->Release();
+	return returnTexture;
+}
+
 ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
 {
 	//VS_CONSTANT_MATRIX_BUFFER cBuffer;
@@ -176,7 +228,7 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		0,
+		0, // D3D11_CREATE_DEVICE_DEBUG
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
@@ -523,6 +575,7 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping, bool isW
 		lightBuff.viewMatrix = Camera::cameraView;
 		lightBuff.projMatrix = Camera::cameraProjectionMatrix;
 		lightBuff.isWater = isWater;
+		lightBuff.glowingObject = drawObject.glowingObject;
 		if (isWater)
 			lightBuff.uvDisplacement = DirectX::XMFLOAT4(lightBuff.uvDisplacement.x += 0.0001, lightBuff.uvDisplacement.y += 0.0001, 0, 0);
 		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
@@ -585,6 +638,7 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater
 		lightBuff.hasTexture = (drawObject.hasTexture);
 		lightBuff.hasNormalMap = (drawObject.hasNormalMap);
 		lightBuff.isWater = isWater;
+		lightBuff.glowingObject = drawObject.glowingObject;
 		if (isWater)
 			lightBuff.uvDisplacement = DirectX::XMFLOAT4(0, 0, 0, 0);
 

@@ -41,7 +41,6 @@ void Engine::initialSetup()
 	createDirectX();
 	directXHandler->setupPShader(L"PShader.hlsl");
 	directXHandler->setupVShader(L"VShader.hlsl");
-	directXHandler->setupComputeShader();
 	directXHandler->setupInputLayout();
 	directXHandler->setupDepthBuffer(WIDTH, HEIGHT); //Sets up depth buffer
 
@@ -85,7 +84,7 @@ void Engine::initialSetup()
 	directXHandler->generateFullscreenQuad();
 
 	D3D11_SAMPLER_DESC textureSamplerDesc;
-	textureSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;//D3D11_FILTER_MIN_MAG_MIP_POINT;
+	textureSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	textureSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -113,6 +112,7 @@ void Engine::initialSetup()
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
 {
+	
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
@@ -157,6 +157,22 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		debugObject->readTextureFromFile(longCharArr);
 	}
 	debugObject->hasNormalMap = debugObject->normalMapContainer.loadNormalTextureFromFile(L"./normalMap2.jpg");
+
+
+	EngineObject* debugObject2 = new EngineObject;
+	debugObject2->glowingObject = true;
+	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
+	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25, 25, 25);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).rotationMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
+	if (debugObject2->meshes.at(0).textureName != "")
+	{
+		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
+		const wchar_t* longCharArr = longString.c_str();
+		debugObject2->readTextureFromFile(longCharArr);
+	}
+	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
+
 	//debugObject->readTextureFromFile(L"texture.png");
 
 
@@ -232,6 +248,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
+			directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Glow].renderTargetView, background_color);
 			directXHandler->contextPtr->ClearRenderTargetView(reflectingCube.renderTargetView[i], background_color);
 
 			DxHandler::contextPtr->ClearDepthStencilView(reflectingCube.depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -241,16 +258,18 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			//DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
 			//DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
 
-			ID3D11RenderTargetView* arr[3] =
+			ID3D11RenderTargetView* arr[4] =
 			{
 				gBuffHandler.buffers[GBufferType::Position].renderTargetView,
 				gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 				gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
+				gBuffHandler.buffers[GBufferType::Glow].renderTargetView
 			};
 			//
-			directXHandler->contextPtr->OMSetRenderTargets(3, arr, reflectingCube.depthStencilView); //DEPTH
+			directXHandler->contextPtr->OMSetRenderTargets(4, arr, reflectingCube.depthStencilView); //DEPTH
 			directXHandler->draw(reflectingCube.faceCameras[i], waterObject, true); //Draw the terrain
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
+			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject2);
 			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject); //Draw the terrain
 
 			//Second pass again -------------------------------------------------------------------------------------------------------------
@@ -261,6 +280,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
 			DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 			DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
+			DxHandler::contextPtr->PSSetShaderResources(3, 1, &gBuffHandler.buffers[GBufferType::Glow].shaderResourceView); //Glow
 
 			//Do the actual drawing here
 			DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
@@ -272,6 +292,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal			
 			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
+			DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Glow
 		}
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		//End cube stuff --------------------------------------------------------------------
@@ -285,16 +306,19 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Position].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Normal].renderTargetView, background_color);
+		directXHandler->contextPtr->ClearRenderTargetView(gBuffHandler.buffers[GBufferType::Glow].renderTargetView, background_color);
+
 		//directXHandler->contextPtr->ClearRenderTargetView(SsaoClass::SSAOBuffRenderTargetView, background_color);
 		directXHandler->contextPtr->ClearRenderTargetView(DxHandler::renderTargetPtr, background_color);
 
-		ID3D11RenderTargetView* arr[3] = 
+		ID3D11RenderTargetView* arr[4] = 
 		{
 			gBuffHandler.buffers[GBufferType::Position].renderTargetView,
 			gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetView,
 			gBuffHandler.buffers[GBufferType::Normal].renderTargetView,
+			gBuffHandler.buffers[GBufferType::Glow].renderTargetView,
 		};
-		directXHandler->contextPtr->OMSetRenderTargets(3, arr, DxHandler::depthStencil); //DEPTH
+		directXHandler->contextPtr->OMSetRenderTargets(4, arr, DxHandler::depthStencil); //DEPTH
 
 
 		directXHandler->contextPtr->RSSetViewports(1, &port);
@@ -311,33 +335,43 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
-
+		directXHandler->draw(*debugObject2);
 		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
 		DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
 
+		directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
 		//First pass end -------------------------------------------------------------------
 
+		//glow pass
+		ID3D11Texture2D* blurredTexture = DxHandler::blurTexture(gBuffHandler.buffers[GBufferType::Glow].shaderResourceView);
+		gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture->Release();
+
+		gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture = blurredTexture;
+		
+		//
 
 		//Second pass -------------------------------------------------------------------
 		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 
-		//Try magical compute shader - DO NOT DELETE
-		/*
+		//Try magical compute shader - DO NOT DELETE ------------------------------------
+		/*DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
 		DxHandler::contextPtr->CSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Read from blur
 		//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
-		UINT val = -1;
-		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &DxHandler::textureToUAV(gBuffHandler.buffers[GBufferType::DiffuseColor].renderTargetTexture), &val);
-		DxHandler::contextPtr->Dispatch(36, 20, 1);
 
-		*/
-		//Try magical compute shader
+		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].unorderedAccessView, NULL);
+		DxHandler::contextPtr->Dispatch(40, 40, 1);
+
+		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, nullUAV, NULL);
+		DxHandler::contextPtr->CSSetShaderResources(0, 1, nullSRV)	; //Read from blur
+		DxHandler::contextPtr->CSSetShader(NULL, NULL, 0);*/
+		//Try magical compute shader ----------------------------------------------------
 
 		//Need these to calculate the occlusion factor
 		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
 		DxHandler::contextPtr->PSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 1, &gBuffHandler.buffers[GBufferType::Position].shaderResourceView); //Position
-
+		DxHandler::contextPtr->PSSetShaderResources(3, 1, &gBuffHandler.buffers[GBufferType::Glow].shaderResourceView); //Glow
 
 		//Do the actual drawing here
 		DxHandler::contextPtr->PSSetShader(DxHandler::deferredPixelPtr, NULL, NULL); //set shaders
@@ -350,6 +384,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
 		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
 		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Glow
 
 
 		//Second pass end -------------------------------------------------------------------

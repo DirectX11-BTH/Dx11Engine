@@ -38,7 +38,8 @@ private:
 	HWND primaryWindow;
 
 	GBufferHandler gBuffHandler;
-
+	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
+    ID3D11ShaderResourceView* nullSRV[1] = { NULL };
 	void createWindow();
 	void createDirectX();
 	void createInputHandler();

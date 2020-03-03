@@ -18,6 +18,7 @@ public:
 
 	bool hasTexture = false;
 	bool hasNormalMap = false;
+	bool glowingObject = false;
 
 	ID3D11Resource* texture;
 	ID3D11ShaderResourceView* textureView = nullptr;

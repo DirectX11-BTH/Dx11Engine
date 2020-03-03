@@ -87,8 +87,7 @@ struct PS_CONSTANT_LIGHT_BUFFER
 	BOOL hasNormalMap = false;
 	BOOL hasTexture = false;
 	BOOL environmentMap = false;
-	//XMFLOAT4 padding3234234;
-	//XMFLOAT4 padding34234234;
+	BOOL glowingObject = false;
 
 	BOOL isWater;
 	DirectX::XMFLOAT4 uvDisplacement;
@@ -153,6 +152,8 @@ public:
 	static ID3D11Buffer* GSConstBuff;
 
 	static Mesh* fullscreenQuad;
+
+	static ID3D11Texture2D* blurTexture(ID3D11ShaderResourceView*& readTexture);
 
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);

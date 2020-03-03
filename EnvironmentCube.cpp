@@ -65,11 +65,12 @@ void EnvironmentCube::buildCubeMap()
 	HRESULT depthStencilViewSucc = DxHandler::devicePtr->CreateDepthStencilView(depthBuffer, &depthStencilViewDesc, &depthStencilView);
 
 	DxHandler::devicePtr->CreateTexture2D(&depthDesc, NULL, &depthBuffer);
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{ 0 };
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	HRESULT depthStencilStateSucc = DxHandler::devicePtr->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+	assert(SUCCEEDED(depthStencilStateSucc));
 
 	depthBuffer->Release(); 
 
