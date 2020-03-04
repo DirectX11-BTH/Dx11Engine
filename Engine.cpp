@@ -108,6 +108,8 @@ void Engine::initialSetup()
 	//SsaoClass::generateRandomVectors();
 	//SsaoClass::setupShaders();
 	//SsaoClass::generateOcclusionBuffer();
+
+	DxHandler::gaussianTexture = DxHandler::generateGaussianKernel();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom

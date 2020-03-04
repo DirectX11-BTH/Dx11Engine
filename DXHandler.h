@@ -123,6 +123,8 @@ public:
 	static ID3D11RenderTargetView* renderTargetPtr;
 	static DXGI_SWAP_CHAIN_DESC swapDesc; //= DXGI_SWAP_CHAIN_DESC{ 0 };
 	//static ID3D11Buffer* vertexShaderBuffer;
+	static ID3D11Texture2D* gaussianTexture;
+	static ID3D11ShaderResourceView* gaussianSRV;
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
@@ -153,7 +155,8 @@ public:
 	static Mesh* fullscreenQuad;
 
 	static ID3D11Texture2D* generateGaussianKernel();
-	static ID3D11Texture2D* textureFromGaussian(float* gaussianArr, int kernelSize);
+	static ID3D11Texture2D* textureFromGaussian(DirectX::XMVECTOR* gaussianArr, int kernelSize);
+	static ID3D11ShaderResourceView* SRVFromGaussian(ID3D11Texture2D* texture, D3D11_TEXTURE2D_DESC* texDesc);
 
 	static ID3D11Texture2D* blurTexture(ID3D11ShaderResourceView*& readTexture);
 

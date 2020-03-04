@@ -10,6 +10,9 @@ DXGI_SWAP_CHAIN_DESC DxHandler::swapDesc = DXGI_SWAP_CHAIN_DESC{ 0 };
 ID3DBlob* DxHandler::vertexShaderBuffer = nullptr;
 ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
+ID3D11Texture2D* DxHandler::gaussianTexture = nullptr;
+ID3D11ShaderResourceView* DxHandler::gaussianSRV = nullptr;
+
 float DxHandler::WIDTH;
 float DxHandler::HEIGHT;
 
@@ -55,13 +58,14 @@ DxHandler::~DxHandler()
 
 ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically generate this
 {
-	float* gaussianArr; 
-	gaussianArr = new float[15*15];
+	DirectX::XMVECTOR* gaussianArr; 
+	gaussianArr = new DirectX::XMVECTOR[15*15];
 
 	int kernelSize = 15;
-	float sigma = 10.f; //How intensive blur is
+	float sigma = 25.f; //How intensive blur is
 
 	float PI = 3.14;
+	float sum = 0;
 
 	for (int y = 0; y < kernelSize; y++)
 	{
@@ -70,37 +74,63 @@ ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically gener
 			float xDist = abs(x - kernelSize / 2);
 			float yDist = abs(x - kernelSize / 2);
 			float val = exp(-(xDist * xDist + yDist * yDist) / (2 * sigma * sigma)) / (2 * PI * sigma * sigma);
-			
-			gaussianArr[x + y * kernelSize] = val;
+			sum += val;
+
+			gaussianArr[x + y * kernelSize] = DirectX::XMVectorSet(val, 0, 0, 0);
 		}
 	}
+
+	//normalize
+	/*for (int y = 0; y < kernelSize; y++)
+	{
+		for (int x = 0; x < kernelSize; x++)
+		{
+			gaussianArr[x + y * kernelSize] = DirectX::XMVectorSet(DirectX::XMVectorGetX(gaussianArr[x + y * kernelSize]) / sum, 0, 0, 0);
+		}
+	}*/
 
 	return textureFromGaussian(gaussianArr, 15);
 }
 
-ID3D11Texture2D* DxHandler::textureFromGaussian(float* gaussianArr, int kernelSize)
+ID3D11Texture2D* DxHandler::textureFromGaussian(DirectX::XMVECTOR* gaussianArr, int kernelSize)
 {
 	ID3D11Texture2D* returnTexture;
 
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = &gaussianArr;
-	data.SysMemPitch = sizeof(float);
+	data.SysMemPitch = sizeof(DirectX::XMVECTOR);
 	data.SysMemSlicePitch = 0;
 	
 	D3D11_TEXTURE2D_DESC textureDesc;
 	textureDesc.Width = kernelSize;
 	textureDesc.Height = kernelSize;
 	textureDesc.MipLevels = textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
-	devicePtr->CreateTexture2D(&textureDesc, &data, &returnTexture);
+	HRESULT texSucc = devicePtr->CreateTexture2D(&textureDesc, &data, &returnTexture);
+	assert(SUCCEEDED(texSucc));
 
+	SRVFromGaussian(returnTexture, &textureDesc);
 	return returnTexture;
+}
+
+ID3D11ShaderResourceView* DxHandler::SRVFromGaussian(ID3D11Texture2D* texture, D3D11_TEXTURE2D_DESC* texDesc)
+{
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
+
+	shaderResourceDesc.Format = texDesc->Format;
+	shaderResourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceDesc.Texture2D.MipLevels = 1;
+	HRESULT shaderResourceSucc = DxHandler::devicePtr->CreateShaderResourceView(texture, &shaderResourceDesc, &gaussianSRV);
+	assert(SUCCEEDED(shaderResourceSucc));
+
+	return gaussianSRV;
 }
 
 ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
@@ -141,6 +171,7 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
 	//Try magical compute shader - DO NOT DELETE ------------------------------------
 	DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
 	DxHandler::contextPtr->CSSetShaderResources(0, 1, &readTexture); //Read from blur
+	DxHandler::contextPtr->CSSetShaderResources(1, 1, &gaussianSRV); //Gaussian Kernel generated on CPU
 	//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
 
 	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &uav, NULL);
