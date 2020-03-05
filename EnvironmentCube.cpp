@@ -110,7 +110,7 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 			3.14f / 2,					//FovAngleY, height angle of perspective in radians, should be 90 deg
 			(float)720 / (float)720,	//AspectRatio, width/height of window
 			0.1f,							//NearZ, how close we render
-			10000.f							//FarZ how far we render
+			1000.f							//FarZ how far we render
 		);
 	}
 }

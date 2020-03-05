@@ -99,7 +99,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		
 		float3 camToPixelVec = (input.positionInWorldSpace.xyz - camPos.xyz);
 		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
-		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz, 3.52)); //Refraction test
+		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz,1)); //Refraction test
 
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
 		output.vColour.w = 2;
