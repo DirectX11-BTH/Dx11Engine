@@ -1,5 +1,5 @@
 #pragma once
-
+// Indicates to hybrid graphics systems to prefer the discrete part by default
 
 const int WIDTH = 720;
 const int HEIGHT = 720;

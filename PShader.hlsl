@@ -75,7 +75,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	}
 	else
 	{
-		output.vColour = float4(1, 1, 1, 1);
+		output.vColour = float4(0.8, 0.8, 0.8, 1);
 	}
 
 	//output.vColour = mytexture.Sample(mysampler, input.vUV);//float4(1, 1, 1, 1);
@@ -102,14 +102,14 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz, 3.52)); //Refraction test
 
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
-		output.vColour.w = 0.1;
+		output.vColour.w = 2;
 		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
 	}
 
 	if (glowingObject)
 	{
 		output.vGlow = float4(0, 1, 1, 1);
-		output.vColour.w = 0.1;
+		output.vColour.w = 2;
 	}
 	else
 		output.vGlow = float4(0, 0, 0, 0);

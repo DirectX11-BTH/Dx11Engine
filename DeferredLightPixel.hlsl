@@ -75,11 +75,17 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
 
-	if (albedo.w != 0.1)
+	if (albedo.w != 2)
+	{
 		return ((diffuseStrength + ambientStrength + specStrength) * albedo) + glow;
+	}
 	else
+	{
 		return albedo + glow;
+	}
 	
+	//return (albedo) + glow;
+
 	//return normal;
 	//return (specStrength + (ambientStrength*0.5)) * albedo;
 	//return float4(specStrength, 0, 0, 0);

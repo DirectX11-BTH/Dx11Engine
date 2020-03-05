@@ -4,15 +4,13 @@
 #include <math.h>
 #include "TerrainGenerator.h"
 
-const bool WALK_ON_TERRAIN = false;
-
 class Camera
 {
 private:
 
 public:
 	Camera();
-
+	static bool WALK_ON_TERRAIN;
 
 	static DirectX::XMVECTOR cameraPosition; //-8f to shoot the camera 'back' a bit //Is set in camera.cpp as static
 	static DirectX::XMVECTOR cameraTarget;

@@ -8,6 +8,8 @@ DirectX::XMVECTOR Camera::cameraForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f,
 DirectX::XMMATRIX Camera::cameraProjectionMatrix;
 DirectX::XMMATRIX Camera::cameraView;
 
+bool Camera::WALK_ON_TERRAIN = false;
+
 float Camera::zTranslation = 0.f;
 float Camera::xTranslation = 0.f;
 float Camera::yTranslation = 0.f;

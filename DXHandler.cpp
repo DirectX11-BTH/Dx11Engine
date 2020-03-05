@@ -63,17 +63,17 @@ ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically gener
 	//gaussianArr = new DirectX::XMFLOAT4[15*15], 15;
 
 	int kernelSize = 25;
-	float sigma = 15.f; //How intensive blur is
+	float sigma = 30.f; //How intensive blur is
 
-	float PI = 3.14;
+	float PI = 3.14159265359;
 	float sum = 0;
 
 	for (int y = 0; y < kernelSize; y++)
 	{
 		for (int x = 0; x < kernelSize; x++)
 		{
-			float xDist = abs(x - kernelSize / 2);
-			float yDist = abs(y - kernelSize / 2);
+			float xDist = abs(floor(x - kernelSize / 2)+1);
+			float yDist = abs(floor(y - kernelSize / 2)+1);
 			float val = exp(-(xDist * xDist + yDist * yDist) / (2 * sigma * sigma)) / (2 * PI * sigma * sigma);
 			sum += val;
 
@@ -139,7 +139,7 @@ ID3D11ShaderResourceView* DxHandler::SRVFromGaussian(ID3D11Texture2D* texture, D
 	return gaussianSRV;
 }
 
-ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
+ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV)
 {
 	//make the magic shit happen
 	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
@@ -176,7 +176,7 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
 
 	//Try magical compute shader - DO NOT DELETE ------------------------------------
 	DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
-	DxHandler::contextPtr->CSSetShaderResources(0, 1, &readTexture); //Read from blur
+	DxHandler::contextPtr->CSSetShaderResources(0, 1, &readSRV); //Read from blur
 	DxHandler::contextPtr->CSSetShaderResources(1, 1, &gaussianSRV); //Gaussian Kernel generated on CPU
 	//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
 
@@ -188,6 +188,11 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11ShaderResourceView*& readTexture)
 	DxHandler::contextPtr->CSSetShader(NULL, NULL, 0);
 	//Try magical compute shader ----------------------------------------------------
 
+	//contextPtr->UpdateSubresource(readTexture, NULL, NULL, returnTexture, sizeof(float)*4*texWidth, 0);
+	contextPtr->CopyResource(readTexture, returnTexture);
+
+	
+	returnTexture->Release();
 	uav->Release();
 	return returnTexture;
 }
@@ -310,6 +315,18 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 {
 	//ID3D11DeviceContext* contextPtr = contextPtr;
 	//ID3D11Device* devicePtr = devicePtr;
+
+	//IDXGIFactory1::EnumAdapters
+	IDXGIFactory6* factory;
+	IDXGIAdapter* adapter;
+
+	/*for (
+		UINT adapterIndex = 0;
+		DXGI_ERROR_NOT_FOUND != factory->EnumAdapterByGpuPreference(
+			adapterIndex,
+			DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+			IID_PPV_ARGS(&adapter->ReleaseAndGetAddressOf()));
+		adapterIndex++)*/
 
 	HRESULT succ = D3D11CreateDeviceAndSwapChain(
 		nullptr,

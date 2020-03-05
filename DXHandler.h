@@ -7,6 +7,7 @@
 #include <cassert>
 #include <iostream>
 #include <Windows.h>
+#include <dxgi1_6.h>
 //#include <d3dcompiler.h>
 #include <tchar.h>
 #include <string>
@@ -156,7 +157,7 @@ public:
 	static ID3D11Texture2D* textureFromGaussian(std::vector<DirectX::XMFLOAT4>& gaussianArr, int kernelSize);
 	static ID3D11ShaderResourceView* SRVFromGaussian(ID3D11Texture2D* texture, D3D11_TEXTURE2D_DESC* texDesc);
 
-	static ID3D11Texture2D* blurTexture(ID3D11ShaderResourceView*& readTexture);
+	static ID3D11Texture2D* blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV);
 
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);

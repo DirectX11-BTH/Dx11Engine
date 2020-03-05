@@ -126,7 +126,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	reflectingCube.buildCameras(1000.f, 200.f, 1000.f);
 	reflectingCube.object.meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(1000.f, 300.f, 1000.f);
-	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25.f, 25.f, 25.0f);
+	reflectingCube.object.meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(45.f, 45.f, 45.0f);
 	reflectingCube.object.meshes.at(0).worldMatrix = reflectingCube.object.meshes.at(0).scalingMatrix * reflectingCube.object.meshes.at(0).translationMatrix;
 	reflectingCube.buildCubeMap();
 	DxHandler::createVertexBuffer(reflectingCube.object.meshes.at(0));
@@ -346,10 +346,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//First pass end -------------------------------------------------------------------
 
 		//glow pass
-		ID3D11Texture2D* blurredTexture = DxHandler::blurTexture(gBuffHandler.buffers[GBufferType::Glow].shaderResourceView);
-		gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture->Release();
+		DxHandler::blurTexture(gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture, gBuffHandler.buffers[GBufferType::Glow].shaderResourceView);
+		//gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture->Release();
 
-		gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture = blurredTexture;
+		//gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture = blurredTexture;
 		
 		//
 
