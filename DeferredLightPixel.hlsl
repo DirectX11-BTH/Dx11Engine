@@ -81,7 +81,7 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	}
 	else
 	{
-		return albedo + glow;
+		return albedo*0.5 + glow;
 	}
 	
 	//return (albedo) + glow;
