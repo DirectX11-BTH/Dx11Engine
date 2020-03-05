@@ -58,11 +58,12 @@ DxHandler::~DxHandler()
 
 ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically generate this
 {
-	DirectX::XMVECTOR* gaussianArr; 
-	gaussianArr = new DirectX::XMVECTOR[15*15];
+	std::vector<DirectX::XMFLOAT4> gaussianArr;
+	//DirectX::XMFLOAT4* gaussianArr; 
+	//gaussianArr = new DirectX::XMFLOAT4[15*15], 15;
 
-	int kernelSize = 15;
-	float sigma = 25.f; //How intensive blur is
+	int kernelSize = 5;
+	float sigma = 1.f; //How intensive blur is
 
 	float PI = 3.14;
 	float sum = 0;
@@ -72,39 +73,42 @@ ID3D11Texture2D* DxHandler::generateGaussianKernel() //Need to dynamically gener
 		for (int x = 0; x < kernelSize; x++)
 		{
 			float xDist = abs(x - kernelSize / 2);
-			float yDist = abs(x - kernelSize / 2);
+			float yDist = abs(y - kernelSize / 2);
 			float val = exp(-(xDist * xDist + yDist * yDist) / (2 * sigma * sigma)) / (2 * PI * sigma * sigma);
 			sum += val;
 
-			gaussianArr[x + y * kernelSize] = DirectX::XMVectorSet(val, 0, 0, 0);
+			gaussianArr.push_back(DirectX::XMFLOAT4(val, 0, 0, 0));
+			//gaussianArr[x + y * kernelSize] = DirectX::XMFLOAT4(val, 0, 0, 0);
 		}
 	}
 
 	//normalize
-	/*for (int y = 0; y < kernelSize; y++)
+	for (int y = 0; y < kernelSize; y++)
 	{
 		for (int x = 0; x < kernelSize; x++)
 		{
-			gaussianArr[x + y * kernelSize] = DirectX::XMVectorSet(DirectX::XMVectorGetX(gaussianArr[x + y * kernelSize]) / sum, 0, 0, 0);
+			//gaussianArr[x + y * kernelSize] = DirectX::XMFLOAT4(gaussianArr[x + y * kernelSize].x / sum, 0, 0, 0);//sum;//DirectX::XMVectorSet(DirectX::XMVectorGetX(gaussianArr[x + y * kernelSize]) / sum, 0, 0, 0);
+			gaussianArr[x + y * kernelSize] = DirectX::XMFLOAT4(1, 0, 0, 1);
 		}
-	}*/
+	}
 
 	return textureFromGaussian(gaussianArr, 15);
 }
 
-ID3D11Texture2D* DxHandler::textureFromGaussian(DirectX::XMVECTOR* gaussianArr, int kernelSize)
+ID3D11Texture2D* DxHandler::textureFromGaussian(std::vector<DirectX::XMFLOAT4>& gaussianArr, int kernelSize)
 {
 	ID3D11Texture2D* returnTexture;
 
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = &gaussianArr;
-	data.SysMemPitch = sizeof(DirectX::XMVECTOR);
+	data.pSysMem = gaussianArr.data();
+	data.SysMemPitch = sizeof(DirectX::XMFLOAT4) * 15;//sizeof(float)*4*kernelSize; //Size per line, 4 because 4 floats per entry and then times per kernelSize.
 	data.SysMemSlicePitch = 0;
-	
+
 	D3D11_TEXTURE2D_DESC textureDesc;
 	textureDesc.Width = kernelSize;
 	textureDesc.Height = kernelSize;
-	textureDesc.MipLevels = textureDesc.ArraySize = 1;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
 	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
@@ -129,6 +133,8 @@ ID3D11ShaderResourceView* DxHandler::SRVFromGaussian(ID3D11Texture2D* texture, D
 	shaderResourceDesc.Texture2D.MipLevels = 1;
 	HRESULT shaderResourceSucc = DxHandler::devicePtr->CreateShaderResourceView(texture, &shaderResourceDesc, &gaussianSRV);
 	assert(SUCCEEDED(shaderResourceSucc));
+
+	//gaussianSRV = gaussianSRV;
 
 	return gaussianSRV;
 }

@@ -71,26 +71,24 @@ struct PS_CONSTANT_LIGHT_BUFFER
 	DirectX::XMFLOAT4 ambientMeshColor;
 	DirectX::XMFLOAT4 diffuseMeshColor;
 	DirectX::XMFLOAT4 specularMeshColor;
-
 	DirectX::XMVECTOR camPos;
+
 	DirectX::XMMATRIX worldViewProjectionMatrix;
+
 	DirectX::XMVECTOR specularExponent;
-	DirectX::XMFLOAT2 noiseScale;
 
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
-
 	DirectX::XMMATRIX viewInverseMatrix;
 	DirectX::XMMATRIX worldInverseMatrix;
+	DirectX::XMFLOAT4 uvDisplacement;
 
 	BOOL hasNormalMap = false;
 	BOOL hasTexture = false;
 	BOOL environmentMap = false;
 	BOOL glowingObject = false;
-
-	BOOL isWater;
-	DirectX::XMFLOAT4 uvDisplacement;
+	BOOL isWater = false;
 };
 
 class DxHandler
@@ -155,7 +153,7 @@ public:
 	static Mesh* fullscreenQuad;
 
 	static ID3D11Texture2D* generateGaussianKernel();
-	static ID3D11Texture2D* textureFromGaussian(DirectX::XMVECTOR* gaussianArr, int kernelSize);
+	static ID3D11Texture2D* textureFromGaussian(std::vector<DirectX::XMFLOAT4>& gaussianArr, int kernelSize);
 	static ID3D11ShaderResourceView* SRVFromGaussian(ID3D11Texture2D* texture, D3D11_TEXTURE2D_DESC* texDesc);
 
 	static ID3D11Texture2D* blurTexture(ID3D11ShaderResourceView*& readTexture);

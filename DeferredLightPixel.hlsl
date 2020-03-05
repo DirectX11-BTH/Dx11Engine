@@ -16,7 +16,6 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 camPos;
 	row_major float4x4 worldViewProjectionMatrix;
 	float4 specularExponent; //Only use x value
-	float2 noiseScale;
 
 	row_major float4x4 worldMatrix;
 	row_major float4x4 viewMatrix;
@@ -75,7 +74,12 @@ float4 main(VS_OUTPUT input) : SV_Target0
 	//return ssaoOcclusion;
 	//return (float4(0.6, 0.6, 0.6, 0.6) * ssaoOcclusion.x)+(albedo*0.1);//
 	//return (diffuseStrength + (ambientStrength*ssaoOcclusion.x) + specStrength) * albedo;
-	return ((diffuseStrength + ambientStrength + specStrength) * albedo) + glow;
+
+	if (albedo.w != 0.1)
+		return ((diffuseStrength + ambientStrength + specStrength) * albedo) + glow;
+	else
+		return albedo + glow;
+	
 	//return normal;
 	//return (specStrength + (ambientStrength*0.5)) * albedo;
 	//return float4(specStrength, 0, 0, 0);

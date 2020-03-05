@@ -16,21 +16,24 @@ cbuffer PS_CONSTANT_BUFFER
 	float4 diffuseMeshColor;
 	float4 specularMeshColor;
 	float4 camPos;
+
 	row_major float4x4 worldViewProjectionMatrix;
+
 	float4 specularExponent; //Only use x value
-	float2 noiseScale;
+
 	row_major float4x4 worldMatrix;
 	row_major float4x4 viewMatrix;
 	row_major float4x4 projMatrix;
 	row_major float4x4 viewInverseMatrix;
 	row_major float4x4 worldInverseMatrix;
+	float4 uvDisplacement;
+
 	bool hasNormalMap;
 	bool hasTexture;
 	bool environmentMap;
 	bool glowingObject;
-
 	bool isWater;
-	float4 uvDisplacement;
+	//If you add something that's not a bool after here you will need padding.
 }
 
 struct VS_OUTPUT
@@ -55,6 +58,7 @@ struct PS_OUTPUT
 
 PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 {
+
 	PS_OUTPUT output;
 	
 	output.vPosition = input.positionInWorldSpace;//input.vPosition;
@@ -62,7 +66,6 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	if (isWater)
 	{
 		input.vUV = input.vUV + uvDisplacement;
-		//output.vColour = float4(0, 1, 1, 1);
 	}
 
 	if (hasTexture == true) //Always returns true, rip
@@ -99,12 +102,14 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz, 3.52)); //Refraction test
 
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
+		output.vColour.w = 0.1;
 		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
 	}
 
 	if (glowingObject)
 	{
-		output.vGlow = float4(1, 1, 1, 1);
+		output.vGlow = float4(0, 1, 1, 1);
+		output.vColour.w = 0.1;
 	}
 	else
 		output.vGlow = float4(0, 0, 0, 0);
