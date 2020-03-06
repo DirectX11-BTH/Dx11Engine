@@ -37,23 +37,10 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT Output;
 
-	//Move everything to view for SSAO, not world <----------------------------------------
-	//In light pass, multiply light with view to do ssao in light pass
-	//Also need to send position in world space to pixel shader, output THAT to gbuffer
-
-	/////////Output.vPosition = normalize(mul(float4(normalize(input.vPosition), 1), worldMatrix));
-	//Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix); //<----------------------------------------- note these
-	//Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 0), worldMatrix));
-	//Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
-
+	//Transform things for the pixel shader to output to the deferred render buffers.
 	Output.positionInWorldSpace = mul(float4(input.vPosition, 1), worldMatrix);
-	//Output.positionInWorldSpace = mul(Output.positionInWorldSpace, viewMatrix);
-
 	Output.vNormal = normalize(mul(float4(normalize(input.vNormal), 0), worldMatrix));
-	//Output.vNormal = normalize(mul(normalize(Output.vNormal), viewMatrix));
-
 	Output.vTangent= normalize(mul(float4(normalize(input.vTangent), 0), worldMatrix));
-	//Output.vTangent = normalize(mul(normalize(Output.vTangent), viewMatrix));
 		
 	Output.vPosition = mul(float4(input.vPosition, 1), worldViewProjectionMatrix);
 	Output.vColour = input.vColour;

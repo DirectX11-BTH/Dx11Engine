@@ -124,6 +124,7 @@ public:
 	//static ID3D11Buffer* vertexShaderBuffer;
 	static ID3D11Texture2D* gaussianTexture;
 	static ID3D11ShaderResourceView* gaussianSRV;
+	static ID3D11Texture2D* gaussianKernelTexture;
 
 	static ID3DBlob* vertexShaderBuffer;
 	static ID3DBlob* pixelShaderBuffer;
@@ -144,7 +145,8 @@ public:
 	static ID3D11VertexShader* deferredVertexPtr;
 
 	static ID3D11InputLayout* input_layout_ptr;
-
+	static ID3D11Texture2D* glowOutputTexture;
+	static ID3D11UnorderedAccessView* gaussBlurUav;
 	static ID3D11DepthStencilView* depthStencil;
 	static ID3D11Texture2D* depthBuffer;
 
@@ -156,6 +158,8 @@ public:
 	static ID3D11Texture2D* generateGaussianKernel();
 	static ID3D11Texture2D* textureFromGaussian(std::vector<DirectX::XMFLOAT4>& gaussianArr, int kernelSize);
 	static ID3D11ShaderResourceView* SRVFromGaussian(ID3D11Texture2D* texture, D3D11_TEXTURE2D_DESC* texDesc);
+	static ID3D11ShaderResourceView* SRVGauss;
+	static void generateGaussianTextures();
 
 	static ID3D11Texture2D* blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV);
 
@@ -186,7 +190,6 @@ public:
 
 	void draw(EngineObject& drawObject, bool environmentMapping = false, bool isWater = false);
 	void draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater = false);
-	void drawIndexedMesh(EngineObject& drawObject);
 	void drawFullscreenQuad();
 
 	static void setupComputeShader();

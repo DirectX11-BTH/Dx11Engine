@@ -35,13 +35,14 @@ cbuffer PS_CONSTANT_BUFFER
 
 struct VS_OUTPUT
 {
-
 	float4 vPosition : SV_POSITION;
 	float4 vColour : COLOR;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
+	float4 positionInWorldSpace : POSITION;
 	float4 vTangent : TANGENT;
 };
+
 
 
 float4 main(VS_OUTPUT input) : SV_Target0

@@ -12,6 +12,7 @@ ID3DBlob* DxHandler::pixelShaderBuffer = nullptr;
 
 ID3D11Texture2D* DxHandler::gaussianTexture = nullptr;
 ID3D11ShaderResourceView* DxHandler::gaussianSRV = nullptr;
+ID3D11Texture2D* DxHandler::gaussianKernelTexture = nullptr;
 
 float DxHandler::WIDTH;
 float DxHandler::HEIGHT;
@@ -32,6 +33,10 @@ ID3D11VertexShader* DxHandler::deferredVertexPtr = nullptr;
 ID3D11PixelShader* DxHandler::pixelPtr = nullptr;
 ID3D11VertexShader* DxHandler::vertexPtr = nullptr;
 ID3D11InputLayout* DxHandler::input_layout_ptr = nullptr;
+
+
+ID3D11Texture2D* DxHandler::glowOutputTexture = nullptr;
+ID3D11UnorderedAccessView* DxHandler::gaussBlurUav = nullptr;
 
 ID3D11DepthStencilView* DxHandler::depthStencil = nullptr;
 ID3D11Texture2D* DxHandler::depthBuffer = nullptr;
@@ -139,17 +144,11 @@ ID3D11ShaderResourceView* DxHandler::SRVFromGaussian(ID3D11Texture2D* texture, D
 	return gaussianSRV;
 }
 
-ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV)
+void DxHandler::generateGaussianTextures()
 {
-	//make the magic shit happen
-	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
-	ID3D11ShaderResourceView* nullSRV[1] = { NULL };
 	D3D11_TEXTURE2D_DESC texDesc{ 0 };
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
-
-	ID3D11Texture2D* returnTexture;
-	ID3D11UnorderedAccessView* uav;
 
 	int texWidth = 720;
 	int texHeight = 720;
@@ -163,7 +162,7 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11Shad
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	
-	HRESULT texSucc = DxHandler::devicePtr->CreateTexture2D(&texDesc, NULL, &returnTexture);
+	HRESULT texSucc = DxHandler::devicePtr->CreateTexture2D(&texDesc, NULL, &glowOutputTexture);
 	assert(SUCCEEDED(texSucc));
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
@@ -171,16 +170,25 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11Shad
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
 
-	HRESULT succ = DxHandler::devicePtr->CreateUnorderedAccessView(returnTexture, &uavDesc, &uav);
+	HRESULT succ = DxHandler::devicePtr->CreateUnorderedAccessView(glowOutputTexture, &uavDesc, &gaussBlurUav);
 	assert(SUCCEEDED(succ));
+}
 
-	//Try magical compute shader - DO NOT DELETE ------------------------------------
+ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV)
+{
+	//make the magic shit happen
+	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
+	ID3D11ShaderResourceView* nullSRV[1] = { NULL };
+
+	FLOAT clearColor[4] = { 0,0,0,0 };
+	contextPtr->ClearUnorderedAccessViewFloat(gaussBlurUav, clearColor);
+
 	DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
 	DxHandler::contextPtr->CSSetShaderResources(0, 1, &readSRV); //Read from blur
 	DxHandler::contextPtr->CSSetShaderResources(1, 1, &gaussianSRV); //Gaussian Kernel generated on CPU
 	//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
 
-	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &uav, NULL);
+	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &gaussBlurUav, NULL);
 	DxHandler::contextPtr->Dispatch(40, 40, 1);
 
 	DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, nullUAV, NULL);
@@ -189,12 +197,10 @@ ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11Shad
 	//Try magical compute shader ----------------------------------------------------
 
 	//contextPtr->UpdateSubresource(readTexture, NULL, NULL, returnTexture, sizeof(float)*4*texWidth, 0);
-	contextPtr->CopyResource(readTexture, returnTexture);
+	contextPtr->CopyResource(readTexture, glowOutputTexture);
 
 	
-	returnTexture->Release();
-	uav->Release();
-	return returnTexture;
+	return glowOutputTexture;
 }
 
 ID3D11Buffer* DxHandler::createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix)
@@ -332,7 +338,7 @@ void DxHandler::initalizeDeviceContextAndSwapChain()
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		0, // D3D11_CREATE_DEVICE_DEBUG
+		D3D11_CREATE_DEVICE_DEBUG,
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
@@ -753,34 +759,6 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater
 		geometryBuff.camPos = cubeCam.cameraPosition;
 		DxHandler::contextPtr->UpdateSubresource(GSConstBuff, 0, NULL, &geometryBuff, 0, 0);
 	}
-}
-
-void DxHandler::drawIndexedMesh(EngineObject& drawObject)
-{
-	/*
-	UINT stride = (UINT)sizeof(float) * FLOATS_PER_VERTEX;
-	UINT offset = 0u;
-
-	for (int i = 0; i < drawObject.meshes.size(); i++)
-	{
-		DxHandler::contextPtr->IASetVertexBuffers(0, 1, &drawObject.meshes.at(i).vertexBuffer,
-			&stride, &offset);
-		DxHandler::contextPtr->IASetIndexBuffer(drawObject.meshes.at(i).indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-		VS_CONSTANT_MATRIX_BUFFER matrixBuff;
-		//matrixBuff.scaleMatrix = drawObject.meshes.at(i).scalingMatrix;
-		//matrixBuff.translationMatrix = drawObject.meshes.at(i).translationMatrix;
-		//matrixBuff.rotationMatrix = drawObject.meshes.at(i).rotationMatrix;
-		
-		matrixBuff.worldViewProjectionMatrix = drawObject.meshes.at(i).worldMatrix * Camera::cameraView * Camera::cameraProjectionMatrix;
-		DirectX::XMMatrixTranspose(matrixBuff.worldViewProjectionMatrix);
-
-		DxHandler::contextPtr->UpdateSubresource(this->loadedVSBuffers[PER_OBJECT_CBUFFER_SLOT], 0, NULL, &matrixBuff, 0, 0);
-
-		contextPtr->PSSetShaderResources(0, 1, &drawObject.textureView);
-		DxHandler::contextPtr->DrawIndexed(drawObject.meshes.at(i).indicies.size(), 0, 0);
-	}
-	*/
 }
 
 void DxHandler::drawFullscreenQuad()

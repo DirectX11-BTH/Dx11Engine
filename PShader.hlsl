@@ -42,7 +42,6 @@ struct VS_OUTPUT
 	float4 vColour : COLOR;
 	float4 vUV : UV;
 	float4 vNormal : NORMAL;
-	//float4 vInterpolatedPosition : POSITION;
 	float4 positionInWorldSpace : POSITION;
 	float4 vTangent : TANGENT;
 };

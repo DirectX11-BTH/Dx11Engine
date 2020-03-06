@@ -3,6 +3,8 @@ cbuffer GS_CONSTANT_BUFFER
 	float4 camPos;
 };
 
+
+
 struct GS_OUTPUT
 {
 	float4 vPosition : SV_POSITION;

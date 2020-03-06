@@ -110,6 +110,7 @@ void Engine::initialSetup()
 	//SsaoClass::generateOcclusionBuffer();
 
 	DxHandler::gaussianTexture = DxHandler::generateGaussianKernel();
+	DxHandler::generateGaussianTextures();
 }
 
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
@@ -214,6 +215,9 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	MSG msg;
 	bool quit = false;
+
+	ID3D11ShaderResourceView* nullSRV = nullptr;
+	
 	while (!quit)
 	{
 
@@ -243,6 +247,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->contextPtr->RSSetViewports(1, &reflectingCube.port);
 		for (int i = 0; i < 6; i++)
 		{
+
 			//First pass ---------------------------------------------------------------------------------------------------------------------
 			DxHandler::contextPtr->PSSetShader(DxHandler::pixelPtr, NULL, NULL);
 			DxHandler::contextPtr->VSSetShader(DxHandler::vertexPtr, NULL, NULL);
@@ -291,10 +296,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 			//Need to unbind for the next pass
-			DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
-			DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal			
-			DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
-			DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Glow
+			DxHandler::contextPtr->PSSetShaderResources(0, 0, &nullSRV); //Color
+			DxHandler::contextPtr->PSSetShaderResources(1, 0, &nullSRV); //Normal			
+			DxHandler::contextPtr->PSSetShaderResources(2, 0, &nullSRV); //Position
+			DxHandler::contextPtr->PSSetShaderResources(3, 0, &nullSRV); //Glow
 		}
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		//End cube stuff --------------------------------------------------------------------
@@ -341,33 +346,14 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
 		DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
-
-		directXHandler->contextPtr->OMSetRenderTargets(0, NULL, NULL);
+		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
 		//First pass end -------------------------------------------------------------------
 
-		//glow pass
+		//blur & glow pass - send milk
 		DxHandler::blurTexture(gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture, gBuffHandler.buffers[GBufferType::Glow].shaderResourceView);
-		//gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture->Release();
-
-		//gBuffHandler.buffers[GBufferType::Glow].renderTargetTexture = blurredTexture;
-		
 		//
 
 		//Second pass -------------------------------------------------------------------
-		directXHandler->contextPtr->OMSetRenderTargets(1, &DxHandler::renderTargetPtr, NULL);//, DxHandler::depthStencil);
-
-		//Try magical compute shader - DO NOT DELETE ------------------------------------
-		/*DxHandler::contextPtr->CSSetShader(DxHandler::computeShaderPtr, NULL, 0);
-		DxHandler::contextPtr->CSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::Normal].shaderResourceView); //Read from blur
-		//DxHandler::contextPtr->CSSetShaderResources(1, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Write to
-
-		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].unorderedAccessView, NULL);
-		DxHandler::contextPtr->Dispatch(40, 40, 1);
-
-		DxHandler::contextPtr->CSSetUnorderedAccessViews(0, 1, nullUAV, NULL);
-		DxHandler::contextPtr->CSSetShaderResources(0, 1, nullSRV)	; //Read from blur
-		DxHandler::contextPtr->CSSetShader(NULL, NULL, 0);*/
-		//Try magical compute shader ----------------------------------------------------
 
 		//Need these to calculate the occlusion factor
 		DxHandler::contextPtr->PSSetShaderResources(0, 1, &gBuffHandler.buffers[GBufferType::DiffuseColor].shaderResourceView); //Color
@@ -383,10 +369,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 		//Need to unbind for the next pass
-		DxHandler::contextPtr->PSSetShaderResources(0, 0, NULL); //Color
-		DxHandler::contextPtr->PSSetShaderResources(1, 0, NULL); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(2, 0, NULL); //Position
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, NULL); //Glow
+		DxHandler::contextPtr->PSSetShaderResources(0, 0, &nullSRV); //Color
+		DxHandler::contextPtr->PSSetShaderResources(1, 0, &nullSRV); //Normal
+		DxHandler::contextPtr->PSSetShaderResources(2, 0, &nullSRV); //Position
+		DxHandler::contextPtr->PSSetShaderResources(3, 0, &nullSRV); //Glow
 
 
 		//Second pass end -------------------------------------------------------------------
