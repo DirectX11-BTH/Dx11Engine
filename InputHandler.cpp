@@ -173,6 +173,10 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		if (wParam == VK_SPACE)
 			Camera::WALK_ON_TERRAIN = !Camera::WALK_ON_TERRAIN;
+
+		if (wParam == VK_ESCAPE)
+			exit(1);
+
 		break;	
 	case WM_KEYUP:
 		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes

@@ -35,7 +35,7 @@ public:
 	DirectX::XMFLOAT4 ambientMeshColor;
 	DirectX::XMFLOAT4 diffuseMeshColor = DirectX::XMFLOAT4( 1, 1, 1, 1 );
 	DirectX::XMFLOAT4 specularMeshColor;
-	float shininess = 0.f;
+	float shininess = 1.f;
 	float specularExponent = 10.f;
 
 	std::string textureName = "";

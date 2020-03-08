@@ -65,16 +65,17 @@ void EngineObject::readTextureFromFile(const wchar_t* textureName) //Kanske bör 
 	ID3D11Resource *res;
 	textureView->GetResource(&res);
 	res->QueryInterface<ID3D11Texture2D>(&pTextureInterface);
+
 	D3D11_TEXTURE2D_DESC desc;
 	pTextureInterface->GetDesc(&desc);
-	imageSampleDesc.Width = static_cast<float>(desc.Width);
-	imageSampleDesc.Height = static_cast<float>(desc.Height);
+	imageSampleDesc.Width = static_cast<int>(desc.Width);
+	imageSampleDesc.Height = static_cast<int>(desc.Height);
 
 	//Releaseing res and interface, we need to release texture and textureView when killing object
 	res->Release();
 	pTextureInterface->Release();
 
-	HRESULT createTextureResult = DxHandler::devicePtr->CreateTexture2D(&imageSampleDesc, NULL, &pTexture);
+	HRESULT createTextureResult = DxHandler::devicePtr->CreateTexture2D(&desc, NULL, &pTexture);
 	assert(SUCCEEDED(createTextureResult));
 
 	hasTexture = true;

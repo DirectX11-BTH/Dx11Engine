@@ -69,7 +69,7 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 	if (hasTexture == true) //Always returns true, rip
 	{
-		output.vColour = mytexture.Sample(mysampler, input.vUV);
+		output.vColour = mytexture.Sample(mysampler, input.vUV.xy);
 		//output.vColour = float4(0, 1, 1, 1);
 	}
 	else
@@ -107,13 +107,14 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 
 	if (glowingObject)
 	{
-		output.vGlow = float4(0, 1, 1, 1);
+		output.vGlow = float4(1, 0, 0, 1);
 		output.vColour.w = 2;
 	}
 	else
 		output.vGlow = float4(0, 0, 0, 0);
 		
 	//output.vColour = float4(input.vUV.x, input.vUV.y, 0, 0);
+	//output.vColour = float4(0, input.vUV.y, 0, 2);
 	output.vNormal = input.vNormal;
 	return output;
 

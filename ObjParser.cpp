@@ -181,6 +181,8 @@ Mesh ObjParser::readFromObj(std::string fileName)
 					//texture coord
 					//objFile >> ignoreChar >> ignoreChar2 >> v1 >> v2;
 					loadedVertTextureCoords.push_back(float2{ v1, v2 });
+					std::cout << v1 << " : " << v2 << std::endl;
+					std::cout << std::endl;
 				}
 				else if (line.at(0) == 'f')
 				{
@@ -228,6 +230,8 @@ Mesh ObjParser::readFromObj(std::string fileName)
 									//std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
 									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).x;
 									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).y;
+
+									std::cout << "" << std::endl; //here
 								}
 								else
 								{

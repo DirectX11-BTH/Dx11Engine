@@ -90,8 +90,8 @@ void Engine::initialSetup()
 	textureSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	textureSamplerDesc.MipLODBias = 0.0f;
 	textureSamplerDesc.MaxAnisotropy = 1;
-	textureSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	textureSamplerDesc.BorderColor[0] = 0.f;
+	textureSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	textureSamplerDesc.BorderColor[0] = 0.5f;
 	textureSamplerDesc.BorderColor[1] = 0.f;
 	textureSamplerDesc.BorderColor[2] = 0.f;
 	textureSamplerDesc.BorderColor[3] = 0.f;
@@ -116,6 +116,21 @@ void Engine::initialSetup()
 void Engine::engineLoop() //The whole function is not run multiple times a second, it initiates a loop at the bottom
 {
 	
+	EngineObject* debugObject2 = new EngineObject;
+	//debugObject2->glowingObject = true;
+	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
+	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25, 25, 25);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).rotationMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
+	if (debugObject2->meshes.at(0).textureName != "")
+	{
+		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
+		const wchar_t* longCharArr = longString.c_str();
+		debugObject2->readTextureFromFile(longCharArr);
+	}
+	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
+	debugObject2->readTextureFromFile(L"./TestModel/texture.png");
+
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
 	terrainObject.meshes.push_back(terrainGenerator.heightTerrain);
@@ -162,39 +177,22 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	debugObject->hasNormalMap = debugObject->normalMapContainer.loadNormalTextureFromFile(L"./normalMap2.jpg");
 
 
-	EngineObject* debugObject2 = new EngineObject;
-	debugObject2->glowingObject = true;
-	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
-	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25, 25, 25);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).rotationMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
-	if (debugObject2->meshes.at(0).textureName != "")
-	{
-		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
-		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
-		const wchar_t* longCharArr = longString.c_str();
-		debugObject2->readTextureFromFile(longCharArr);
-	}
-	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
-
-	//debugObject->readTextureFromFile(L"texture.png");
-
-
-	/*EngineObject* debugObject2 = new EngineObject;
-	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/cube.obj"));
-	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, -10.0f);
-	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(10.f, 10.f, 10.f);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).worldMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
-	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
-	std::cout << "Cube parsed, nr of vertices in debugObject2 is " << debugObject2->meshes.at(0).vertices.size() << std::endl;*/
+	EngineObject* debugObject3 = new EngineObject;
+	debugObject3->meshes.push_back(ObjParser::readFromObj("./TestModel/Wood_Table.obj"));
+	debugObject3->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, 100.0f);
+	debugObject3->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(70.f, 70.f, 70.f);
+	debugObject3->meshes.at(0).worldMatrix = debugObject3->meshes.at(0).scalingMatrix * debugObject3->meshes.at(0).worldMatrix * debugObject3->meshes.at(0).translationMatrix;
+	directXHandler->createVertexBuffer(debugObject3->meshes.at(0));
+	std::cout << "Cube parsed, nr of vertices in debugObject3 is " << debugObject3->meshes.at(0).vertices.size() << std::endl;
 
 	//Get texture name from debugMesh, gotta convert string to wchar_t*
-	/*if (debugObject2->meshes.at(0).textureName != "")
+	if (debugObject3->meshes.at(0).textureName != "")
 	{
-		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
-		std::wstring longString = std::wstring(debugObject2->meshes.at(0).textureName.begin(), debugObject2->meshes.at(0).textureName.end());
+		debugObject3->meshes.at(0).textureName = "./TestModel/" + debugObject3->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject3->meshes.at(0).textureName.begin(), debugObject3->meshes.at(0).textureName.end());
 		const wchar_t* longCharArr = longString.c_str();
-		debugObject2->readTextureFromFile(longCharArr);
-	}*/
+		debugObject3->readTextureFromFile(longCharArr);
+	}
 	
 	//debugObject2->readTextureFromFile(L"./Texture.png");
 	
@@ -216,7 +214,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	MSG msg;
 	bool quit = false;
 
-	ID3D11ShaderResourceView* nullSRV = nullptr;
+	ID3D11ShaderResourceView* nullSRV = { NULL };
 	
 	while (!quit)
 	{
@@ -296,10 +294,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 			//Need to unbind for the next pass
-			DxHandler::contextPtr->PSSetShaderResources(0, 0, &nullSRV); //Color
-			DxHandler::contextPtr->PSSetShaderResources(1, 0, &nullSRV); //Normal			
-			DxHandler::contextPtr->PSSetShaderResources(2, 0, &nullSRV); //Position
-			DxHandler::contextPtr->PSSetShaderResources(3, 0, &nullSRV); //Glow
+			DxHandler::contextPtr->PSSetShaderResources(0, 1, &nullSRV); //Color
+			DxHandler::contextPtr->PSSetShaderResources(1, 1, &nullSRV); //Normal			
+			DxHandler::contextPtr->PSSetShaderResources(2, 1, &nullSRV); //Position
+			DxHandler::contextPtr->PSSetShaderResources(3, 1, &nullSRV); //Glow
 		}
 		directXHandler->contextPtr->RSSetViewports(1, &port);
 		//End cube stuff --------------------------------------------------------------------
@@ -343,6 +341,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		//directXHandler->draw(*debugObject2);
 		directXHandler->draw(terrainObject);
 		directXHandler->draw(*debugObject2);
+		directXHandler->draw(*debugObject3);
 		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
 		DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);
@@ -369,10 +368,10 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->drawFullscreenQuad(); //Fill in screen with quad to activate all pixels for loading from gbuffs
 
 		//Need to unbind for the next pass
-		DxHandler::contextPtr->PSSetShaderResources(0, 0, &nullSRV); //Color
-		DxHandler::contextPtr->PSSetShaderResources(1, 0, &nullSRV); //Normal
-		DxHandler::contextPtr->PSSetShaderResources(2, 0, &nullSRV); //Position
-		DxHandler::contextPtr->PSSetShaderResources(3, 0, &nullSRV); //Glow
+		DxHandler::contextPtr->PSSetShaderResources(0, 1, &nullSRV); //Color
+		DxHandler::contextPtr->PSSetShaderResources(1, 1, &nullSRV); //Normal
+		DxHandler::contextPtr->PSSetShaderResources(2, 1, &nullSRV); //Position
+		DxHandler::contextPtr->PSSetShaderResources(3, 1, &nullSRV); //Glow
 
 
 		//Second pass end -------------------------------------------------------------------

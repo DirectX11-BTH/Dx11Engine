@@ -176,7 +176,7 @@ void DxHandler::generateGaussianTextures()
 
 ID3D11Texture2D* DxHandler::blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV)
 {
-	//make the magic shit happen
+	//make the magic happen
 	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
 	ID3D11ShaderResourceView* nullSRV[1] = { NULL };
 
@@ -695,6 +695,10 @@ void DxHandler::draw(EngineObject& drawObject, bool environmentMapping, bool isW
 		DxHandler::contextPtr->UpdateSubresource(GSConstBuff, 0, NULL, &geometryBuff, 0, 0);
 
 		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
+
+		ID3D11ShaderResourceView* nullSRV[1] = { NULL };
+		contextPtr->PSSetShaderResources(0, 1, nullSRV);
+		contextPtr->PSSetShaderResources(1, 1, nullSRV);
 	}
 }
 
@@ -752,12 +756,16 @@ void DxHandler::draw(cubeCamera& cubeCam, EngineObject& drawObject, bool isWater
 		if (isWater)
 			lightBuff.uvDisplacement = DirectX::XMFLOAT4(0, 0, 0, 0);
 
-		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
-		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
-
 		GS_CONSTANT_MATRIX_BUFFER geometryBuff;
 		geometryBuff.camPos = cubeCam.cameraPosition;
 		DxHandler::contextPtr->UpdateSubresource(GSConstBuff, 0, NULL, &geometryBuff, 0, 0);
+
+		DxHandler::contextPtr->UpdateSubresource(PSConstBuff, 0, NULL, &lightBuff, 0, 0);
+		DxHandler::contextPtr->Draw(drawObject.meshes.at(i).vertices.size(), 0);
+
+		ID3D11ShaderResourceView* nullSRV[1] = { NULL };
+		contextPtr->PSSetShaderResources(0, 1, nullSRV);
+		contextPtr->PSSetShaderResources(1, 1, nullSRV);
 	}
 }
 
