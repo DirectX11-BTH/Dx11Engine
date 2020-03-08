@@ -120,7 +120,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	//debugObject2->glowingObject = true;
 	debugObject2->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
 	debugObject2->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25, 25, 25);
-	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).rotationMatrix * debugObject2->meshes.at(0).translationMatrix * debugObject2->meshes.at(0).scalingMatrix;
+	debugObject2->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(25, 200, 150);
+	debugObject2->meshes.at(0).worldMatrix = debugObject2->meshes.at(0).scalingMatrix * debugObject2->meshes.at(0).rotationMatrix * debugObject2->meshes.at(0).translationMatrix;
 	if (debugObject2->meshes.at(0).textureName != "")
 	{
 		debugObject2->meshes.at(0).textureName = "./TestModel/" + debugObject2->meshes.at(0).textureName;
@@ -130,6 +131,23 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 	}
 	directXHandler->createVertexBuffer(debugObject2->meshes.at(0));
 	debugObject2->readTextureFromFile(L"./TestModel/texture.png");
+
+
+	EngineObject* debugObject4 = new EngineObject;
+	debugObject4->glowingObject = true;
+	debugObject4->meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj"));
+	debugObject4->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(25, 25, 25);
+	debugObject4->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(25, 200, 25);
+	debugObject4->meshes.at(0).worldMatrix = debugObject4->meshes.at(0).scalingMatrix * debugObject4->meshes.at(0).rotationMatrix * debugObject4->meshes.at(0).translationMatrix;
+	if (debugObject4->meshes.at(0).textureName != "")
+	{
+		debugObject4->meshes.at(0).textureName = "./TestModel/" + debugObject4->meshes.at(0).textureName;
+		std::wstring longString = std::wstring(debugObject4->meshes.at(0).textureName.begin(), debugObject4->meshes.at(0).textureName.end());
+		const wchar_t* longCharArr = longString.c_str();
+		debugObject4->readTextureFromFile(longCharArr);
+	}
+	directXHandler->createVertexBuffer(debugObject4->meshes.at(0));
+
 
 	terrainGenerator.generateFromHeightMap("./heightmap.png");
 	EngineObject terrainObject;
@@ -179,7 +197,7 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 
 	EngineObject* debugObject3 = new EngineObject;
 	debugObject3->meshes.push_back(ObjParser::readFromObj("./TestModel/Wood_Table.obj"));
-	debugObject3->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(0.f, 10.f, 100.0f);
+	debugObject3->meshes.at(0).translationMatrix = DirectX::XMMatrixTranslation(100.f, 200.f, 150.0f);
 	debugObject3->meshes.at(0).scalingMatrix = DirectX::XMMatrixScaling(70.f, 70.f, 70.f);
 	debugObject3->meshes.at(0).worldMatrix = debugObject3->meshes.at(0).scalingMatrix * debugObject3->meshes.at(0).worldMatrix * debugObject3->meshes.at(0).translationMatrix;
 	directXHandler->createVertexBuffer(debugObject3->meshes.at(0));
@@ -275,6 +293,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 			directXHandler->draw(reflectingCube.faceCameras[i], waterObject, true); //Draw the terrain
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject);
 			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject2);
+			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject3);
+			directXHandler->draw(reflectingCube.faceCameras[i], *debugObject4);
 			directXHandler->draw(reflectingCube.faceCameras[i], terrainObject); //Draw the terrain
 
 			//Second pass again -------------------------------------------------------------------------------------------------------------
@@ -342,6 +362,8 @@ void Engine::engineLoop() //The whole function is not run multiple times a secon
 		directXHandler->draw(terrainObject);
 		directXHandler->draw(*debugObject2);
 		directXHandler->draw(*debugObject3);
+		directXHandler->draw(*debugObject4);
+
 		//draws the cube
 		directXHandler->draw(reflectingCube.object, true);
 		DxHandler::contextPtr->GSSetShader(NULL, NULL, NULL);

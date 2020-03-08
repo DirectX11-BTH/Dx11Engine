@@ -229,7 +229,7 @@ Mesh ObjParser::readFromObj(std::string fileName)
 								{
 									//std::cout << "Reading vt index: " << (std::stoi(tempString)) - 1 << std::endl;
 									tempVert.u = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).x;
-									tempVert.v = loadedVertTextureCoords.at((std::stoi(tempString)) - 1).y;
+									tempVert.v = 1-loadedVertTextureCoords.at((std::stoi(tempString)) - 1).y;
 
 									std::cout << "" << std::endl; //here
 								}

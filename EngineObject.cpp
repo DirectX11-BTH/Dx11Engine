@@ -53,7 +53,7 @@ void EngineObject::readTextureFromFile(const wchar_t* textureName) //Kanske bör 
 	assert(SUCCEEDED(readTextureResult));
 
 	imageSampleDesc.MipLevels = imageSampleDesc.ArraySize = 1;
-	imageSampleDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	imageSampleDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	imageSampleDesc.SampleDesc.Count = 1;
 	imageSampleDesc.Usage = D3D11_USAGE_DEFAULT;
 	imageSampleDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
