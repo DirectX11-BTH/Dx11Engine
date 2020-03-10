@@ -158,12 +158,6 @@
     <FxCompile Include="DeferredLightPixel.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SSAOPixel.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="SSAOVertex.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="GeometryShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>

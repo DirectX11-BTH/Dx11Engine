@@ -29,6 +29,7 @@ struct VS_OUTPUT
 	float4 vTangent : TANGENT;
 };
 
+//Pure passthrough, world matrix is indentity matrix when doing this.
 VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT output;

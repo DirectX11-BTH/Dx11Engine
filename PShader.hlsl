@@ -36,7 +36,7 @@ cbuffer PS_CONSTANT_BUFFER
 	//If you add something that's not a bool after here you will need padding.
 }
 
-struct VS_OUTPUT
+struct VS_OUTPUT //Output from geometry shader
 {
 	float4 vPosition : SV_POSITION;	
 	float4 vColour : COLOR;
@@ -46,43 +46,37 @@ struct VS_OUTPUT
 	float4 vTangent : TANGENT;
 };
 
-struct PS_OUTPUT
+struct PS_OUTPUT //Output to gbuffers
 {
 	float4 vPosition : SV_TARGET0;
 	float4 vColour : SV_TARGET1;
 	float4 vNormal : SV_TARGET2;
 	float4 vGlow : SV_TARGET3;
-	//float4 vInterpolatedPosition : POSITION;
 };
 
 PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 {
 
 	PS_OUTPUT output;
-	
-	output.vPosition = input.positionInWorldSpace;//input.vPosition;
+	output.vPosition = input.positionInWorldSpace;
 
 	if (isWater)
 	{
 		input.vUV = input.vUV + uvDisplacement;
 	}
 
-	if (hasTexture == true) //Always returns true, rip
+	if (hasTexture == true) 
 	{
 		output.vColour = mytexture.Sample(mysampler, input.vUV.xy);
-		//output.vColour = float4(0, 1, 1, 1);
 	}
 	else
 	{
 		output.vColour = float4(0.8, 0.8, 0.8, 1);
 	}
-
-	//output.vColour = mytexture.Sample(mysampler, input.vUV);//float4(1, 1, 1, 1);
 		
 	if (hasNormalMap)
 	{
-		float3 loadedNormal = NormalMapTexture.Sample(mysampler, input.vUV);//NormalMapTexture.Load(float3(input.vPosition.xy, 0), 0).xyz;
-		//float4 tangent = TangentTexture.Load(float3(input.vPosition.xy, 0), 0);
+		float3 loadedNormal = NormalMapTexture.Sample(mysampler, input.vUV);
 		float3 tangent = normalize(input.vTangent - dot(input.vTangent, input.vNormal) * input.vNormal);
 		float3 bitangent = normalize(cross(loadedNormal, tangent));
 
@@ -92,29 +86,22 @@ PS_OUTPUT main(VS_OUTPUT input) : SV_Target
 	}
 
 	if (environmentMap)
-	{
-		float3 pixelToCamVec =  (camPos.xyz - input.positionInWorldSpace.xyz);
-		float3 pixelToCameraReflected = normalize(reflect(pixelToCamVec, input.vNormal.xyz));
-		
+	{		
 		float3 camToPixelVec = (input.positionInWorldSpace.xyz - camPos.xyz);
 		float3 camToPixelReflected = normalize(reflect(camToPixelVec, input.vNormal.xyz));
-		//float3 camToPixelReflected = normalize(refract(camToPixelVec, input.vNormal.xyz,1)); //Refraction test
 
 		output.vColour = EnvironmentTexture.Sample(mysampler, camToPixelReflected);
-		output.vColour.w = 2;
-		//output.vColour = EnvironmentTexture.Sample(mysampler, pixelToCameraReflected);
+		output.vColour.w = 2; //To avoid light calculations later. Is normally not above 1.
 	}
 
 	if (glowingObject)
 	{
-		output.vGlow = float4(1, 0, 0, 1);
-		output.vColour.w = 2;
+		output.vGlow = float4(1, 0, 0, 1); //White glow.
+		output.vColour.w = 2; //To avoid light calculations later. Is normally not above 1.
 	}
 	else
 		output.vGlow = float4(0, 0, 0, 0);
 		
-	//output.vColour = float4(input.vUV.x, input.vUV.y, 0, 0);
-	//output.vColour = float4(0, input.vUV.y, 0, 2);
 	output.vNormal = input.vNormal;
 	return output;
 

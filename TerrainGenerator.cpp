@@ -29,7 +29,7 @@ void TerrainGenerator::generateFromHeightMap(std::string textureName)
 }
 void TerrainGenerator::readTexture(std::string textureName)
 {
-	int bpp;
+	int bpp; 
 	width = 200;
 	height = 200;
 	bpp = sizeof(uint8_t)*4; //RGBA, bits per pixel
@@ -41,26 +41,19 @@ void TerrainGenerator::readTexture(std::string textureName)
     uint8_t* rgb_image = stbi_load(textureName.data(), &width, &height, &bpp, 1);
 
 	//Row by row from top down
-
-	float r = (float)rgb_image[0];
-	float g = (float)rgb_image[1];
-	float b = (float)rgb_image[2];
-	float r1 = (float)rgb_image[3];
-	float g1 = (float)rgb_image[4];
-	float b1 = (float)rgb_image[5];
-
 	float sizeMultiplier = scaling;
+	XMFLOAT3 temp0, temp1, temp2, temp3; //These are the quad positions to generate from
 
 	for(int y = 0; y < height-1; y++)
 	{
 		for(int x = 0; x < width-1; x++)
 		{
-			XMFLOAT3 temp0, temp1, temp2, temp3; //bootiful
-			temp0.x = x * sizeMultiplier;
+			temp0.x = x * sizeMultiplier; //Vertex locations on x and y axis loaded here.
 			temp0.z = y * sizeMultiplier;
-			temp0.y = (float)rgb_image[y*width + x + 0]/255.f;
+			temp0.y = (float)rgb_image[y*width + x + 0]/255.f;  //Load in height of said vertex, only returns 0-1.
 			temp0.y *= verticalScaling;
-					
+			//Repeat this for all 4 vertex positions.		
+
 			temp2.x = (x+1)* sizeMultiplier;
 			temp2.z = (y) *sizeMultiplier;
 			temp2.y = (float)rgb_image[y * width + x +1]/255.f;
@@ -76,9 +69,10 @@ void TerrainGenerator::readTexture(std::string textureName)
 			temp3.y = (float)rgb_image[(y + 1) * width + x + 1]/255.f;
 			temp3.y *= verticalScaling;
 
-
+			//After we have all 4 positions, generate quad.
 			std::vector<Vertex> vertList = generateQuad(temp0,temp1,temp2,temp3);
 
+			//Push this to the mesh.
 			for (int i = 0; i < vertList.size(); i++)
 			{
 				heightTerrain.vertices.push_back(vertList.at(i));
@@ -94,7 +88,7 @@ void TerrainGenerator::readTexture(std::string textureName)
 
 std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 corner2, XMFLOAT3 corner3)
 {
-	//Generate default vertex w/ normal pointing up, default color grey defined in ambientMeshColor
+	//Generate default vertex w/ normal pointing up, default color grey defined in ambientMeshColor.
 	std::vector<Vertex> quadVertices;
 
 	/*
@@ -108,7 +102,7 @@ std::vector<Vertex> generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1, XMFLOAT3 co
 	vert0.x = corner0.x;
 	vert0.y = corner0.y;
 	vert0.z = corner0.z;
-	vert0.u = corner0.x / (200*TerrainGenerator::scaling);;
+	vert0.u = corner0.x / (200*TerrainGenerator::scaling);; //Terrain now has UV mapping. Arbitrary.
 	vert0.v = corner0.z / (200*TerrainGenerator::scaling);;
 
 	vert0.r = 0.5;

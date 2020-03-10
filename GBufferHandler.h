@@ -7,6 +7,6 @@ class GBufferHandler
 {
 private:
 public:
-	DeferredRenderBuffer buffers[4]; //magical gbuffers
+	DeferredRenderBuffer buffers[4];
 	void init(int width, int height);
 };

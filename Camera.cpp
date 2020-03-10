@@ -27,25 +27,25 @@ Camera::Camera()
 
 void Camera::updateCamera()
 {
-	
+	/*
+	This moves camera (in world space) & generates rotation matrices based on mouse movement (based on mouse delta position).
+	Moves camera based on a multiplier to move it.
+	*/
+
 	if (WALK_ON_TERRAIN)
 	{
 		//set height of camera accordingly
-		
-		
 		XMFLOAT4 cameraPosInFloats;
 		XMStoreFloat4(&cameraPosInFloats, cameraPosition);
 		int xpos = cameraPosInFloats.x / TerrainGenerator::scaling;
 		int zpos = cameraPosInFloats.z / TerrainGenerator::scaling;	
-		int whichVertex = (zpos *6* (TerrainGenerator::width-1)+(xpos*6));
+		int whichVertex = (zpos *6* (TerrainGenerator::width-1)+(xpos*6)); //Returns vertex index based on which x and y position the camera is on. Always the 6th vertex of the quad.
+		//This works because our terrain is grid based & matched with pixels from a texture.
 
 		float heightOfTriangle = 0;
 
 		if (whichVertex < TerrainGenerator::heightTerrain.vertices.size())
-			heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+150.f;
-
-		std::cout << xpos << " : " << zpos << std::endl;
-		//std::cout << cameraPosInFloats.x << " : " << cameraPosInFloats.y << " : " << cameraPosInFloats.z  << std::endl;
+			heightOfTriangle = (TerrainGenerator::heightTerrain.vertices.at(whichVertex).y)+150.f; //Retrieves vertex height to set camera to (+ some offset).
 
 		cameraPosition = DirectX::XMVectorSet(cameraPosInFloats.x, heightOfTriangle, cameraPosInFloats.z, 1.0f);
 	}
@@ -53,13 +53,11 @@ void Camera::updateCamera()
 	Camera::cameraTarget = XMVector3TransformCoord(XMVectorSet(0, 0, 1, 0), cameraRotationMatrix); //Spinning the target around us
 	Camera::cameraTarget = XMVector3Normalize(Camera::cameraTarget);
 
-	//XMMATRIX tempYMatrix;
-	XMMATRIX tempYMatrix = XMMatrixRotationY(Camera::yaw); //left to right
-	XMMATRIX tempXMatrix = XMMatrixRotationX(Camera::pitch); //look up and down
+	XMMATRIX tempYMatrix = XMMatrixRotationY(Camera::yaw); //left to right, generates rotation matrix on y axis.
+	XMMATRIX tempXMatrix = XMMatrixRotationX(Camera::pitch); //look up and down, generates rotation matrix on x axis.
 	 
 	Camera::cameraRight = XMVector3TransformCoord(XMVectorSet(1, 0, 0, 0), tempYMatrix); //To move sideways (X axis)
 	Camera::cameraRight = XMVector3Normalize(Camera::cameraRight);
-
 
 	Camera::cameraUp = XMVector3TransformCoord(Camera::cameraUp, tempYMatrix);
 	Camera::cameraUp = XMVector3Normalize(Camera::cameraUp);
@@ -76,7 +74,7 @@ void Camera::updateCamera()
 	Camera::cameraPosition += Camera::cameraForward * zTranslation;
 	Camera::cameraPosition += Camera::cameraUp * yTranslation;
 
-	Camera::cameraTarget = Camera::cameraPosition + Camera::cameraTarget * -1;//Camera::cameraForward * -2;//Camera::cameraTarget;
+	Camera::cameraTarget = Camera::cameraPosition + Camera::cameraTarget * -1;
 
 
 	cameraView = DirectX::XMMatrixLookAtLH(Camera::cameraPosition, Camera::cameraTarget, Camera::cameraUp);

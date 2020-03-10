@@ -60,8 +60,6 @@ void InputHandler::handleInput()
 
 LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//PAINTSTRUCT ps;
-	//HDC hdc; //HDC is to handle		 context.
 
 	float degToRad = (XM_PI * 2.f) / 380.f;
 	float deltaX = 0;
@@ -75,11 +73,6 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	switch (message)
 	{
-	/*case WM_PAINT: //If the window is resized
-		hdc = BeginPaint(hWnd, &ps); //Indicate it's using paint func
-
-		EndPaint(hWnd, &ps); //Return control of the paint func
-		break;*/
 
 	case WM_ACTIVATEAPP:
 		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
@@ -94,55 +87,13 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case VK_ESCAPE:
 		PostQuitMessage(0);
 		break;
-	case WM_MOUSEMOVE:
-		//float x = LOWORD(lParam);
-		//float y = HIWORD(lParam);
-
-		//GetCursorPos(&currentMousePosition);
-
-		//if (currentMousePosition.x != mouseResetPosition.x && currentMousePosition.y != mouseResetPosition.y && !resetCursor)
-		//if(leftMouseButtonDown)
-		/*if (LOWORD(lParam) != 600 / 2 && HIWORD(lParam) != 500/2)
-		{
-
-			deltaX = LOWORD(lParam) - lastMousePos.x; //LOWORD(lParam) = x in indow
-			deltaY = HIWORD(lParam) - lastMousePos.y; //HIWORD(lParam) = y in window
-
-			Camera::pitch += -30 * deltaY / 600 * degToRad; //Up and down
-			Camera::yaw += -30 * -deltaX / 500 * degToRad; //Side to side
-			
-			GetWindowRect(hWnd, &windowRect);
-			windowPosX = windowRect.left;
-			windowPosY = windowRect.top;
-
-			XMFLOAT4 camPos;
-			XMStoreFloat4(&camPos, (Camera::cameraTarget + Camera::cameraPosition));
-			lastMousePos = { (float)LOWORD(lParam), (float)HIWORD(lParam) };
-
-			mouseResetPosition.x = 600 / 2;
-			mouseResetPosition.y = 500 / 2;
-			ClientToScreen(hWnd, &mouseResetPosition); //From window space to your entire screen
-			std::cout << mouseResetPosition.x << " : " << mouseResetPosition.y << std::endl;
-
-			SetCursorPos(mouseResetPosition.y, mouseResetPosition.y);
-			std::cout << currentMousePosition.x << " = " << currentMousePosition.y << std::endl;
-			resetCursor = true;
-		}
-		else
-			resetCursor = false;
-		break;*/
-	case WM_LBUTTONDOWN: //If someone clicks left mouse button
-		//leftMouseButtonDown = true;
-		break;
 	case WM_LBUTTONUP: //If someone clicks left mouse button
-		//leftMouseButtonDown = false;
 		break;
 	case WM_MOUSEHOVER:
 		DirectX::Mouse::ProcessMessage(message, wParam, lParam);
 		break;
-	case WM_KEYDOWN:
-		//DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
-		if (wParam == 0x57) //W Button, virtual keycodes, see https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+	case WM_KEYDOWN: //When a key is pushed down.
+		if (wParam == 0x57) //W Button, virtual keycodes.
 		{
 			Camera::zTranslation = -2.5f;
 		}
@@ -220,7 +171,6 @@ LRESULT InputHandler::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		trackMouse = true;
 		break;
 	default:
-		//return DefWindowProc(hWnd, message, wParam, lParam);
 		break;
 	}
 

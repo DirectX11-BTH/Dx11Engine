@@ -8,7 +8,6 @@
 #include <iostream>
 #include <Windows.h>
 #include <dxgi1_6.h>
-//#include <d3dcompiler.h>
 #include <tchar.h>
 #include <string>
 #include <wrl.h>
@@ -47,23 +46,11 @@ struct VS_CONSTANT_MATRIX_BUFFER
 
 	DirectX::XMMATRIX viewInverseMatrix;
 	DirectX::XMMATRIX worldInverseMatrix;
-
-	//DirectX::XMVECTOR randomVectors[SsaoClass::nrOfVecs * SsaoClass::nrOfVecs];
 };
 
 struct GS_CONSTANT_MATRIX_BUFFER
 {
 	DirectX::XMVECTOR camPos;
-};
-
-struct VS_CONSTANT_CAMERA_BUFFER
-{
-	DirectX::XMMATRIX worldViewProjectionMatrix;
-	DirectX::XMMATRIX cameraView;
-
-	DirectX::XMVECTOR cameraPosition; //= DirectX::XMVectorSet(0.0f, 0.0f, -8.f, 0.0f); //0.5f to shoot the camera 'back' a bit
-	DirectX::XMVECTOR cameraTarget; //= DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	DirectX::XMVECTOR cameraUp; //= DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 };
 
 struct PS_CONSTANT_LIGHT_BUFFER
@@ -164,7 +151,6 @@ public:
 	static ID3D11Texture2D* blurTexture(ID3D11Texture2D* readTexture, ID3D11ShaderResourceView* readSRV);
 
 	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_MATRIX_BUFFER& matrix);
-	ID3D11Buffer* createVSConstBuffer(VS_CONSTANT_CAMERA_BUFFER& matrix);
 
 	ID3D11Buffer*& createPSConstBuffer(PS_CONSTANT_LIGHT_BUFFER& matrix);
 	ID3D11Buffer*& createGSConstBuffer();
@@ -176,7 +162,6 @@ public:
 	void setupLightBuffer();
 
 	static ID3D11Buffer* createVertexBuffer(Mesh& mesh);
-	ID3D11Buffer* createIndexBuffer(Mesh& mesh);
 
 	void setCullingMode(D3D11_CULL_MODE mode);
 
@@ -193,7 +178,6 @@ public:
 	void drawFullscreenQuad();
 
 	static void setupComputeShader();
-	static ID3D11UnorderedAccessView*& textureToUAV(ID3D11Texture2D* texture);
 
 	void generateFullscreenQuad();
 };

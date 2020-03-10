@@ -19,7 +19,7 @@ Texture2D gaussianKernelTexture : register(t1);
 void main(uint3 DispatchThreadID : SV_DispatchThreadID)
 {
 	static const float kernelSize = 25;
-	//do the magic thing here, start at the top left of the kernel
+
 	int2 pixelLocation = DispatchThreadID.xyz - int3((kernelSize/2)-1, (kernelSize / 2)-1, 0); //pixel coords
 	float4 outputColor = float4(0, 0, 0, 0); //Start at zero
 
@@ -29,7 +29,7 @@ void main(uint3 DispatchThreadID : SV_DispatchThreadID)
 		for (int x = 0; x < kernelSize; x++)
 		{
 			float gaussWeight = gaussianKernelTexture.Load(float3(x, y, 0), 0).x;
-			outputColor += textureToBlur.Load(float3(pixelLocation + int3(x- offset, y- offset, 0), 0)) * gaussWeight;//gaussianKernelTexture[x][y].x; //Weight together adjacent pixel based on kernel weights
+			outputColor += textureToBlur.Load(float3(pixelLocation + int3(x- offset, y- offset, 0), 0)) * gaussWeight;//Weight together adjacent pixel based on kernel weights
 		}
 	}
 	outputTarget[DispatchThreadID.xy] = outputColor;

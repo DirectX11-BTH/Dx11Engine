@@ -79,8 +79,8 @@ std::vector<Vertex> WaterPlane::generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1,
 	vert1.x = corner1.x;
 	vert1.y = corner1.y;
 	vert1.z = corner1.z;
-	vert1.u = corner1.x / (quadsPerAxis ); //ing);;
-	vert1.v = corner1.z / (quadsPerAxis ); //ing);;
+	vert1.u = corner1.x / (quadsPerAxis ); 
+	vert1.v = corner1.z / (quadsPerAxis ); 
 
 	vert1.r = 0.7;
 	vert1.g = 0;
@@ -90,8 +90,8 @@ std::vector<Vertex> WaterPlane::generateQuad(XMFLOAT3 corner0, XMFLOAT3 corner1,
 	vert2.x = corner2.x;
 	vert2.y = corner2.y;
 	vert2.z = corner2.z;
-	vert2.u = corner2.x / (quadsPerAxis ); //ing);;
-	vert2.v = corner2.z / (quadsPerAxis ); //ing);;
+	vert2.u = corner2.x / (quadsPerAxis ); 
+	vert2.v = corner2.z / (quadsPerAxis );
 
 	vert2.r = 0;
 	vert2.g = 0.5;

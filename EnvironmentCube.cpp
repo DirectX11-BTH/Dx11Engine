@@ -9,7 +9,7 @@ void EnvironmentCube::buildCubeMap()
 
 
 	//TEXTURE DESC
-	texDesc.Width = 720;
+	texDesc.Width = 720; //Matches screen size & gbuffer size
 	texDesc.Height = 720;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
 	texDesc.MipLevels = 0;
@@ -29,6 +29,7 @@ void EnvironmentCube::buildCubeMap()
 	renderTargetDesc.Texture2DArray.ArraySize = 1;
 	renderTargetDesc.Texture2DArray.MipSlice = 0;
 
+	//One for each camera/side.
 	for (int i = 0; i < 6; i++)
 	{
 		renderTargetDesc.Texture2DArray.FirstArraySlice = i;
@@ -79,6 +80,7 @@ void EnvironmentCube::buildCubeMap()
 
 void EnvironmentCube::buildCameras(float x, float y, float z)
 {
+	//Camera targets, offset from wherever it's placed.
 	XMVECTOR targets[6] =
 	{
 		XMVectorSet(x + 1, y, z, 1), //right x
@@ -89,6 +91,7 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 		XMVectorSet(x, y, z - 1, 1) //back
 	};
 
+	//Possible up vectors, coupled with targets above.
 	XMVECTOR upVectors[6] =
 	{
 		XMVectorSet(0, 1, 0, 0),
@@ -99,6 +102,7 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 		XMVectorSet(0, 1, 0, 0),
 	};
 
+	//Sets the position which is never updated again.
 	XMVECTOR position = XMVectorSet(x, y, z, 1);
 
 	for (int i = 0; i < 6; i++)
@@ -117,9 +121,6 @@ void EnvironmentCube::buildCameras(float x, float y, float z)
 
 EnvironmentCube::EnvironmentCube()
 {
-	object.meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj")); //Fix this
-}
-
-void EnvironmentCube::render()
-{
+	//Reads in cube mesh.
+	object.meshes.push_back(ObjParser::readFromObj("./TestModel/actualCube.obj")); 
 }

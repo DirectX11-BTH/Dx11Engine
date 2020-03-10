@@ -34,5 +34,4 @@ public:
 
 	EngineObject object;
 	EnvironmentCube();
-	void render();
 };

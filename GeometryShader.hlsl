@@ -49,8 +49,4 @@ void main(triangle GS_INPUT input[3], inout TriangleStream<GS_OUTPUT> output)
 			output.Append(element);
 		}
 	}
-
-	/*for (int i = 0; i < 3; i++)
-		output.Append(input[i]);*/
-	
 }
